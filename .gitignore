@@ -1,0 +1,20 @@
+# masky souboru a slozek, ktere bude git ignorovat
+
+# binarky
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# VS2010 stuff
+Debug/*
+ipch/*
+*.sdf
+*.opensdf
+*.sln
+*.suo
+*.vcxproj
+*.filters
+*.user
