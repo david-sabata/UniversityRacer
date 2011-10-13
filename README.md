@@ -2,30 +2,30 @@
 Jak to funguje
 --------------
 
-`main.cpp` zajišuje inicializaci SDL, spuštìní hlavní smyèky a pøeposílání eventù aplikaci.
+`main.cpp` zajiÅ¡Å¥uje inicializaci SDL, spuÅ¡tÄ›nÃ­ hlavnÃ­ smyÄky a pÅ™eposÃ­lÃ¡nÃ­ eventÅ¯ aplikaci.
 
-Samotnou aplikaci pak pøedstavuje potomek tøídy `BaseApp`, kterı podle potøeby pøekrıvá defaultní handlery událostí. (Dùleité jsou zejména metody `onInit` a `onWindowRedraw` - pojmenování je stejné jako v souborech ze cvièení.) Jeden potomek je tedy samotná hra, další mùe bıt menu a podobnì. 
-Dokonce by mìlo bıt moné pouívat více potomkù souèasnì - napøíklad vykreslit snímek hry, event pøedat objektu menu, kterı do snímku ještì vloí menu. Alespoò teoreticky by to takhle fungovat mohlo, vyzkoušené to nemám :-)
+Samotnou aplikaci pak pÅ™edstavuje potomek tÅ™Ã­dy `BaseApp`, kterÃ½ podle potÅ™eby pÅ™ekrÃ½vÃ¡ defaultnÃ­ handlery udÃ¡lostÃ­. (DÅ¯leÅ¾itÃ© jsou zejmÃ©na metody `onInit` a `onWindowRedraw` - pojmenovÃ¡nÃ­ je stejnÃ© jako v souborech ze cviÄenÃ­.) Jeden potomek je tedy samotnÃ¡ hra, dalÅ¡Ã­ mÅ¯Å¾e bÃ½t menu a podobnÄ›. 
+Dokonce by mÄ›lo bÃ½t moÅ¾nÃ© pouÅ¾Ã­vat vÃ­ce potomkÅ¯ souÄasnÄ› - napÅ™Ã­klad vykreslit snÃ­mek hry, event pÅ™edat objektu menu, kterÃ½ do snÃ­mku jeÅ¡tÄ› vloÅ¾Ã­ menu. AlespoÅˆ teoreticky by to takhle fungovat mohlo, vyzkouÅ¡enÃ© to nemÃ¡m :-)
 
 Git
 ----
 
-Jestli nevíte jak na Git, je to jednoduché, snad je na to i nìjaké GUI. Bohatì ale staèí pøíkazovı øádek, terminál nebo tak nìco. Velice pìknì popsané pøíkazy jsou tady: http://gitref.org/remotes/ . 
-Pro bìné verzování mi prozatím vdycky staèil následující postup: 
- - `pull` (stáhne data ze vzdáleného repozitáøe)
- - (`log` - vypíše poslední commity a jejich zprávy)
- - upravení souborù, pøidání, smazání
- - (`status` - vypíše co se zmìnilo, co u je pøidané do commitu,...)
- - `add` (pøidá soubory do commitu)
- - `commit` (uloí commit, je moné a vhodné vloit zprávu)
- - `push` (nahraje commit do vzdáleného repozitáøe)
+Jestli nevÃ­te jak na Git, je to jednoduchÃ©, snad je na to i nÄ›jakÃ© GUI. BohatÄ› ale staÄÃ­ pÅ™Ã­kazovÃ½ Å™Ã¡dek, terminÃ¡l nebo tak nÄ›co. Velice pÄ›knÄ› popsanÃ© pÅ™Ã­kazy jsou tady: http://gitref.org/remotes/ . 
+Pro bÄ›Å¾nÃ© verzovÃ¡nÃ­ mi prozatÃ­m vÅ¾dycky staÄil nÃ¡sledujÃ­cÃ­ postup: 
+ - `pull` (stÃ¡hne data ze vzdÃ¡lenÃ©ho repozitÃ¡Å™e)
+ - (`log` - vypÃ­Å¡e poslednÃ­ commity a jejich zprÃ¡vy)
+ - upravenÃ­ souborÅ¯, pÅ™idÃ¡nÃ­, smazÃ¡nÃ­
+ - (`status` - vypÃ­Å¡e co se zmÄ›nilo, co uÅ¾ je pÅ™idanÃ© do commitu,...)
+ - `add` (pÅ™idÃ¡ soubory do commitu)
+ - `commit` (uloÅ¾Ã­ commit, je moÅ¾nÃ© a vhodnÃ© vloÅ¾it zprÃ¡vu)
+ - `push` (nahraje commit do vzdÃ¡lenÃ©ho repozitÃ¡Å™e)
 
- Verzování
+ VerzovÃ¡nÃ­
  ---------
 
- Bylo by urèitì dobré pouívat branche, alespoò ze zaèátku, ne to slepíme dohromady. Vidìl bych to tak, e si mùete udìlat vlastního potomka `BaseApp`, kde by vám mohlo staèit upravovat asi jen `onWindowRedraw` a `onInit`. Ikdyby toho ale bylo víc, tak to nevadí, bude to vaše tøída, mùete si tam dìlat co chcete :-)
- Vıhoda je v tom, e staèí upravit jedinı øádek v `main.cpp` a tím se všechny eventy a jejich obsluha pøesune na vaši tøídu. Díky tomu budeme moct vyvíjet nezávisle na sobì, ale souèasnì sdílet nìkteré funkce - kdy napøíklad pøidám nìjaké naèítání modelù, budete ho moct pouít taky, protoe bude buï v oddìlené tøídì anebo v `BaseApp`.
+ Bylo by urÄitÄ› dobrÃ© pouÅ¾Ã­vat branche, alespoÅˆ ze zaÄÃ¡tku, neÅ¾ to slepÃ­me dohromady. VidÄ›l bych to tak, Å¾e si mÅ¯Å¾ete udÄ›lat vlastnÃ­ho potomka `BaseApp`, kde by vÃ¡m mohlo staÄit upravovat asi jen `onWindowRedraw` a `onInit`. Ikdyby toho ale bylo vÃ­c, tak to nevadÃ­, bude to vaÅ¡e tÅ™Ã­da, mÅ¯Å¾ete si tam dÄ›lat co chcete :-)
+ VÃ½hoda je v tom, Å¾e staÄÃ­ upravit jedinÃ½ Å™Ã¡dek v `main.cpp` a tÃ­m se vÅ¡echny eventy a jejich obsluha pÅ™esune na vaÅ¡i tÅ™Ã­du. DÃ­ky tomu budeme moct vyvÃ­jet nezÃ¡visle na sobÄ›, ale souÄasnÄ› sdÃ­let nÄ›kterÃ© funkce - kdyÅ¾ napÅ™Ã­klad pÅ™idÃ¡m nÄ›jakÃ© naÄÃ­tÃ¡nÃ­ modelÅ¯, budete ho moct pouÅ¾Ã­t taky, protoÅ¾e bude buÄ v oddÄ›lenÃ© tÅ™Ã­dÄ› anebo v `BaseApp`.
 
- Take ideálnì kadı svoji branch + vlastní implementace `BaseApp`.
+ TakÅ¾e ideÃ¡lnÄ› kaÅ¾dÃ½ svoji branch + vlastnÃ­ implementace `BaseApp`.
 
- Taky do Gitu nenahrávejte soubory vašeho IDE, includy knihoven a jiné vìci, co se dají stáhnout, nainstalovat,... Aby vám Git pøi kadém `add` nepøidával konfiguraèní soubory IDE a jiné, mùete masky pøidat do `.gitignore`.
+ Taky do Gitu nenahrÃ¡vejte soubory vaÅ¡eho IDE, includy knihoven a jinÃ© vÄ›ci, co se dajÃ­ stÃ¡hnout, nainstalovat,... Aby vÃ¡m Git pÅ™i kaÅ¾dÃ©m `add` nepÅ™idÃ¡val konfiguraÄnÃ­ soubory IDE a jinÃ©, mÅ¯Å¾ete masky pÅ™idat do `.gitignore`.
