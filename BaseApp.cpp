@@ -1,5 +1,6 @@
 #include "BaseApp.h"
 
+using namespace std;
 
 
 BaseApp::BaseApp() 
@@ -100,7 +101,7 @@ void BaseApp::onMouseUp(Uint8 /*button*/, unsigned /*x*/, unsigned /*y*/)
 
 
 void BaseApp::onWindowRedraw()
-{
+{	
 }
 
 void BaseApp::onInit()

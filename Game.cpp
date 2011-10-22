@@ -1,5 +1,8 @@
 #include "Game.h"
 
+using namespace std;
+
+
 
 struct Point {
     float color[3];
@@ -79,6 +82,8 @@ GLuint VS, FS, Prog;
 
 GLuint positionAttrib, colorAttrib, mvpUniform;
 
+Scene scene;
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // Event handlers
@@ -87,6 +92,18 @@ GLuint positionAttrib, colorAttrib, mvpUniform;
 
 void Game::onInit()
 {
+	BaseApp::onInit();
+
+	ModelContainer* container = new ModelContainer;
+	container->load3DS("models/car.3ds");
+	//container->load3DS("models/box.3DS");
+
+	scene.addModelContainer(container);
+	scene.init();
+
+	ShaderManager::loadMaterial("default");
+	
+	/*
     // Shader
     VS = CompileShader(GL_VERTEX_SHADER, VSSource);
     FS = CompileShader(GL_FRAGMENT_SHADER, FSSource);
@@ -95,7 +112,9 @@ void Game::onInit()
     positionAttrib = glGetAttribLocation(Prog, "position");
     colorAttrib = glGetAttribLocation(Prog, "color");
     mvpUniform = glGetUniformLocation(Prog, "mvp");
+	*/
 
+	/*
     // Copy house to graphics card
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -104,20 +123,33 @@ void Game::onInit()
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(house), house, GL_STATIC_DRAW);
+	*/
+
+	
+	for (map<string, ShaderManager::MATERIAL>::iterator it = ShaderManager::materials.begin(); it != ShaderManager::materials.end(); it++)
+	{
+		ShaderManager::MATERIAL mat = (*it).second;
+		cout << "Material '" << (*it).first << "'" << endl;
+		cout << "\tprog: " << mat.program << endl << "\tpos:" << mat.positionAttrib << endl;
+		cout << "\ttex:" << mat.texposAttrib << endl << "\tmvp:" << mat.mvpUniform << endl << endl;
+	}
+
+	//quit();
 }
  
 
 
 
 void Game::onWindowRedraw() {	
+	BaseApp::onWindowRedraw();
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glEnable(GL_DEPTH_TEST);
-    
+    glEnable(GL_DEPTH_TEST);    
     glDepthFunc(GL_LESS);
-
-    glUseProgram(Prog);
-
+	
+    //glUseProgram(Prog);
+	
     //MVP
     glm::mat4 projection;
 
@@ -136,8 +168,10 @@ void Game::onWindowRedraw() {
             mouseRX, glm::vec3(0, 1, 0)
             );
 
-    glUniformMatrix4fv(mvpUniform, 1, GL_FALSE, glm::value_ptr(mvp));
+    //glUniformMatrix4fv(mvpUniform, 1, GL_FALSE, glm::value_ptr(mvp));
 
+
+	/*
     glEnableVertexAttribArray(positionAttrib);
     glEnableVertexAttribArray(colorAttrib);
 
@@ -149,6 +183,17 @@ void Game::onWindowRedraw() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
     glDrawElements(GL_TRIANGLES, sizeof(house)/sizeof(*house), GL_UNSIGNED_BYTE, NULL);
+	*/
+
+	scene.draw(mvp);
 
     SDL_GL_SwapBuffers(); 
+}
+
+
+
+
+Game::~Game()
+{
+	
 }

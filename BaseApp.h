@@ -1,13 +1,20 @@
 #ifndef BASEAPP_H
 #define BASEAPP_H
 
+#ifndef GLM_INCLUDED
+#define GLM_INCLUDED
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_projection.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#endif
 
 #include "Exceptions.h"
 #include "Utils.h"
+#include "ModelContainer.h"
+#include "Scene.h"
+#include "ShaderManager.h"
+
 
 
 class BaseApp {
@@ -39,7 +46,7 @@ class BaseApp {
 		float pz;
 
 		////////////////////////////////////////////////////////////////////////////////
-
+		
 		// Send quit event
 		inline void quit()
 		{
