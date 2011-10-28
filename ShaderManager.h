@@ -16,12 +16,15 @@ class ShaderManager
 {
 	public:
 		/**
-		 * Struktura materialu; obsahuje handles GL objektu shaderu
+		 * Struktura materialu; obsahuje handles GL objektu shaderu, aby
+		 * nebylo nutne je ziskavat stale dokola z GL
 		 */
 		typedef struct Material {
 			GLuint program;
 			GLuint positionAttrib, texposAttrib;
-			GLuint mvpUniform;
+			GLuint mViewUniform;
+			GLuint mProjectionUniform;
+			GLuint mModelUniform;
 		} MATERIAL;
 
 		/**

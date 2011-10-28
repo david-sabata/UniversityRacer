@@ -30,7 +30,9 @@ void ShaderManager::loadMaterial(string material)
 	// Vstupy
 	mat.positionAttrib = glGetAttribLocation(mat.program, "position");
 	mat.texposAttrib = glGetAttribLocation(mat.program, "texpos");
-	mat.mvpUniform = glGetUniformLocation(mat.program, "mvp");
+	mat.mViewUniform = glGetUniformLocation(mat.program, "view");
+	mat.mProjectionUniform = glGetUniformLocation(mat.program, "projection");
+	mat.mModelUniform = glGetUniformLocation(mat.program, "model");
 
 	materials[material] = mat;
 }

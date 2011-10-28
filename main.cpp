@@ -58,14 +58,12 @@ void mainLoop()
 
         // Screen needs redraw
         bool redraw = false;
-
-		/*
+		
 		// aktualizovat FPS
 		updateFPS(SDL_GetTicks());
 		ostringstream text;
-		text << "University Racer - " << getFPS() << " fps";
+		text << "University Racer - " << setiosflags(ios::fixed) << setprecision(0) << getFPS() << " fps";
 		SDL_WM_SetCaption(text.str().c_str(), text.str().c_str());
-		*/
 
         // Handle all waiting events
         do
@@ -111,6 +109,44 @@ void mainLoop()
 
 
 
+// Animation main loop
+// period - maximum time between redraws in ms
+void mainLoop(unsigned int period)
+{
+    // This main loop requires timer support
+    if(SDL_InitSubSystem(SDL_INIT_TIMER) < 0) throw SDL_Exception();
+
+    // Create redraw timer
+    class RedrawTimer
+    {
+        private :
+            SDL_TimerID id;
+            static Uint32 callback(Uint32 interval, void *)
+            {
+                SDL_Event event;
+				event.type = SDL_VIDEOEXPOSE;
+				if(SDL_PushEvent(&event) < 0) throw SDL_Exception();
+
+                return interval;
+            }
+        public :
+            RedrawTimer(unsigned interval)
+                : id(SDL_AddTimer(interval, callback, NULL))
+            {
+                if(id == NULL) throw SDL_Exception();
+            }
+            ~RedrawTimer()
+            {
+                if(id != NULL) SDL_RemoveTimer(id);
+            }
+    } redrawTimer(period);
+
+    // Start simple main loop
+    mainLoop();
+}
+
+
+
 
 
 int main(int /*argc*/, char ** /*argv*/) 
@@ -126,7 +162,7 @@ int main(int /*argc*/, char ** /*argv*/)
         init(800, 600, 24, 24, 8);
 
 		// start the main loop
-		mainLoop();
+		mainLoop(16); // 16ms = cca 60fps
 
 		// cleanup
 		delete application;

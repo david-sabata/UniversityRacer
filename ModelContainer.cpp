@@ -104,7 +104,13 @@ void ModelContainer::load3DS(string filename)
 		for (unsigned int i = 0; i < mesh.Vertices().size(); i++)
 		{
 			Mesh3DSVertex vert = mesh.Vertices()[i];
-			vertices.push_back( glm::vec3(vert.x, vert.y, vert.z) );
+			glm::vec4 glmvert(vert.x, vert.y, vert.z, 1);
+
+			// 3DS modely jsou Z-up; transformovat na Y-up
+			glm::mat4 rotate = glm::rotate(glm::mat4(), 90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+			glmvert = glmvert * rotate;
+
+			vertices.push_back(glm::vec3(glmvert));
 		}
 
 		// indexy

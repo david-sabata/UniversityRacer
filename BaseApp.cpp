@@ -5,14 +5,23 @@ using namespace std;
 
 BaseApp::BaseApp() 
 {
+	/*
 	mouseRX = 0.0f;
 	mouseRY = 0.0f;
 	mouseWheel = 1.0f;
 
 	pz = -100.0f;	
+	*/
 
 	windowWidth = 0;
 	windowHeight = 0;
+}
+
+
+
+Camera* const BaseApp::getCamera()
+{
+	return &camera;
 }
 
 
@@ -54,11 +63,15 @@ void BaseApp::handleEvent(SDL_Event event)
 void BaseApp::onWindowResized(int w, int h)
 {
 	glViewport(0, 0, w, h);
-	windowWidth = w; windowHeight = h;
+	windowWidth = w;
+	windowHeight = h;
 }
 
 void BaseApp::onKeyDown(SDLKey key, Uint16 /*mod*/)
 {
+	activeKeys.remove(key); // chceme mit kazdou klavesu jen jednou
+	activeKeys.push_back(key);
+
 	switch(key) {
 		case SDLK_ESCAPE : quit(); return;
 		default : return;
@@ -66,12 +79,14 @@ void BaseApp::onKeyDown(SDLKey key, Uint16 /*mod*/)
 }
 
 
-void BaseApp::onKeyUp(SDLKey /*key*/, Uint16 /*mod*/)
+void BaseApp::onKeyUp(SDLKey key, Uint16 /*mod*/)
 {
+	activeKeys.remove(key);
 }
 
 void BaseApp::onMouseMove(unsigned /*x*/, unsigned /*y*/, int xrel, int yrel, Uint8 buttons)
 {
+	/*
 	if(buttons & SDL_BUTTON_LMASK)
 	{
 		mouseRX += xrel;
@@ -83,16 +98,19 @@ void BaseApp::onMouseMove(unsigned /*x*/, unsigned /*y*/, int xrel, int yrel, Ui
 		pz += yrel;
 		redraw();
 	}
+	*/	
 }
 
 void BaseApp::onMouseDown(Uint8 button, unsigned /*x*/, unsigned /*y*/)
 {
+	/*
 	switch(button) {
 		case SDL_BUTTON_WHEELUP : mouseWheel += 1; break;
 		case SDL_BUTTON_WHEELDOWN : mouseWheel -= 1; break;
 		default : return;
 	};
 	redraw();
+	*/
 }
 
 void BaseApp::onMouseUp(Uint8 /*button*/, unsigned /*x*/, unsigned /*y*/)

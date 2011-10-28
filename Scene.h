@@ -7,11 +7,19 @@
 
 #include "ModelContainer.h"
 #include "ShaderManager.h"
+#include "Camera.h"
+#include "BaseApp.h"
+
+
+// forward-declaration; Scene a BaseApp se potrebuji vzajemne znat
+class BaseApp;
+
 
 class Scene
 {
 
 	public:
+		Scene(BaseApp& parentApp);
 		~Scene();
 
 		/**
@@ -28,7 +36,7 @@ class Scene
 		/**
 		 * Vykresleni cele sceny
 		 */
-		void draw(glm::mat4 mvp);
+		void draw();
 
 
 	protected:
@@ -48,6 +56,11 @@ class Scene
 		 * na odpovidajicim indexu
 		 */
 		std::vector<GLuint> EBOs;
+
+		/**
+		 * Reference na objekt aplikace, ktera scenu stvorila
+		 */
+		BaseApp& application;
 
 		////////////////////////////////////////////////////////////////
 

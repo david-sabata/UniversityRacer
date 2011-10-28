@@ -13,6 +13,12 @@ typedef struct VBOENTRY {
 
 
 
+Scene::Scene(BaseApp& parentApp) : application(parentApp)
+{	
+}
+
+
+
 Scene::~Scene() 
 {
 	// uvolnit obsah kontejneru
@@ -42,12 +48,15 @@ void Scene::init()
 {
 	buildBufferObjects();
 
+#if 0
 	cout << "Scene: " << containers.size() << " containers" << endl;
 	for (unsigned int i = 0; i < containers.size(); i++)
 	{
 		cout << i << endl;
 		cout << "\tmodels: " << containers[i]->modelsCount() << "\tverts: " << containers[i]->verticesCount() << "\tfaces: " << containers[i]->facesCount() << endl;
 	}
+#endif
+
 }
 
 
@@ -161,11 +170,22 @@ void Scene::buildBufferObjects()
 
 
 
-void Scene::draw(glm::mat4 mvp) 
+void Scene::draw() 
 {
 	ShaderManager::MATERIAL mat = ShaderManager::useMaterial("default");
+	
+    // pohledova matice
+	glm::mat4 mView = application.getCamera()->GetMatrix();
+	glUniformMatrix4fv(mat.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
 
-	glUniformMatrix4fv(mat.mvpUniform, 1, GL_FALSE, glm::value_ptr(mvp));
+	// projekcni matice
+	glm::mat4 mProjection = glm::perspective(45.0f, (float)application.getWindowAspectRatio(), 1.0f, 1000.0f);
+	glUniformMatrix4fv(mat.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
+
+	// modelova matice - !!! tmp reseni !!!
+	glm::mat4 mModel(1.0);
+	glUniformMatrix4fv(mat.mModelUniform, 1, GL_FALSE, glm::value_ptr(mModel));
+
 
 	for (unsigned int i = 0; i < containers.size(); i++)
 	{
