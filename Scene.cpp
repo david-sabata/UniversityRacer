@@ -13,6 +13,10 @@ typedef struct VBOENTRY {
 
 
 
+
+/////////////////////////////////////////////////////////////////////////
+
+
 Scene::Scene(BaseApp& parentApp) : application(parentApp)
 {	
 }
@@ -47,6 +51,13 @@ void Scene::addModelContainer(ModelContainer* container)
 void Scene::init()
 {
 	buildBufferObjects();
+
+
+	// !!! tmp pro testovani !!!
+	glEnable(GL_LIGHT0);
+	GLfloat lightPos[] = { 0, 2, 0, 1 }; // homogenni souradnice
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+
 
 #if 0
 	cout << "Scene: " << containers.size() << " containers" << endl;
@@ -185,6 +196,13 @@ void Scene::draw()
 	// modelova matice - !!! tmp reseni !!!
 	glm::mat4 mModel(1.0);
 	glUniformMatrix4fv(mat.mModelUniform, 1, GL_FALSE, glm::value_ptr(mModel));
+
+	// nastaveni svetel - !!! tmp reseni !!!
+	GLint lights[] = {
+		1, 0, 0, 0, 0, 0, 0, 0
+	};
+	GLuint enabledLightsUniform = glGetUniformLocation(ShaderManager::getCurrentMaterial().program, "enabledLights");
+	glUniform1iv(enabledLightsUniform, 8, lights);
 
 
 	for (unsigned int i = 0; i < containers.size(); i++)
