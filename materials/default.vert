@@ -10,6 +10,8 @@ uniform mat4 model;
 uniform mat4 projection;
 uniform mat4 view;
 
+uniform vec3 eye;
+uniform vec3 sight;
 
 #define MAX_LIGHTS 8
 uniform int enabledLights[MAX_LIGHTS]; // flagy pro jednotliva svetla [0/1]

@@ -19,6 +19,30 @@
 
 class Camera {
 
+	public:
+
+		Camera(void);
+		void Reset();
+		
+		void Move(float x, float y, float z);		
+		void Aim(float vertical_angle, float horizontal_angle);
+		
+		glm::mat4 GetMatrix();		
+
+		void DebugDump();
+
+		//void toggleObserve();
+
+		inline glm::vec3 getEye()
+		{
+			return eye;
+		}
+		
+		inline glm::vec3 getTarget()
+		{
+			return target;
+		}
+
 	private:
 		glm::vec3 eye;			// pozice kamery
 		glm::vec3 target;		// smer pohledu
@@ -32,20 +56,7 @@ class Camera {
 		float observeRadius;
 		float observeSpeed;
 		CTimer observeTimer;
-		*/
-	public:
-
-		Camera(void);
-		void Reset();
-		
-		void Move(float x, float y, float z);		
-		void Aim(float vertical_angle, float horizontal_angle);
-		
-		glm::mat4 GetMatrix();
-
-		void DebugDump();
-
-		//void toggleObserve();
+		*/	
 
 };
 
