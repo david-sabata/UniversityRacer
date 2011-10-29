@@ -2,6 +2,7 @@
 #define MESH_H
 
 #include <vector>
+#include <string>
 
 #ifndef GLM_INCLUDED
 #define GLM_INCLUDED
