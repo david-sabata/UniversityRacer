@@ -1,83 +1,25 @@
 #include "Game.h"
 
+using namespace std;
 
-struct Point {
-    float color[3];
-    float position[3];
-} const houseVertices[] = {
-    // Walls
-    { { 0.0, 0.0, 1.0 }, { -5.0, -5.0, -5.0 } },
-    { { 0.0, 1.0, 0.0 }, { -5.0, -5.0,  5.0 } },
-    { { 0.0, 1.0, 1.0 }, {  5.0, -5.0,  5.0 } },
-    { { 1.0, 0.0, 0.0 }, {  5.0, -5.0, -5.0 } },
-        
-    { { 1.0, 0.0, 1.0 }, { -5.0,  5.0, -5.0 } },
-    { { 1.0, 1.0, 0.0 }, { -5.0,  5.0,  5.0 } },
-    { { 1.0, 1.0, 1.0 }, {  5.0,  5.0,  5.0 } },
-    { { 0.0, 0.0, 1.0 }, {  5.0,  5.0, -5.0 } },
-        
-    { { 0.0, 1.0, 0.0 }, { -5.0, -5.0, -5.0 } },
-    { { 0.0, 1.0, 1.0 }, { -5.0, -5.0,  5.0 } },
-    { { 1.0, 0.0, 0.0 }, { -5.0,  5.0,  5.0 } },
-    { { 1.0, 0.0, 1.0 }, { -5.0,  5.0, -5.0 } },
-        
-    { { 0.0, 1.0, 0.0 }, {  5.0, -5.0, -5.0 } },
-    { { 0.0, 1.0, 1.0 }, {  5.0, -5.0,  5.0 } },
-    { { 1.0, 0.0, 0.0 }, {  5.0,  5.0,  5.0 } },
-    { { 1.0, 0.0, 1.0 }, {  5.0,  5.0, -5.0 } },
-    // Roof
-    { { 0.0, 0.0, 1.0 }, { -5.0,  5.0, -5.0 } },
-    { { 0.0, 1.0, 1.0 }, {  5.0,  5.0, -5.0 } },
-    { { 1.0, 1.0, 1.0 }, {  0.0, 11.0,  0.0 } }, 
 
-    { { 1.0, 0.0, 0.0 }, {  5.0,  5.0, -5.0 } },
-    { { 1.0, 1.0, 0.0 }, {  5.0,  5.0,  5.0 } },
-    { { 1.0, 1.0, 1.0 }, {  0.0, 11.0,  0.0 } },
 
-    { { 0.0, 1.0, 0.0 }, {  5.0,  5.0,  5.0 } },
-    { { 0.0, 1.0, 1.0 }, { -5.0,  5.0,  5.0 } },
-    { { 1.0, 1.0, 1.0 }, {  0.0, 11.0,  0.0 } },
-
-    { { 0.0, 1.0, 0.0 }, { -5.0,  5.0,  5.0 } },
-    { { 1.0, 1.0, 0.0 }, { -5.0,  5.0, -5.0 } },
-    { { 1.0, 1.0, 1.0 }, {  0.0, 11.0,  0.0 } }
-};
-
-// House indices
-const unsigned char house[] = {
-//Walls
-     0,  1,  2,
-     0,  2,  3,
-     4,  5,  6,
-     4,  6,  7,
-     8,  9, 10,
-     8, 10, 11,
-    12, 13, 14,
-    12, 14, 15,
-//Roof
-    16, 17, 18,
-    19, 20, 21,
-    22, 23, 24,
-    25, 26, 27
-};
-
-GLuint VBO, EBO;
+#define WALK_SPEED 0.01
 
 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-// Shaders
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 
-const char * VSSource
-    = "#version 130\n in vec3 position; in vec3 color; uniform mat4 mvp; out vec3 c; void main() { gl_Position = mvp*vec4(position,1); c = color; }";
-const char * FSSource
-    = "#version 130\n in vec3 c; out vec4 FragColor; void main() { FragColor = vec4(c,1); }";
 
-GLuint VS, FS, Prog;
+Game::Game()
+{
+	mouseCaptured = false;
+}
 
-GLuint positionAttrib, colorAttrib, mvpUniform;
+Game::~Game()
+{
+	delete scene;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -87,40 +29,36 @@ GLuint positionAttrib, colorAttrib, mvpUniform;
 
 void Game::onInit()
 {
-    // Shader
-    VS = CompileShader(GL_VERTEX_SHADER, VSSource);
-    FS = CompileShader(GL_FRAGMENT_SHADER, FSSource);
-    Prog = LinkShader(2, VS, FS);
+	BaseApp::onInit();
 
-    positionAttrib = glGetAttribLocation(Prog, "position");
-    colorAttrib = glGetAttribLocation(Prog, "color");
-    mvpUniform = glGetUniformLocation(Prog, "mvp");
+	ModelContainer* container = new ModelContainer;
+	//container->load3DS("models/car.3ds");
+	container->load3DS("models/box.3DS");
 
-    // Copy house to graphics card
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(houseVertices), houseVertices, GL_STATIC_DRAW);
+	// vyrobit scenu
+	scene = new Scene(*this);
+	scene->addModelContainer(container);
+	scene->init();
 
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(house), house, GL_STATIC_DRAW);
+	// nacist vsechny materialy
+	ShaderManager::loadMaterial("default");	
 }
  
 
 
 
-void Game::onWindowRedraw() {	
+void Game::onWindowRedraw() 
+{	
+	BaseApp::onWindowRedraw();
+
+	handleActiveKeys();
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glEnable(GL_DEPTH_TEST);
-    
+    glEnable(GL_DEPTH_TEST);    
     glDepthFunc(GL_LESS);
-
-    glUseProgram(Prog);
-
-    //MVP
-    glm::mat4 projection;
-
+	
+	/*
 	float aspect = (float)windowWidth/(float)windowHeight;
 
 	projection = glm::perspective(10.0f*mouseWheel, aspect, 1.0f, 1000.0f);
@@ -136,19 +74,70 @@ void Game::onWindowRedraw() {
             mouseRX, glm::vec3(0, 1, 0)
             );
 
-    glUniformMatrix4fv(mvpUniform, 1, GL_FALSE, glm::value_ptr(mvp));
+    //glUniformMatrix4fv(mvpUniform, 1, GL_FALSE, glm::value_ptr(mvp));
+	*/
 
-    glEnableVertexAttribArray(positionAttrib);
-    glEnableVertexAttribArray(colorAttrib);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(Point), (void*)offsetof(Point, position));
-    glVertexAttribPointer(colorAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(Point), (void*)offsetof(Point, color));
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-
-    glDrawElements(GL_TRIANGLES, sizeof(house)/sizeof(*house), GL_UNSIGNED_BYTE, NULL);
+	scene->draw();
 
     SDL_GL_SwapBuffers(); 
 }
+
+
+
+
+void Game::handleActiveKeys()
+{
+	bool wDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_w) != activeKeys.end() );
+	bool sDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_s) != activeKeys.end() );
+	bool aDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_a) != activeKeys.end() );
+	bool dDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_d) != activeKeys.end() );
+	
+	// chceme aby byla rychlost pohybu nezavisla na fps
+	float f_fps = float(1 / getFPS());
+	float f_step = float(WALK_SPEED / f_fps);
+
+	// vysledkem jsou slozky vektoru ve smerech X ("strafe", ne otaceni) a Z
+	float x = -( (-1.0f * aDown) + (1.0f * dDown) ) * f_step;	
+	float z = ( (-1.0f * sDown) + (1.0f * wDown) ) * f_step;		
+
+	camera.Move(x, 0.0f, z);
+	
+}
+
+
+
+void Game::onKeyDown(SDLKey key, Uint16 mod)
+{
+	BaseApp::onKeyDown(key, mod);
+
+	// mezernik zamyka mys pro ovladani kamery
+	if (key == SDLK_SPACE) {
+		mouseCaptured = !mouseCaptured;
+		SDL_ShowCursor(!mouseCaptured);
+
+		if (mouseCaptured)
+			SDL_WM_GrabInput(SDL_GRAB_ON);
+		else
+			SDL_WM_GrabInput(SDL_GRAB_OFF);
+	}
+}
+
+
+void Game::onMouseMove(unsigned x, unsigned y, int xrel, int yrel, Uint8 buttons)
+{
+	BaseApp::onMouseMove(x, y, xrel, yrel, buttons);
+
+
+	if(mouseCaptured) {					
+		float vertAngle = -yrel * 0.001f;
+		float horizAngle = -xrel * 0.001f;
+
+		camera.Aim(vertAngle, horizAngle);
+
+		if (0) {
+			cout << "xrel: " << xrel << "\tyrel: " << yrel << endl;
+			camera.DebugDump();
+		}
+	}
+}
+
