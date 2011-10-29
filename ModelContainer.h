@@ -6,7 +6,7 @@
 #include <map>
 
 #include "BaseModel.h"
-#include "3ds\3ds.h"
+#include "3ds/3ds.h"
 
 class ModelContainer
 {

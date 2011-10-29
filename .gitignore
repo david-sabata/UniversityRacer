@@ -18,3 +18,19 @@ ipch/*
 *.vcxproj
 *.filters
 *.user
+
+#Veci potrebne na linux
+GL/*
+BaseApp.h~
+Camera.h~
+GLee.c~
+Makefile
+Makefile (kopie)
+Makefile~
+Mesh.h~
+ModelContainer.h~
+UniversityRacer
+glm/
+main.h~
+.gitignore~
+GLee.c

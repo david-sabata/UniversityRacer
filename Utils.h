@@ -4,7 +4,11 @@
 #include <stdlib.h>
 
 #include <SDL/SDL.h>
-#include <GL/glew.h>
+#ifdef USE_GLEE
+# include <GL/GLee.h>
+#else
+# include <GL/glew.h>
+#endif
 
 #include "Exceptions.h"
 
