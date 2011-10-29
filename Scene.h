@@ -3,7 +3,11 @@
 
 #include <iostream>
 
-#include <GL/glew.h>
+#ifdef USE_GLEE
+# include <GL/GLee.h>
+#else
+# include <GL/glew.h>
+#endif
 
 #include "ModelContainer.h"
 #include "ShaderManager.h"
