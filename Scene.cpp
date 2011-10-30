@@ -4,11 +4,12 @@ using namespace std;
 
 
 /**
- * Jeden vrchol ve VBO slozeny ze souradnic a souradnic textury
+ * Jeden vrchol ve VBO slozeny ze souradnic, normaly a souradnic textury
  */
 typedef struct VBOENTRY {
-	float x, y, z;
-	float u, v;
+	float x, y, z;		// souradnice
+	float nx, ny, nz;	// normala
+	float u, v;			// textura
 } VBOENTRY;
 
 
@@ -100,16 +101,25 @@ void Scene::buildBufferObjects()
 				{
 					Mesh* mesh = (*meshit);
 
+					// spocitat normaly
+					mesh->computeNormals();
+
 					for (unsigned int i = 0; i < mesh->getVertices().size(); i++)
 					{
 						glm::vec3 vert = mesh->getVertices()[i];
+						glm::vec3 norm = mesh->getNormals()[i];
 
 						glm::vec2 tex(0, 0);
 						if (mesh->getTexCoords().size() > i)
 							tex = mesh->getTexCoords()[i];				
 
 						// zapsat data a posunout ukazatel na nasledujici volne misto
-						VBOENTRY e = {vert.x, vert.y, vert.z, tex.r, tex.s};
+						VBOENTRY e = {
+							vert.x, vert.y, vert.z, 
+							norm.x, norm.y, norm.z, 
+							tex.r, tex.s
+						};
+						
 						*mapping = e;
 						mapping++;
 
@@ -221,6 +231,7 @@ void Scene::draw()
 		glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
 
 		glVertexAttribPointer(mat.positionAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, x));
+		glVertexAttribPointer(mat.normalAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, nx));
 		glVertexAttribPointer(mat.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[i]);

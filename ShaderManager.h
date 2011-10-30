@@ -26,7 +26,7 @@ class ShaderManager
 		 */
 		typedef struct Material {
 			GLuint program;
-			GLuint positionAttrib, texposAttrib;
+			GLuint positionAttrib, normalAttrib, texposAttrib;
 			GLuint mViewUniform;
 			GLuint mProjectionUniform;
 			GLuint mModelUniform;

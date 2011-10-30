@@ -25,6 +25,11 @@ class Mesh
 		
 		/////////////////////////////////////////////////////////////////////////
 
+		/**
+		 * Spocita per-vertex normaly
+		 */
+		void computeNormals();
+
 
 		/**
 		 * Vraci nazev meshe
@@ -43,6 +48,11 @@ class Mesh
 		std::vector<glm::vec3> const& getVertices();
 
 		/**
+		 * Vraci ukazatel na pole normal odpovidajicich vrcholum
+		 */
+		std::vector<glm::vec3> const& getNormals();
+
+		/**
 		 * Vraci ukazatel na pole souradnic textur. Indexy
 		 * odpovidaji indexum do pole vrcholu
 		 */
@@ -58,6 +68,8 @@ class Mesh
 		std::vector<glm::vec3> faces;
 
 		std::vector<glm::vec3> vertices;
+
+		std::vector<glm::vec3> normals;
 
 		std::vector<glm::vec2> texcoords;
 
