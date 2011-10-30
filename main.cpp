@@ -3,25 +3,12 @@
 
 using namespace std;
 
-const char * getGlErrorString(GLenum error)
-{
-#define ERROR(e) case e : return #e
-    switch(error)
-    {
-        ERROR(GL_NO_ERROR);
-        ERROR(GL_INVALID_ENUM);
-        ERROR(GL_INVALID_VALUE);
-        ERROR(GL_INVALID_OPERATION);
-        ERROR(GL_INVALID_FRAMEBUFFER_OPERATION);
-        ERROR(GL_OUT_OF_MEMORY);
-    default : 
-        return "UNKNOWN_GL_ERROR";
-    }
-#undef ERROR
-}
+
 
 // Pointer to active application instance, which will recieve and handle SDL events
 BaseApp* application = NULL;
+
+
 
 SDL_Surface * init(unsigned width, unsigned height, unsigned color, unsigned depth, unsigned stencil)
 {
@@ -191,4 +178,28 @@ int main(int /*argc*/, char ** /*argv*/)
 
 	//system("pause");
     return EXIT_SUCCESS;
+}
+
+
+
+
+
+/**
+ * Pomocna funkce pro GLEE/GLEW kompatibilitu
+ */
+const char * getGlErrorString(GLenum error)
+{
+#define ERROR(e) case e : return #e
+    switch(error)
+    {
+        ERROR(GL_NO_ERROR);
+        ERROR(GL_INVALID_ENUM);
+        ERROR(GL_INVALID_VALUE);
+        ERROR(GL_INVALID_OPERATION);
+        ERROR(GL_INVALID_FRAMEBUFFER_OPERATION);
+        ERROR(GL_OUT_OF_MEMORY);
+    default : 
+        return "UNKNOWN_GL_ERROR";
+    }
+#undef ERROR
 }
