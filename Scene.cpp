@@ -184,6 +184,7 @@ void Scene::buildBufferObjects()
 void Scene::draw() 
 {
 	ShaderManager::MATERIAL mat = ShaderManager::useMaterial("default");
+	GLuint program = ShaderManager::getCurrentMaterial().program;
 	
     // pohledova matice
 	glm::mat4 mView = application.getCamera()->GetMatrix();
@@ -201,9 +202,16 @@ void Scene::draw()
 	GLint lights[] = {
 		1, 0, 0, 0, 0, 0, 0, 0
 	};
-	GLuint enabledLightsUniform = glGetUniformLocation(ShaderManager::getCurrentMaterial().program, "enabledLights");
+	GLuint enabledLightsUniform = glGetUniformLocation(program, "enabledLights");
 	glUniform1iv(enabledLightsUniform, 8, lights);
 
+	// nastaveni kamery
+	glm::vec3 eye = application.getCamera()->getEye();
+	glm::vec3 sight = application.getCamera()->getTarget();
+	GLuint eyeUniform = glGetUniformLocation(program, "eye");
+	GLuint sightUniform = glGetUniformLocation(program, "sight");
+	glUniform3f(eyeUniform, eye.x, eye.y, eye.z);
+	glUniform3f(sightUniform, sight.x, sight.y, sight.z);
 
 	for (unsigned int i = 0; i < containers.size(); i++)
 	{
