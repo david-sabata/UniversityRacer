@@ -4,6 +4,7 @@
 // Musi zustat stejne
 /////////////////////////////////////////////////
 in vec3 position; 
+in vec3 normal;
 in vec2 texpos;
 
 uniform mat4 model;
@@ -17,18 +18,21 @@ uniform vec3 sight;
 uniform int enabledLights[MAX_LIGHTS]; // flagy pro jednotliva svetla [0/1]
 /////////////////////////////////////////////////
 
-varying vec4 diffuse; //rozptyl svetla
+varying vec4 diffuse; //vysledne svetlo
 out vec2 t; 
 
 void main() {
+	
+	//barva svetla nastavime na bilou
+	vec4 LightDiffuse = vec4(1.0,1.0,1.0,1.0);
+  vec3 vertexNormal = gl_NormalMatrix * normal;	
+  vec3 vertexLightPosition = normalize(gl_LightSource[0].position.xyz);
+	
+	float reflex = max(dot(vertexNormal, vertexLightPosition), 0.0);//skalarni soucin vektoru svetla a normály polygonu,na ktery dopada svetlo
+	//~ diffuse = LightDiffuse * diffuse;
+	diffuse = LightDiffuse * reflex;
 	mat4 mvp = projection * view * model;
 	gl_Position = mvp * vec4(position,1);
 	
-	//vec3 normal = gl_Normal;
-	vec3 normal = vec3(1.0,0.2,0.2);
-	
-	vec3 lightVector = normalize(gl_LightSource[0].position.xyz);
-	float reflex = max(0.0, dot(normal, lightVector));//skalarni soucin vektoru svetla a normály polygonu,na ktery dopada svetlo
-	diffuse = gl_LightSource[0].diffuse * reflex;
 	t = texpos;
 }

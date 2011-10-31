@@ -124,6 +124,7 @@ void Scene::buildBufferObjects()
 						mapping++;
 
 						//cout << "v[" << i << "]\t" << vert.x << "\t" << vert.y << "\t" << vert.z << endl;
+						cout << "n[" << i << "]\t" << norm.x << "\t" << norm.y << "\t" << norm.z << endl;
 					}
 				}
 			}
@@ -226,6 +227,7 @@ void Scene::draw()
 	for (unsigned int i = 0; i < containers.size(); i++)
 	{
 		glEnableVertexAttribArray(mat.positionAttrib);
+		glEnableVertexAttribArray(mat.normalAttrib);
 		glEnableVertexAttribArray(mat.texposAttrib);
 	
 		glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
