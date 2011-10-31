@@ -124,7 +124,7 @@ void Scene::buildBufferObjects()
 						mapping++;
 
 						//cout << "v[" << i << "]\t" << vert.x << "\t" << vert.y << "\t" << vert.z << endl;
-						cout << "n[" << i << "]\t" << norm.x << "\t" << norm.y << "\t" << norm.z << endl;
+						//~ cout << "n[" << i << "]\t" << norm.x << "\t" << norm.y << "\t" << norm.z << endl;
 					}
 				}
 			}

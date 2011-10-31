@@ -26,11 +26,19 @@ void main() {
 	//barva svetla nastavime na bilou
 	vec4 LightDiffuse = vec4(1.0,1.0,1.0,1.0);
   vec3 vertexNormal = gl_NormalMatrix * normal;	
-  vec3 vertexLightPosition = normalize(gl_LightSource[0].position.xyz);
+  vec3 lightVector = normalize(gl_LightSource[0].position.xyz - position);
 	
-	float reflex = max(dot(vertexNormal, vertexLightPosition), 0.0);//skalarni soucin vektoru svetla a normály polygonu,na ktery dopada svetlo
+	float distance = length(lightVector);
+	
+	float attenuation = 1.0 / (gl_LightSource[0].constantAttenuation +
+														 gl_LightSource[0].linearAttenuation * distance +
+														 gl_LightSource[0].quadraticAttenuation * distance * distance);
+														 
+														 
+	float reflex = max(dot(vertexNormal, lightVector), 0.0);//skalarni soucin vektoru svetla a normály polygonu,na ktery dopada svetlo
 	//~ diffuse = LightDiffuse * diffuse;
-	diffuse = LightDiffuse * reflex;
+	diffuse = LightDiffuse * reflex * attenuation;
+	
 	mat4 mvp = projection * view * model;
 	gl_Position = mvp * vec4(position,1);
 	
