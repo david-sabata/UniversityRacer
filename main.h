@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include <SDL.h>
+#include <SDL/SDL.h>
 
 #ifndef GLM_INCLUDED
 #define GLM_INCLUDED
