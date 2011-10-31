@@ -1,19 +1,33 @@
 #ifndef BASEAPP_H
 #define BASEAPP_H
 
+#include <list>
+
+#ifndef GLM_INCLUDED
+#define GLM_INCLUDED
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_projection.hpp>
+# ifndef USE_ONE
+#	include <glm/gtc/matrix_projection.hpp>
+# endif
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#endif
 
 #include "Exceptions.h"
 #include "Utils.h"
+#include "ModelContainer.h"
+#include "Scene.h"
+#include "ShaderManager.h"
+#include "Camera.h"
+
 
 
 class BaseApp {
 	
 	public:
 		BaseApp();
+
+		Camera* const getCamera();		
 
 		virtual void handleEvent(SDL_Event);
 		
@@ -27,19 +41,25 @@ class BaseApp {
 		virtual void onMouseDown(Uint8 button, unsigned /*x*/, unsigned /*y*/);
 		virtual void onMouseUp(Uint8 /*button*/, unsigned /*x*/, unsigned /*y*/);
 
+		// Vraci pomer stran okna aplikace
+		inline double getWindowAspectRatio()
+		{
+			return windowWidth / windowHeight;
+		}
+
 
 	protected:
-		// viewport dimensions
+		// rozmery viewportu
 		int windowWidth, windowHeight;
 
-		// mouse
-		float mouseRX, mouseRY, mouseWheel;
+		// camera
+		Camera camera;
 
-		// Z-axis // TODO: use Camera
-		float pz;
-
+		// seznam aktualne stisknutych klaves
+		std::list<SDLKey> activeKeys;
+		
 		////////////////////////////////////////////////////////////////////////////////
-
+		
 		// Send quit event
 		inline void quit()
 		{
