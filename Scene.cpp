@@ -111,7 +111,7 @@ void Scene::buildBufferObjects()
 
 						glm::vec2 tex(0, 0);
 						if (mesh->getTexCoords().size() > i)
-							tex = mesh->getTexCoords()[i];				
+							tex = mesh->getTexCoords()[i];
 
 						// zapsat data a posunout ukazatel na nasledujici volne misto
 						VBOENTRY e = {
@@ -226,6 +226,7 @@ void Scene::draw()
 	for (unsigned int i = 0; i < containers.size(); i++)
 	{
 		glEnableVertexAttribArray(mat.positionAttrib);
+		glEnableVertexAttribArray(mat.normalAttrib);
 		glEnableVertexAttribArray(mat.texposAttrib);
 	
 		glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
@@ -236,8 +237,7 @@ void Scene::draw()
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[i]);
 
-		glDrawElements(GL_TRIANGLES, containers[i]->facesCount() * 3, GL_UNSIGNED_INT, NULL);	
-		//glDrawElements(GL_TRIANGLES, 4 * 3, GL_UNSIGNED_INT, (void*)(10 * 3 * sizeof(unsigned int)));
+		glDrawElements(GL_TRIANGLES, containers[i]->facesCount() * 3, GL_UNSIGNED_INT, NULL);		
 
 		break;
 	}
