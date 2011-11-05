@@ -117,7 +117,7 @@ void Scene::buildBufferObjects()
 						VBOENTRY e = {
 							vert.x, vert.y, vert.z, 
 							norm.x, norm.y, norm.z, 
-							tex.r, tex.s
+							tex.x, tex.y
 						};
 						
 						*mapping = e;
