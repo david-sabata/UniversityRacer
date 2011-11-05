@@ -4,11 +4,8 @@
 using namespace std;
 
 
-
 // Pointer to active application instance, which will recieve and handle SDL events
 BaseApp* application = NULL;
-
-
 
 SDL_Surface * init(unsigned width, unsigned height, unsigned color, unsigned depth, unsigned stencil)
 {
@@ -179,10 +176,6 @@ int main(int /*argc*/, char ** /*argv*/)
 	//system("pause");
     return EXIT_SUCCESS;
 }
-
-
-
-
 
 /**
  * Pomocna funkce pro GLEE/GLEW kompatibilitu

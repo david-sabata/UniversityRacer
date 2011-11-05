@@ -32,9 +32,7 @@ void Game::onInit()
 	BaseApp::onInit();
 
 	ModelContainer* container = new ModelContainer;
-	container->load3DS("models/texture-test.3ds");
-	//container->load3DS("models/car.3ds");
-	//container->load3DS("models/vut_1.3ds");
+	container->load3DS("models/car.3ds");
 	//container->load3DS("models/box.3DS");
 
 	// vyrobit scenu

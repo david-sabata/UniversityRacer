@@ -57,7 +57,8 @@ void Mesh::computeNormals()
 	// spocitat per-vertex normaly
 	for (vector<glm::vec3>::iterator it = normals.begin(); it != normals.end(); it++)
 	{
-		(*it) = glm::normalize(*it);		
+		(*it) = glm::normalize(*it);
+		//~ cout << (*it).x << "," << (*it).y << "," << (*it).z << endl;
 	}
 }
 
