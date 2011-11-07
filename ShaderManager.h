@@ -29,7 +29,7 @@ class ShaderManager
 		 */
 		typedef struct TextureBinding {
 			// GL handle uniformniho vstupu shaderu
-			GLuint uniform;
+			GLint uniform;
 
 			// GL handle pouzite textury
 			GLuint texture;

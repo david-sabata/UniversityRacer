@@ -7,8 +7,6 @@ ShaderManager::MATERIAL ShaderManager::currentMaterial;
 map<string, ShaderManager::MATERIAL> ShaderManager::materials = map<string, ShaderManager::MATERIAL>();
 map<string, GLuint> ShaderManager::textures = map<string, GLuint>();
 
-GLuint tmpTexUniform, tmpTex;
-
 
 void ShaderManager::loadMaterial(string material)
 {
@@ -26,9 +24,7 @@ void ShaderManager::loadMaterial(string material)
 
 	// Program	
 	mat.program = linkShader(2, vs, fs);
-
-	tmpTexUniform = glGetUniformLocation(mat.program, "textura");
-
+	
 	// Vstupy
 	mat.positionAttrib = glGetAttribLocation(mat.program, "position");
 	mat.normalAttrib = glGetAttribLocation(mat.program, "normal");
@@ -230,8 +226,9 @@ vector<ShaderManager::TEXTUREBINDING> ShaderManager::loadTextures(GLuint program
 
 
 		// na radku neni ani anotace, ani deklarace; jestlize existovala nejaka nepouzita anotace, zneplatnime ji
+		binding = TEXTUREBINDING();
 		binding.isValid = false;
-	}
+	} // for each line
 
 
 #if 0
