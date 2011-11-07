@@ -4,7 +4,7 @@ using namespace std;
 
 
 
-#define WALK_SPEED 0.01
+#define WALK_SPEED 50
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -104,8 +104,9 @@ void Game::handleActiveKeys()
 	bool dDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_d) != activeKeys.end() );
 	
 	// chceme aby byla rychlost pohybu nezavisla na fps
-	float f_fps = float(1 / getFPS());
-	float f_step = float(WALK_SPEED / f_fps);
+	//float f_fps = float(1 / getFPS());
+	//float f_step = float(WALK_SPEED / f_fps);
+	float f_step = float(WALK_SPEED / getFPS());
 
 	// vysledkem jsou slozky vektoru ve smerech X ("strafe", ne otaceni) a Z
 	float x = -( (-1.0f * aDown) + (1.0f * dDown) ) * f_step;	
