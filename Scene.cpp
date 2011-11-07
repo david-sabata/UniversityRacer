@@ -205,10 +205,6 @@ void Scene::draw()
 	glm::mat4 mProjection = glm::perspective(45.0f, (float)application.getWindowAspectRatio(), 1.0f, 1000.0f);
 	glUniformMatrix4fv(mat.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
 
-	// modelova matice - !!! tmp reseni !!!
-	glm::mat4 mModel(1.0);
-	glUniformMatrix4fv(mat.mModelUniform, 1, GL_FALSE, glm::value_ptr(mModel));
-
 	// nastaveni svetel - !!! tmp reseni !!!
 	GLint lights[] = {
 		1, 0, 0, 0, 0, 0, 0, 0
@@ -224,6 +220,12 @@ void Scene::draw()
 	glUniform3f(eyeUniform, eye.x, eye.y, eye.z);
 	glUniform3f(sightUniform, sight.x, sight.y, sight.z);
 
+
+	// modelova matice - !!! tmp reseni !!!
+	//glm::mat4 mModel(1.0);
+	//glUniformMatrix4fv(mat.mModelUniform, 1, GL_FALSE, glm::value_ptr(mModel));
+
+	
 	for (unsigned int i = 0; i < containers.size(); i++)
 	{
 		glEnableVertexAttribArray(mat.positionAttrib);
@@ -238,7 +240,16 @@ void Scene::draw()
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[i]);
 
-		glDrawElements(GL_TRIANGLES, containers[i]->facesCount() * 3, GL_UNSIGNED_INT, NULL);		
+		// postupne provadet kreslici frontu kontejneru, slozenou z kresleneho modelu a jeho matice
+		// kazdy model se pak sklada z meshi, kde kazda ma nejaky material (shader)
+		vector<ModelContainer::DRAWINGQUEUEITEM> drawingQueue = containers[i]->getDrawingQueue();
+
+		for (vector<ModelContainer::DRAWINGQUEUEITEM>::iterator it = drawingQueue.begin(); it != drawingQueue.end(); it++)
+		{
+			glUniformMatrix4fv(mat.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix) );
+			glDrawElements(GL_TRIANGLES, (*it).model->facesCount() * 3, GL_UNSIGNED_INT, (void*)(containers[i]->getModelIndexOffset((*it).model) * sizeof(GLuint)) );
+		}
+		//glDrawElements(GL_TRIANGLES, containers[i]->facesCount() * 3, GL_UNSIGNED_INT, NULL);		
 
 		break;
 	}

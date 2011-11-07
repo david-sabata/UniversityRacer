@@ -27,6 +27,12 @@ class BaseModel
 		 */
 		unsigned int vertexCount();
 
+		/**
+		 * Vraci pocet facu modelu (soucet vsech meshi)
+		 */
+		unsigned int facesCount();
+
+
 	protected:
 		std::vector<Mesh*> meshes;
 

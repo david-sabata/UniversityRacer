@@ -9,6 +9,7 @@
 #include <sstream>
 #include <iterator>
 
+#include <SDL/SDL.h>
 
 #ifdef USE_GLEE
 # include <GL/GLee.h>
@@ -128,6 +129,8 @@ class ShaderManager
 		static GLuint compileShader(const GLenum type, const char * source);
 		static GLuint linkShader(size_t count, ...);
 
+		// vertikalne prevrati obrazek (texturu)
+		static void verticalSurfaceFlip(SDL_Surface*& image);
 };
 
 

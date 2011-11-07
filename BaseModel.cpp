@@ -40,3 +40,14 @@ unsigned int BaseModel::vertexCount()
 
 	return total;
 }
+
+
+unsigned int BaseModel::facesCount()
+{
+	unsigned int total = 0;
+
+	for (vector<Mesh*>::iterator it = meshes.begin(); it != meshes.end(); it++)
+		total += (*it)->getFaces().size();
+
+	return total;
+}

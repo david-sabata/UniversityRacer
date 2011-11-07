@@ -31,14 +31,25 @@ void Game::onInit()
 {
 	BaseApp::onInit();
 
+	cout << "The Game is loading..." << endl;
+
+	// nacist modely 
+	// (muze byt pomalejsi - automaticky generuje per-vertex normaly)
 	ModelContainer* container = new ModelContainer;
-	container->load3DS("models/car.3ds");
-	//container->load3DS("models/box.3DS");
+	BaseModel* e112 = container->load3DS("models/e112.3ds");
+	
+	// vykresli E112 zmensenou na 20%
+	container->addModel("e112", e112);
+	glm::mat4 modelmat = glm::scale(glm::vec3(0.2));	
+	container->queueDraw(e112, modelmat);
+
 
 	// vyrobit scenu
 	scene = new Scene(*this);
 	scene->addModelContainer(container);
 	scene->init();
+
+	cout << "... done!" << endl;
 
 	// nacist vsechny materialy
 	ShaderManager::loadMaterial("default");	
