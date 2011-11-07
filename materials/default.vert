@@ -26,12 +26,14 @@ void main() {
 	
 	//barva svetla nastavime na bilou
 	vec4 LightDiffuse = vec4(1.0,1.0,1.0,1.0);
+
 	vec4 LightSpecular = vec4(1.0,1.0,1.0,1.0);
 	float MaterialShinines = 64;
 	
 	
   vec3 vertexNormal = gl_NormalMatrix * normal;	
   vec3 lightVector = normalize(gl_LightSource[0].position.xyz - position);
+
 	
 	float distance = length(lightVector);
 	

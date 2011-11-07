@@ -5,6 +5,7 @@ using namespace std;
 
 ModelContainer::ModelContainer(void)
 {
+	totalFacesCount = 0;
 }
 
 
@@ -19,17 +20,82 @@ ModelContainer::~ModelContainer(void)
 
 
 
+
+
+
+
 map<string, BaseModel*> const &ModelContainer::getModels()
 {
 	return models;
 }
 
 
+vector<ModelContainer::DRAWINGQUEUEITEM> const &ModelContainer::getDrawingQueue()
+{
+	return drawingQueue;
+}
+
+
+
+
+
+
+
 
 void ModelContainer::addModel(string name, BaseModel *model) 
 {
+	// pridame model
 	models.insert( pair<string, BaseModel*>(name, model) );
+
+	// pridame info o jeho offsetu
+	modelsIndexOffsets.insert(pair<BaseModel*, unsigned int>(model, totalFacesCount * 3));
+
+	// a aktualizujeme pocet facu v kontejneru
+	totalFacesCount += model->facesCount();
 }
+
+
+
+
+
+
+void ModelContainer::queueDraw(string modelName)
+{
+	queueDraw(modelName, glm::mat4(1.0));
+}
+
+void ModelContainer::queueDraw(string modelName, glm::mat4 mat)
+{
+	map<string, BaseModel*>::iterator it = models.find(modelName);
+	if (it == models.end())
+		runtime_error("Model queued for drawing has not been loaded into container");
+
+	queueDraw((*it).second, mat);
+}
+
+void ModelContainer::queueDraw(BaseModel* model)
+{
+	queueDraw(model, glm::mat4(1.0));
+}
+
+void ModelContainer::queueDraw(BaseModel* model, glm::mat4 mat)
+{
+	DRAWINGQUEUEITEM item = {model, mat};
+	drawingQueue.push_back(item);
+}
+
+
+
+
+
+
+
+unsigned int ModelContainer::getModelIndexOffset(BaseModel* model)
+{
+	return modelsIndexOffsets[model];
+}
+
+
 
 
 
@@ -51,20 +117,9 @@ unsigned int ModelContainer::verticesCount()
 
 
 
-
 unsigned int ModelContainer::facesCount()
 {
-	unsigned int total = 0;
-
-	for (map<string, BaseModel*>::iterator it = models.begin(); it != models.end(); it++)
-	{
-		for (vector<Mesh*>::iterator mit = (*it).second->getMeshes().begin(); mit != (*it).second->getMeshes().end(); mit++)
-		{
-			total += (*mit)->getFaces().size();
-		}				
-	}
-
-	return total;
+	return totalFacesCount;
 }
 
 
@@ -75,7 +130,13 @@ unsigned int ModelContainer::modelsCount()
 
 
 
-void ModelContainer::load3DS(string filename) 
+
+
+
+
+
+
+BaseModel* ModelContainer::load3DS(string filename) 
 {
 	// parsovani souboru
 	Scene3DS *scene = new Scene3DS(filename.c_str());
@@ -133,11 +194,11 @@ void ModelContainer::load3DS(string filename)
 		Mesh* m = new Mesh(name, material, vertices, faces, texcoords);
 		model->addMesh(m);
 	}
-
-
-	addModel(filename, model);
-
+	
 	delete scene;
+
+	//addModel(filename, model);
+	return model;
 }
 
 
