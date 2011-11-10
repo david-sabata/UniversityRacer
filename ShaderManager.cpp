@@ -96,7 +96,7 @@ ShaderManager::MATERIAL ShaderManager::useMaterial(string material)
 		else
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-		glUniform1i(binding.uniform, 0);
+		glUniform1i(binding.uniform, i);
 	}
 	
 	return mat;
@@ -231,7 +231,7 @@ vector<ShaderManager::TEXTUREBINDING> ShaderManager::loadTextures(GLuint program
 	} // for each line
 
 
-#if 0
+#if 1
 	for (unsigned int i = 0; i < bindings.size(); i++)
 	{
 		TEXTUREBINDING b = bindings[i];

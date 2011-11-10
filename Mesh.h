@@ -77,6 +77,8 @@ class Mesh
 
 		std::string materialName;
 
+		bool normalsComputed;
+
 };
 
 #endif

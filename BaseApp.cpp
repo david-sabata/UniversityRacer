@@ -45,7 +45,13 @@ void BaseApp::handleEvent(SDL_Event event)
 			break;
 		case SDL_MOUSEBUTTONUP :
 			onMouseUp(event.button.button, event.button.x, event.button.y);
-			break;		
+			break;
+		case SDL_VIDEORESIZE:
+			onWindowResized(event.resize.w, event.resize.h);
+			break;
+		case SDL_VIDEOEXPOSE:
+			onWindowRedraw();
+			break;
 		default :
 			break;
 	}

@@ -5,6 +5,7 @@
 
 #include "BaseApp.h"
 #include "Scene.h"
+#include "CachedModel.h"
 
 class Game : public BaseApp
 {
