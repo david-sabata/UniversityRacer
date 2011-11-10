@@ -13,6 +13,7 @@ Mesh::Mesh(string name, string materialName, vector<glm::vec3> vertices,
 {
 	// vynulovat normaly
 	normals = vector<glm::vec3>(vertices.size(), glm::vec3(0.0f));
+	normalsComputed = false;
 
 	if (0) {
 		cout << "Mesh '" << name.c_str() << "' made of '" << materialName.c_str() << "'" << endl;
@@ -27,6 +28,9 @@ Mesh::Mesh(string name, string materialName, vector<glm::vec3> vertices,
  */
 void Mesh::computeNormals()
 {
+	if (normalsComputed)
+		return;
+
 	vector<glm::vec3> faceNormals(faces.size());
 
 	// spocitat per-face normaly
@@ -60,6 +64,8 @@ void Mesh::computeNormals()
 		(*it) = glm::normalize(*it);
 		//~ cout << (*it).x << "," << (*it).y << "," << (*it).z << endl;
 	}
+
+	normalsComputed = true;
 }
 
 

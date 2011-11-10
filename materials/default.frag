@@ -19,7 +19,6 @@ void main() {
 	vec3 bumpNormal = normalize(texture(texCarpetNormal, t).rgb * 2.0 - 1.0);
 	float bumpDiffuse = max(dot(bumpNormal, gl_LightSource[0].position.xyz), 0.0);
 	
-	//~ FragColor =  (specular +  texColor * (LightAmbient + diffuse));
-	FragColor =  texColorNormal;
-
+	FragColor =  (specular +  texColor * (LightAmbient + diffuse));
+//	FragColor =  texColorNormal;
 }
