@@ -231,7 +231,7 @@ vector<ShaderManager::TEXTUREBINDING> ShaderManager::loadTextures(GLuint program
 	} // for each line
 
 
-#if 1
+#if 0
 	for (unsigned int i = 0; i < bindings.size(); i++)
 	{
 		TEXTUREBINDING b = bindings[i];

@@ -77,7 +77,7 @@ void Scene::buildBufferObjects()
 	for (vector<ModelContainer*>::iterator it = containers.begin(); it != containers.end(); it++)
 	{
 		ModelContainer* container = (*it);
-		map<string, BaseModel*> models = container->getModels();
+		vector<BaseModel*> models = container->getModels();
 		
 		// VBO /////////////////////////////////////////////////////////
 		{
@@ -93,9 +93,9 @@ void Scene::buildBufferObjects()
 			VBOENTRY* mapping = (VBOENTRY*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
 			// naplneni daty
-			for (map<string, BaseModel*>::iterator modelit = models.begin(); modelit != models.end(); modelit++)
+			for (vector<BaseModel*>::iterator modelit = models.begin(); modelit != models.end(); modelit++)
 			{
-				BaseModel* model = (*modelit).second;
+				BaseModel* model = (*modelit);
 
 				for (vector<Mesh*>::iterator meshit = model->getMeshes().begin(); meshit != model->getMeshes().end(); meshit++)
 				{
@@ -124,7 +124,7 @@ void Scene::buildBufferObjects()
 						mapping++;
 
 						//cout << "v[" << i << "]\t" << vert.x << "\t" << vert.y << "\t" << vert.z << endl;
-						//~ cout << "n[" << i << "]\t" << norm.x << "\t" << norm.y << "\t" << norm.z << endl;
+						//cout << "n[" << i << "]\t" << norm.x << "\t" << norm.y << "\t" << norm.z << endl;
 					}
 				}
 			}
@@ -146,40 +146,38 @@ void Scene::buildBufferObjects()
 			// mapovani pameti
 			unsigned int* mapping = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
 			unsigned int writingIndex = 0; // index do mapovane pameti, kam se bude zapisovat
-
-			unsigned int modelIndexOffset = 0; // kolik indexu uz zapsaly predchozi modely
-			unsigned int meshIndexOffset = 0; // kolik indexu uz zapsaly predchozi meshe tohoto modelu
+			unsigned int indexOffset = 0; // kolik indexu uz bylo zapsano; nutno pricitat pocty vrcholu (!) predchozich meshi
 
 			// naplneni daty
-			for (map<string, BaseModel*>::iterator modelit = models.begin(); modelit != models.end(); modelit++)
+			for (vector<BaseModel*>::iterator modelit = models.begin(); modelit != models.end(); modelit++)
 			{
-				BaseModel* model = (*modelit).second;
-			
+				BaseModel* model = (*modelit);
+				
 				for (unsigned int mi = 0; mi < model->getMeshes().size(); mi++)
 				{
-					Mesh* mesh = model->getMeshes()[mi];					
+					// kazda mesh ma indexy cislovane od 0
+					Mesh* mesh = model->getMeshes()[mi];
 
 					for (unsigned int i = 0; i < mesh->getFaces().size(); i++)
 					{
 						glm::vec3 face = mesh->getFaces().at(i);
+						
+						// zapsat data a posunout ukazatel na nasledujici volne misto
+						mapping[writingIndex + 0] = (unsigned int)face.x + indexOffset;
+						mapping[writingIndex + 1] = (unsigned int)face.y + indexOffset;
+						mapping[writingIndex + 2] = (unsigned int)face.z + indexOffset;
 
-						// zapsat data a posunout ukazatel na nasledujici volne misto					
-						mapping[writingIndex + 0] = (unsigned int)face.x + modelIndexOffset + meshIndexOffset;
-						mapping[writingIndex + 1] = (unsigned int)face.y + modelIndexOffset + meshIndexOffset;
-						mapping[writingIndex + 2] = (unsigned int)face.z + modelIndexOffset + meshIndexOffset;
-
-						//cout << "i\t" << mapping[writingIndex + 0] << "\t" << mapping[writingIndex + 1] << "\t" << mapping[writingIndex + 2] << endl;
-
+						if (0) {
+							cout << "writingIndex " << writingIndex << "\t" << mapping[writingIndex + 0] << "\t" << mapping[writingIndex + 1] << "\t" << mapping[writingIndex + 2] << endl;
+							cout << "original     " << writingIndex << "\t" << (unsigned int)face.x << "\t" << (unsigned int)face.y << "\t" << (unsigned int)face.z << endl;
+						}
+						
 						writingIndex += 3;					
 					}	
 					
-					// pricist pocet vrcholu teto meshe; pristi musi nalezite precislovat indexy
-					meshIndexOffset += mesh->getVertices().size();
-				}
-				
-				// pricist pocet vrcholu tohoto modelu
-				modelIndexOffset += model->vertexCount();
-				meshIndexOffset = 0;
+					// pricist pocet vrcholu (!) teto meshe; pristi mesh musi nalezite precislovat indexy
+					indexOffset += mesh->getVertices().size();
+				}				
 			}
 
 			// presun dat do graficke pameti
@@ -227,18 +225,20 @@ void Scene::draw()
 
 	
 	for (unsigned int i = 0; i < containers.size(); i++)
-	{
-		glEnableVertexAttribArray(mat.positionAttrib);
-		glEnableVertexAttribArray(mat.normalAttrib);
-		glEnableVertexAttribArray(mat.texposAttrib);
-	
+	{				
 		glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
 
+		glEnableVertexAttribArray(mat.positionAttrib);
 		glVertexAttribPointer(mat.positionAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, x));
+
+		glEnableVertexAttribArray(mat.normalAttrib);
 		glVertexAttribPointer(mat.normalAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, nx));
+
+		glEnableVertexAttribArray(mat.texposAttrib);
 		glVertexAttribPointer(mat.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[i]);
+
 
 		// postupne provadet kreslici frontu kontejneru, slozenou z kresleneho modelu a jeho matice
 		// kazdy model se pak sklada z meshi, kde kazda ma nejaky material (shader)
@@ -247,9 +247,12 @@ void Scene::draw()
 		for (vector<ModelContainer::DRAWINGQUEUEITEM>::iterator it = drawingQueue.begin(); it != drawingQueue.end(); it++)
 		{
 			glUniformMatrix4fv(mat.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix) );
-			glDrawElements(GL_TRIANGLES, (*it).model->facesCount() * 3, GL_UNSIGNED_INT, (void*)(containers[i]->getModelIndexOffset((*it).model) * sizeof(GLuint)) );
-		}
-		//glDrawElements(GL_TRIANGLES, containers[i]->facesCount() * 3, GL_UNSIGNED_INT, NULL);		
+			
+			unsigned int count = (*it).model->facesCount() * 3;			
+			unsigned int offset = containers[i]->getModelIndexOffset((*it).model);
+			
+			glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, (void*)(offset * sizeof(GLuint)) );
+		}		
 
 		break;
 	}

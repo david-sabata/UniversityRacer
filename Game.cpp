@@ -37,8 +37,11 @@ void Game::onInit()
 
 	cout << "The Game is loading:" << endl;
 
+	cout << "- loading models" << endl;
+
 	// nacist modely	
-	ModelContainer* container = new ModelContainer;
+	ModelContainer* container = new ModelContainer;	
+	BaseModel* chairs = container->load3DS("models/chairs.3ds");
 	BaseModel* e112 = container->load3DS("models/e112.3ds");
 
 	/*
@@ -49,21 +52,32 @@ void Game::onInit()
 	}
 	*/
 	
-	cout << "- models loaded" << endl;
-
+	cout << "- setting up drawing queue" << endl;
+	
 	// vykresli E112 zmensenou na 20%
-	container->addModel("e112", e112);
-	glm::mat4 modelmat = glm::scale(glm::vec3(0.2));	
-	container->queueDraw(e112, modelmat);
+	if (1) {
+		container->addModel("e112", e112);
+		glm::mat4 modelmat = glm::scale(glm::vec3(0.2));
+		container->queueDraw(e112, modelmat);
+	}
 
+	// vykresli zidle
+	{
+		glm::mat4 scale = glm::scale(glm::vec3(0.2));
+		glm::mat4 row0 = glm::translate(scale, glm::vec3(10, 0, 0));
+
+		container->addModel("chairs", chairs);
+		container->queueDraw(chairs, row0);
+	}
+
+
+	cout << "- constructing scene" << endl;
 
 	// vyrobit scenu
 	scene = new Scene(*this);
 	scene->addModelContainer(container);
 	scene->init();
-
-	cout << "- scene constructed" << endl;
-
+	
 	cout << "- done!" << endl;
 
 	// nacist vsechny materialy

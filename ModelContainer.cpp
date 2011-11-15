@@ -12,9 +12,9 @@ ModelContainer::ModelContainer(void)
 ModelContainer::~ModelContainer(void)
 {
 	// uvolnit vsechny modely
-	for (map<string, BaseModel*>::iterator it = models.begin(); it != models.end(); it++)
+	for (vector<BaseModel*>::iterator it = models.begin(); it != models.end(); it++)
 	{
-		delete (*it).second;
+		delete (*it);
 	}
 }
 
@@ -24,7 +24,7 @@ ModelContainer::~ModelContainer(void)
 
 
 
-map<string, BaseModel*> const &ModelContainer::getModels()
+vector<BaseModel*> const &ModelContainer::getModels()
 {
 	return models;
 }
@@ -45,11 +45,12 @@ vector<ModelContainer::DRAWINGQUEUEITEM> const &ModelContainer::getDrawingQueue(
 void ModelContainer::addModel(string name, BaseModel *model) 
 {
 	// pridame model
-	models.insert( pair<string, BaseModel*>(name, model) );
+	models.push_back(model);
+	modelNames.insert( pair<string, unsigned int>(name, models.size()) );
 
-	// pridame info o jeho offsetu
+	// pridame info o offsetu jeho indexu
 	modelsIndexOffsets.insert(pair<BaseModel*, unsigned int>(model, totalFacesCount * 3));
-
+	
 	// a aktualizujeme pocet facu v kontejneru
 	totalFacesCount += model->facesCount();
 }
@@ -66,11 +67,11 @@ void ModelContainer::queueDraw(string modelName)
 
 void ModelContainer::queueDraw(string modelName, glm::mat4 mat)
 {
-	map<string, BaseModel*>::iterator it = models.find(modelName);
-	if (it == models.end())
+	map<string, unsigned int>::iterator it = modelNames.find(modelName);
+	if (it == modelNames.end())
 		runtime_error("Model queued for drawing has not been loaded into container");
 
-	queueDraw((*it).second, mat);
+	queueDraw(models.at((*it).second), mat);
 }
 
 void ModelContainer::queueDraw(BaseModel* model)
@@ -104,9 +105,9 @@ unsigned int ModelContainer::verticesCount()
 {
 	unsigned int total = 0;
 
-	for (map<string, BaseModel*>::iterator it = models.begin(); it != models.end(); it++)
+	for (vector<BaseModel*>::iterator it = models.begin(); it != models.end(); it++)
 	{
-		for (vector<Mesh*>::iterator mit = (*it).second->getMeshes().begin(); mit != (*it).second->getMeshes().end(); mit++)
+		for (vector<Mesh*>::iterator mit = (*it)->getMeshes().begin(); mit != (*it)->getMeshes().end(); mit++)
 		{
 			total += (*mit)->getVertices().size();
 		}				
@@ -144,7 +145,7 @@ BaseModel* ModelContainer::load3DS(string filename)
 
 	// vytvorime novy model
 	BaseModel* model = new BaseModel;
-	
+	vector<Mesh*> modelMeshes;
 
 	for (vector<Mesh3DSObject>::iterator it = meshes.begin(); it != meshes.end(); it++) 
 	{
@@ -190,11 +191,14 @@ BaseModel* ModelContainer::load3DS(string filename)
 			texcoords.push_back( glm::vec2(coord.u, coord.v) );
 		}
 		
-
-		Mesh* m = new Mesh(name, material, vertices, faces, texcoords);
-		model->addMesh(m);
+		if (faces.size() > 0) {
+			Mesh* m = new Mesh(name, material, vertices, faces, texcoords);
+			modelMeshes.push_back(m);
+		}
 	}
 	
+	model->setMeshes(modelMeshes);
+
 	delete scene;
 
 	//addModel(filename, model);

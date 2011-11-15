@@ -48,7 +48,8 @@ class ModelContainer
 		/**
 		 * Vraci asociativni pole modelu v kontejneru
 		 */
-		std::map<std::string, BaseModel*> const &getModels();
+		//std::map<std::string, BaseModel*> const &getModels();
+		std::vector<BaseModel*> const &getModels();
 
 
 
@@ -102,9 +103,17 @@ class ModelContainer
 
 	protected:
 		/**
-		 * Asociativni pole modelu podle jejich nazvu
+		 * Asociativni pole modelu podle jejich nazvu (pro moznost dohledani 
+		 * i po ztraceni ukazatele, tj. mimo init); hodnota je index do vektoru models
 		 */
-		std::map<std::string, BaseModel*> models;
+		std::map<std::string, unsigned int> modelNames;
+
+
+		/**
+		 * Pole modelu, usporadane podle pridani
+		 */
+		std::vector<BaseModel*> models;
+
 
 		/**
 		 * Offset prvniho indexu (pocet predchazejicich uint hodnot
