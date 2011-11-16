@@ -5,12 +5,20 @@ out vec4 FragColor;
 varying vec4 diffuse;
 varying vec4 specular;
 
-// @LOAD materials/dummy.bmp
-uniform sampler2D textura;
+// @LOAD materials/textures/carpet2.bmp
+uniform sampler2D texCarpet;
 
-void main() {		
-	vec4 LightAmbient = vec4(0.2, 0.2, 0.2, 0.2);
+// @LOAD materials/textures/carpet2_normal.bmp
+uniform sampler2D texCarpetNormal;
 
-	vec4 texColor = texture(textura, t);
-	FragColor = specular + texColor * (LightAmbient + diffuse);
+void main() {	
+	vec4 LightAmbient = vec4(0.4, 0.4, 0.4, 0.4);
+	vec4 texColor = texture(texCarpet, t);
+	vec4 texColorNormal = texture(texCarpetNormal, t);
+	
+	vec3 bumpNormal = normalize(texture(texCarpetNormal, t).rgb * 2.0 - 1.0);
+	float bumpDiffuse = max(dot(bumpNormal, normalize(gl_LightSource[0].position.xyz)), 0.0);
+	
+	FragColor =   ( specular +  texColor * (bumpDiffuse + LightAmbient + diffuse));
+	//FragColor =  texColorNormal;
 }
