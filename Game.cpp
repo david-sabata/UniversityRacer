@@ -81,7 +81,9 @@ void Game::onInit()
 	cout << "- done!" << endl;
 
 	// nacist vsechny materialy
-	ShaderManager::loadMaterial("default");	
+	ShaderManager::loadPrograms();
+
+	glEnable(GL_CULL_FACE);
 }
  
 

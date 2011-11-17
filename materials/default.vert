@@ -16,6 +16,13 @@ uniform vec3 sight;
 
 #define MAX_LIGHTS 8
 uniform int enabledLights[MAX_LIGHTS]; // flagy pro jednotliva svetla [0/1]
+
+uniform struct material {
+	vec4 ambient;
+	vec4 diffuse;
+	vec4 specular;
+	int shininess;
+};
 /////////////////////////////////////////////////
 
 varying vec4 diffuse; //vysledne svetlo

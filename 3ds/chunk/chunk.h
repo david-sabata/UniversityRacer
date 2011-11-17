@@ -22,6 +22,7 @@ class Model3DSChunk
 
 	int ID();
 
+	unsigned char Char();
 	short Short();
 	int Int();
 	float Float();

@@ -59,6 +59,12 @@ int Model3DSChunk::ID()
 	return id;
 }
 
+unsigned char Model3DSChunk::Char()
+{
+	short s = 0;
+	file.read((char*)&s , 1);
+	return s;
+}
 short Model3DSChunk::Short()
 {
 	short s = 0;

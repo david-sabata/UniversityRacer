@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <sstream>
 
+// Libraries ///////////////////////////////////////////
+
 #include <SDL/SDL.h>
 
 #ifndef GLM_INCLUDED
@@ -24,6 +26,10 @@
 #endif
 
 #include <GL/glu.h>
+
+////////////////////////////////////////////////////////
+
+
 
 #include "Exceptions.h"
 #include "Utils.h"

@@ -54,10 +54,18 @@ void Scene::init()
 	buildBufferObjects();
 
 
-	// !!! tmp pro testovani !!!
-	glEnable(GL_LIGHT0);
-	GLfloat lightPos[] = { 0, 2, 0, 1 }; // homogenni souradnice
-	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+	// najit vsechna svetla a aktivovat je
+	for (vector<ModelContainer*>::iterator it = containers.begin(); it != containers.end(); it++)
+	{
+		GLenum lightEnums[] = { GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3, GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7 };
+		unsigned int i = 0;
+		if ((*it)->getLights().size() > 0 && i < 8)
+		{
+			glEnable(lightEnums[i]);
+			Light l = (*it)->getLights().at(i);
+			glLightfv(lightEnums[i], GL_POSITION, &l.Position().x);
+		}
+	}
 
 
 #if 0
@@ -192,16 +200,63 @@ void Scene::buildBufferObjects()
 
 void Scene::draw() 
 {
-	ShaderManager::MATERIAL mat = ShaderManager::useMaterial("default");
-	GLuint program = ShaderManager::getCurrentMaterial().program;
 	
+	for (unsigned int i = 0; i < containers.size(); i++)
+	{						
+		glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[i]);
+
+		// postupne provadet kreslici frontu kontejneru, slozenou z kresleneho modelu a jeho matice
+		// kazdy model se pak sklada z meshi, kde kazda ma nejaky material (shader)
+		vector<ModelContainer::DRAWINGQUEUEITEM> drawingQueue = containers[i]->getDrawingQueue();
+
+		for (vector<ModelContainer::DRAWINGQUEUEITEM>::iterator it = drawingQueue.begin(); it != drawingQueue.end(); it++)
+		{
+			
+			for (vector<Mesh*>::iterator meshIt = (*it).model->getMeshes().begin(); meshIt != (*it).model->getMeshes().end(); meshIt++)
+			{
+				// pouzit material meshe
+				ShaderManager::PROGRAMBINDING binding = ShaderManager::useProgram( (*meshIt)->getMaterialName() );
+				GLuint program = binding.program;
+
+				setProgramUniforms(binding);
+
+				glEnableVertexAttribArray(binding.positionAttrib);
+				glVertexAttribPointer(binding.positionAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, x));
+
+				glEnableVertexAttribArray(binding.normalAttrib);
+				glVertexAttribPointer(binding.normalAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, nx));
+
+				glEnableVertexAttribArray(binding.texposAttrib);
+				glVertexAttribPointer(binding.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
+
+				glUniformMatrix4fv(binding.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix) );
+						
+				unsigned int count = (*it).model->facesCount() * 3;			
+				unsigned int offset = containers[i]->getModelIndexOffset((*it).model);
+			
+				glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, (void*)(offset * sizeof(GLuint)) );
+			}
+			
+		}		
+
+	}
+
+}
+
+
+
+void Scene::setProgramUniforms(ShaderManager::PROGRAMBINDING binding)
+{
+	GLuint program = binding.program;
+
     // pohledova matice
 	glm::mat4 mView = application.getCamera()->GetMatrix();
-	glUniformMatrix4fv(mat.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
+	glUniformMatrix4fv(binding.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
 
 	// projekcni matice
 	glm::mat4 mProjection = glm::perspective(45.0f, (float)application.getWindowAspectRatio(), 1.0f, 1000.0f);
-	glUniformMatrix4fv(mat.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
+	glUniformMatrix4fv(binding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
 
 	// nastaveni svetel - !!! tmp reseni !!!
 	GLint lights[] = {
@@ -217,44 +272,4 @@ void Scene::draw()
 	GLuint sightUniform = glGetUniformLocation(program, "sight");
 	glUniform3f(eyeUniform, eye.x, eye.y, eye.z);
 	glUniform3f(sightUniform, sight.x, sight.y, sight.z);
-
-
-	// modelova matice - !!! tmp reseni !!!
-	//glm::mat4 mModel(1.0);
-	//glUniformMatrix4fv(mat.mModelUniform, 1, GL_FALSE, glm::value_ptr(mModel));
-
-	
-	for (unsigned int i = 0; i < containers.size(); i++)
-	{				
-		glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
-
-		glEnableVertexAttribArray(mat.positionAttrib);
-		glVertexAttribPointer(mat.positionAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, x));
-
-		glEnableVertexAttribArray(mat.normalAttrib);
-		glVertexAttribPointer(mat.normalAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, nx));
-
-		glEnableVertexAttribArray(mat.texposAttrib);
-		glVertexAttribPointer(mat.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[i]);
-
-
-		// postupne provadet kreslici frontu kontejneru, slozenou z kresleneho modelu a jeho matice
-		// kazdy model se pak sklada z meshi, kde kazda ma nejaky material (shader)
-		vector<ModelContainer::DRAWINGQUEUEITEM> drawingQueue = containers[i]->getDrawingQueue();
-
-		for (vector<ModelContainer::DRAWINGQUEUEITEM>::iterator it = drawingQueue.begin(); it != drawingQueue.end(); it++)
-		{
-			glUniformMatrix4fv(mat.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix) );
-			
-			unsigned int count = (*it).model->facesCount() * 3;			
-			unsigned int offset = containers[i]->getModelIndexOffset((*it).model);
-			
-			glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, (void*)(offset * sizeof(GLuint)) );
-		}		
-
-		break;
-	}
-
 }

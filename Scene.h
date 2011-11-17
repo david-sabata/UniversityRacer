@@ -73,6 +73,8 @@ class Scene
 		 */
 		void buildBufferObjects();
 
+		void setProgramUniforms(ShaderManager::PROGRAMBINDING binding);
+
 };
 
 #endif

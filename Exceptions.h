@@ -36,5 +36,9 @@ struct GL_Exception : public std::runtime_error
         : std::runtime_error(std::string("OpenGL : ") + text + " - " + (const char*)getGlErrorString(error)) {}
 };
 
+struct String_Exception : public std::runtime_error
+{
+    String_Exception(std::string message) throw() : std::runtime_error(message) {}
+};
 
 #endif

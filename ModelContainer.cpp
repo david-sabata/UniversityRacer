@@ -134,6 +134,21 @@ unsigned int ModelContainer::modelsCount()
 
 
 
+void ModelContainer::addLight(Light light)
+{
+	lights.push_back(light);
+}
+
+
+const vector<Light> &ModelContainer::getLights()
+{
+	return lights;
+}
+
+
+
+
+
 
 
 
@@ -154,7 +169,7 @@ BaseModel* ModelContainer::load3DS(string filename)
 		// nazev
 		string name = mesh.Name();
 
-		// material (jen prvni, pokud je vice)
+		// nazev materialu (jen prvni, pokud je vice)
 		string material = "";
 		if (mesh.Materials().size() > 0)
 		{
@@ -198,6 +213,50 @@ BaseModel* ModelContainer::load3DS(string filename)
 	}
 	
 	model->setMeshes(modelMeshes);
+
+
+	// ulozit materialy
+	vector<Material3DSObject> materials = scene->Materials();
+	for (vector<Material3DSObject>::iterator it = materials.begin(); it != materials.end(); it++) {
+		Material3DSObject m = (*it);
+
+		ShaderManager::MATERIALPARAMS params;
+		params.ambient = glm::vec4( m.AmbientColor().r, m.AmbientColor().g, m.AmbientColor().b, 1.0f );
+		params.diffuse = glm::vec4( m.DiffuseColor().r, m.DiffuseColor().g, m.DiffuseColor().b, 1.0f );
+		params.specular = glm::vec4( m.SpecularColor().r, m.SpecularColor().g, m.SpecularColor().b, 1.0f );
+		params.shininess = m.Shininess();
+
+		ShaderManager::setMaterialParams(m.Name(), params);
+
+#if 1
+		cout << "------------------------------------------------" << endl;
+		cout << "Material: " << m.Name() << endl;
+		cout << "Ambient: " << m.AmbientColor().r << " / " << m.AmbientColor().g << " / " << m.AmbientColor().b << endl;
+		cout << "Diffuse: " << m.DiffuseColor().r << " / " << m.DiffuseColor().g << " / " << m.DiffuseColor().b << endl;
+		cout << "Specular: " << m.SpecularColor().r << " / " << m.SpecularColor().g << " / " << m.SpecularColor().b << endl;
+		cout << "Shininess percentage: " << m.Shininess() << endl;
+#endif
+	}
+
+	// ulozit svetla
+	vector<Light3DSObject> parsedLights = scene->Lights();
+	for (vector<Light3DSObject>::iterator it = parsedLights.begin(); it != parsedLights.end(); it++) {
+		
+		// vse v 3DS je Z-up; transformovat na Y-up
+		Light3DSObject::POSITION pos = (*it).Position();
+		glm::vec4 glmvert(pos.x, pos.y, pos.z, 1);				
+		glm::mat4 rotate = glm::rotate(glm::mat4(), 90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+		glmvert = glmvert * rotate;
+				
+		Light l(glmvert.x, glmvert.y, glmvert.z);
+		addLight(l);
+
+#if 1
+		cout << "Light position: " << pos.x << "\t" << pos.y << "\t" << pos.z << endl;
+#endif
+	}
+
+
 
 	delete scene;
 

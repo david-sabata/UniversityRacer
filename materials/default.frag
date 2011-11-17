@@ -5,10 +5,10 @@ out vec4 FragColor;
 varying vec4 diffuse;
 varying vec4 specular;
 
-// @LOAD materials/textures/carpet2.bmp
+// @LOAD materials/textures/zed.bmp
 uniform sampler2D texCarpet;
 
-// @LOAD materials/textures/carpet2_normal.bmp
+// @LOAD materials/textures/zed_normal.bmp
 uniform sampler2D texCarpetNormal;
 
 void main() {	

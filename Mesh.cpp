@@ -15,10 +15,10 @@ Mesh::Mesh(string name, string materialName, vector<glm::vec3> vertices,
 	normals = vector<glm::vec3>(vertices.size(), glm::vec3(0.0f));
 	normalsComputed = false;
 
-	if (0) {
+#if 0
 		cout << "Mesh '" << name.c_str() << "' made of '" << materialName.c_str() << "'" << endl;
 		cout << "\tverts: " << vertices.size() << "\tfaces: " << faces.size() << "\ttexcoords: " << texcoords.size() << endl << endl;
-	}
+#endif
 }
 
 

@@ -18,6 +18,9 @@ class Light3DS
 	~Light3DS();
 
 	void Parse(const std::string &name , Model3DSChunk c);
+	
+	const std::vector<Light3DSObject> &Lights();
+
     private:
 
 	std::vector<Light3DSObject> lights;

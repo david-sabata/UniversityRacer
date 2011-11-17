@@ -2,18 +2,28 @@
 #define LIGHT3DSOBJECT_H
 
 #include <string>
+#include "../chunk/chunk.h"
 
 /***/
 class Light3DSObject
 {
     public:
-	/***/
-	Light3DSObject(const std::string &nname);
-	/***/
-	~Light3DSObject();
-    private:
 
-	std::string name;
+		typedef struct Position {
+			float x;
+			float y;
+			float z;
+		} POSITION;
+
+		/***/
+		Light3DSObject(Model3DSChunk c);
+		/***/
+		~Light3DSObject();
+
+		const POSITION &Position();
+    
+	private:
+		POSITION position;
 };
 
 #endif

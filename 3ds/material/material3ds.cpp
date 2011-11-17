@@ -14,7 +14,7 @@ Material3DS::~Material3DS()
 void Material3DS::Parse(Model3DSChunk c)
 {
 	//cout << "edit material\n";
-	
+	/*
 	for(Model3DSChunk cc = c.Child() ; cc ; cc = cc.Sibling())
 	{
 		switch(cc.ID())
@@ -27,14 +27,16 @@ void Material3DS::Parse(Model3DSChunk c)
 			break;
 		}
 	}
+	*/
+	NewMaterial(c);
 }
 
 void Material3DS::NewMaterial(Model3DSChunk c)
 {
-	string mat_name = c.Str();
+	//string mat_name = c.Str();
 	//cout << mat_name << "\n";
 
-	Material3DSObject material(mat_name);
+	Material3DSObject material(c);
 	materials.push_back(material);
 }
 

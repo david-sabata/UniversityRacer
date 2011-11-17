@@ -8,6 +8,8 @@
 
 #include "BaseModel.h"
 #include "3ds/3ds.h"
+#include "ShaderManager.h"
+#include "Light.h"
 
 class ModelContainer
 {
@@ -50,6 +52,26 @@ class ModelContainer
 		 */
 		//std::map<std::string, BaseModel*> const &getModels();
 		std::vector<BaseModel*> const &getModels();
+
+
+
+
+
+		/**
+		 * Prida do kontejneru svetlo
+		 * @param positioin pozice svetla
+		 * @param color barva svetla
+		 */
+		void addLight(Light light);
+
+		/**
+		 * Vraci pole vsech svetel v kontejneru
+		 */
+		const std::vector<Light> &getLights();
+
+
+
+
 
 
 
@@ -114,6 +136,10 @@ class ModelContainer
 		 */
 		std::vector<BaseModel*> models;
 
+		/**
+		 * Pole svetel v tomto kontejneru
+		 */
+		std::vector<Light> lights;
 
 		/**
 		 * Offset prvniho indexu (pocet predchazejicich uint hodnot
