@@ -151,7 +151,6 @@ const vector<Light> &ModelContainer::getLights()
 
 
 
-
 BaseModel* ModelContainer::load3DS(string filename) 
 {
 	// parsovani souboru

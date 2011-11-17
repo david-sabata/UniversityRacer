@@ -200,7 +200,9 @@ void Scene::buildBufferObjects()
 
 void Scene::draw() 
 {
-	
+	string activeMaterial = "?_dummy_?";
+	ShaderManager::PROGRAMBINDING activeBinding;
+
 	for (unsigned int i = 0; i < containers.size(); i++)
 	{						
 		glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
@@ -213,29 +215,37 @@ void Scene::draw()
 		for (vector<ModelContainer::DRAWINGQUEUEITEM>::iterator it = drawingQueue.begin(); it != drawingQueue.end(); it++)
 		{
 			
+			unsigned int meshOffset = 0;
+
 			for (vector<Mesh*>::iterator meshIt = (*it).model->getMeshes().begin(); meshIt != (*it).model->getMeshes().end(); meshIt++)
 			{
-				// pouzit material meshe
-				ShaderManager::PROGRAMBINDING binding = ShaderManager::useProgram( (*meshIt)->getMaterialName() );
-				GLuint program = binding.program;
+				// prepinat shadery jen pokud je treba
+				if (activeMaterial != (*meshIt)->getMaterialName())
+				{				
+					activeMaterial = (*meshIt)->getMaterialName();
+					activeBinding = ShaderManager::useProgram(activeMaterial);
+				}
 
-				setProgramUniforms(binding);
+				// nastavi pohledove matice, kameru, atd.
+				setProgramUniforms(activeBinding);
 
-				glEnableVertexAttribArray(binding.positionAttrib);
-				glVertexAttribPointer(binding.positionAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, x));
+				glEnableVertexAttribArray(activeBinding.positionAttrib);
+				glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, x));
 
-				glEnableVertexAttribArray(binding.normalAttrib);
-				glVertexAttribPointer(binding.normalAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, nx));
+				glEnableVertexAttribArray(activeBinding.normalAttrib);
+				glVertexAttribPointer(activeBinding.normalAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, nx));
 
-				glEnableVertexAttribArray(binding.texposAttrib);
-				glVertexAttribPointer(binding.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
+				glEnableVertexAttribArray(activeBinding.texposAttrib);
+				glVertexAttribPointer(activeBinding.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
 
-				glUniformMatrix4fv(binding.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix) );
+				glUniformMatrix4fv(activeBinding.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix) );
 						
-				unsigned int count = (*it).model->facesCount() * 3;			
-				unsigned int offset = containers[i]->getModelIndexOffset((*it).model);
+				unsigned int count = (*meshIt)->getFaces().size() * 3;
+				unsigned int offset = containers[i]->getModelIndexOffset((*it).model) + meshOffset;
 			
 				glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, (void*)(offset * sizeof(GLuint)) );
+
+				meshOffset += count;
 			}
 			
 		}		

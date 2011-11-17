@@ -28,6 +28,9 @@ void ShaderManager::loadPrograms()
 			cerr << "Warning: Shader for material '" << (*it).first << "' not found" << endl;
 		}
 	}
+
+	// fallback, musi byt dostupny vzdy
+	loadDefaultProgram();
 }
 
 
@@ -93,22 +96,14 @@ void ShaderManager::setMaterialParams(string material, MATERIALPARAMS params)
 
 
 
-ShaderManager::PROGRAMBINDING ShaderManager::useProgram(string material)
+ShaderManager::PROGRAMBINDING ShaderManager::useProgram(string program)
 {	
-	map<string, PROGRAMBINDING>::iterator el = programs.find(material);
+	map<string, PROGRAMBINDING>::iterator el = programs.find(program);
 	
-	if (el == programs.end()) { 
-		el = programs.find(DEFAULT_PROGRAM); // fallback
-		
-		// pokud jeste neni nacteny, zkusit nacist
-		if (el == programs.end()) {
-			loadDefaultProgram();
-			el = programs.find(DEFAULT_PROGRAM);
-		}
-
-		if (el == programs.end())
-			throw std::runtime_error("Material '" + material + "' is not loaded and neither default material was found");
-	}
+	// fallback shaderu
+	if (el == programs.end())
+		el = programs.find(DEFAULT_PROGRAM);
+	
 
 	PROGRAMBINDING mat = (*el).second;
 
@@ -119,7 +114,12 @@ ShaderManager::PROGRAMBINDING ShaderManager::useProgram(string material)
 	glUseProgram(mat.program);
 	
 
-	map<string, MATERIALPARAMS>::iterator matIt = materialParams.find(material);
+	map<string, MATERIALPARAMS>::iterator matIt = materialParams.find(program);
+	
+	// fallback parametru
+	if (matIt == materialParams.end())
+		matIt = materialParams.find(DEFAULT_PROGRAM);
+
 	if (matIt != materialParams.end())
 	{
 		MATERIALPARAMS matParams = (*matIt).second;
@@ -172,7 +172,7 @@ ShaderManager::PROGRAMBINDING ShaderManager::useProgram(string material)
 
 		glUniform1i(binding.uniform, i);
 	}
-	
+
 	return mat;
 }
 
@@ -326,16 +326,19 @@ vector<ShaderManager::TEXTUREBINDING> ShaderManager::loadTextures(GLuint program
 
 void ShaderManager::loadDefaultProgram()
 {
-	loadProgram(DEFAULT_PROGRAM);
+	if (!loadProgram(DEFAULT_PROGRAM))
+		throw std::runtime_error("Default material shader not found");
 
 	// podivny sedy material
 	MATERIALPARAMS params;
-	params.ambient = glm::vec4(0.2, 0.2, 0.2, 0.2);
-	params.diffuse = glm::vec4(0.3, 0.3, 0.3, 0.3);
-	params.specular = glm::vec4(0.8, 0.8, 0.8, 0.8);
+	params.ambient = glm::vec4(0.5, 0.5, 0.5, 1);
+	params.diffuse = glm::vec4(0.3, 0.3, 0.3, 1);
+	params.specular = glm::vec4(0.8, 0.8, 0.8, 1);
 	params.shininess = 10;
 
 	setMaterialParams(DEFAULT_PROGRAM, params);
+
+	cout << "Default shader loaded" << endl;
 }
 
 

@@ -64,10 +64,15 @@ void Game::onInit()
 	// vykresli zidle
 	{
 		glm::mat4 scale = glm::scale(glm::vec3(0.2));
-		glm::mat4 row0 = glm::translate(scale, glm::vec3(10, 0, 0));
+		glm::mat4 row0 = glm::translate(scale, glm::vec3(0, 19, -70));
 
 		container->addModel("chairs", chairs);
-		container->queueDraw(chairs, row0);
+		
+		for (unsigned int i = 0; i < 4; i++)
+		{
+			glm::mat4 col = glm::translate(row0, glm::vec3(110 * i, 0, 0));
+			container->queueDraw(chairs, col);
+		}		
 	}
 
 

@@ -29,8 +29,8 @@ uniform Material material;
 
 
 void main() {
-	vec4 lightDiffuse = vec4(1.0, 1.0, 1.0, 1.0);
-	vec4 lightAmbient = vec4(0.8, 0.8, 0.8, 1.0);
+	vec4 lightDiffuse = vec4(0.8, 0.8, 0.8, 0.8);
+	vec4 lightAmbient = vec4(0.5, 0.5, 0.5, 0.5);
 
 	vec3 vertexNormal, lightDir;
 	vec4 vertexDiffuse, ambient, globalAmbient;
