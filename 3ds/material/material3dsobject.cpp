@@ -10,6 +10,9 @@ Material3DSObject::Material3DSObject(Model3DSChunk c)
 		{
 			case(0xA000):
 				name = cc.Str();
+				
+				// parsovaci fce vraci retezec obsahujici \0 na konci, prestoze jde o std::string
+				name = string(name.c_str());
 			break;
 
 			case (0xA040):

@@ -2,6 +2,7 @@
 #define MATERIAL3DSOBJECT_H
 
 #include <string>
+#include <iostream>
 #include "../chunk/chunk.h"
 
 struct Mesh3Dcolor
