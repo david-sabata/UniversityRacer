@@ -60,29 +60,30 @@ void ModelContainer::addModel(string name, BaseModel *model)
 
 
 
-void ModelContainer::queueDraw(string modelName)
+ModelContainer::DRAWINGQUEUEITEM & ModelContainer::queueDraw(string modelName)
 {
-	queueDraw(modelName, glm::mat4(1.0));
+	return queueDraw(modelName, glm::mat4(1.0));
 }
 
-void ModelContainer::queueDraw(string modelName, glm::mat4 mat)
+ModelContainer::DRAWINGQUEUEITEM & ModelContainer::queueDraw(string modelName, glm::mat4 mat)
 {
 	map<string, unsigned int>::iterator it = modelNames.find(modelName);
 	if (it == modelNames.end())
 		runtime_error("Model queued for drawing has not been loaded into container");
 
-	queueDraw(models.at((*it).second), mat);
+	return queueDraw(models.at((*it).second), mat);
 }
 
-void ModelContainer::queueDraw(BaseModel* model)
+ModelContainer::DRAWINGQUEUEITEM & ModelContainer::queueDraw(BaseModel* model)
 {
-	queueDraw(model, glm::mat4(1.0));
+	return queueDraw(model, glm::mat4(1.0));
 }
 
-void ModelContainer::queueDraw(BaseModel* model, glm::mat4 mat)
+ModelContainer::DRAWINGQUEUEITEM & ModelContainer::queueDraw(BaseModel* model, glm::mat4 mat)
 {
 	DRAWINGQUEUEITEM item = {model, mat};
 	drawingQueue.push_back(item);
+	return drawingQueue.back();
 }
 
 
