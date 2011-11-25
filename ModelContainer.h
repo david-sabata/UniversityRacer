@@ -30,7 +30,15 @@ class ModelContainer
 
 
 		/**
-		 * Prida model do vykreslovaci fronty. Tato fronta se v kazdem
+		 * Polozka kreslici fronty
+		 */
+		typedef struct {
+			BaseModel* model;
+			glm::mat4 matrix;
+		} DRAWINGQUEUEITEM;
+
+		/**
+		 * Prida model do vykreslovaci fronty a vraci referenci na novy zaznam. Tato fronta se v kazdem
 		 * snimku postupne prochazi a modely se s prislusnymi maticemi vykresluji.
 		 * Model je mozne pridat podle jeho jmena anebo ukazatele, ale vzdy
 		 * musi byt nejdrive 'fyzicky pridan' do kontejneru (metoda addModel).
@@ -41,10 +49,10 @@ class ModelContainer
 		 *
 		 * Modelovou matici je mozne vynechat; v takovem pripade se pouzije identita.
 		 */
-		void queueDraw(std::string modelName);
-		void queueDraw(std::string modelName, glm::mat4 mat);
-		void queueDraw(BaseModel* model);
-		void queueDraw(BaseModel* model, glm::mat4 mat);
+		DRAWINGQUEUEITEM &queueDraw(std::string modelName);
+		DRAWINGQUEUEITEM &queueDraw(std::string modelName, glm::mat4 mat);
+		DRAWINGQUEUEITEM &queueDraw(BaseModel* model);
+		DRAWINGQUEUEITEM &queueDraw(BaseModel* model, glm::mat4 mat);
 
 
 		/**
@@ -75,14 +83,7 @@ class ModelContainer
 
 
 
-		/**
-		 * Polozka kreslici fronty
-		 */
-		typedef struct {
-			BaseModel* model;
-			glm::mat4 matrix;
-		} DRAWINGQUEUEITEM;
-
+		
 		/**
 		 * Vraci referenci na kreslici frontu
 		 * Pro pridavani modelu do fronty slouzi metoda queueDraw().

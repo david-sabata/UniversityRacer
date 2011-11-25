@@ -10,6 +10,9 @@ using namespace std;
 // pomocna promenna pro moznost kreslit wireframe (TAB)
 bool drawWireframe = false;
 
+// pomocna promenna pro zapamatovani si polozky kreslici fronty
+ModelContainer::DRAWINGQUEUEITEM* superChair;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -71,7 +74,7 @@ void Game::onInit()
 		for (unsigned int i = 0; i < 4; i++)
 		{
 			glm::mat4 col = glm::translate(row0, glm::vec3(110 * i, 0, 0));
-			container->queueDraw(chairs, col);
+			superChair = &(container->queueDraw(chairs, col)); // jen testovaci; ulozi se ukazatel na posledni pridanou zidli
 		}		
 	}
 
@@ -105,6 +108,9 @@ void Game::onWindowRedraw()
     glEnable(GL_DEPTH_TEST);    
     glDepthFunc(GL_LESS);
 	
+	// kazdy snimek upravuju modelovou matici
+	superChair->matrix = glm::rotate(superChair->matrix, 1.0f, glm::vec3(0, 1, 0));
+
 	// vykreslit scenu
 	scene->draw();
 
