@@ -13,9 +13,9 @@ class BaseModel
 		virtual ~BaseModel();
 
 		/**
-		 * Prida do modelu novou mesh
+		 * Nastavi meshe modelu
 		 */
-		void addMesh(Mesh*);
+		void setMeshes(std::vector<Mesh*> meshes);
 
 		/**
 		 * Vrati pole vsech meshi v modelu
@@ -25,11 +25,19 @@ class BaseModel
 		/**
 		 * Vraci pocet vrcholu v modelu (soucet vsech meshi)
 		 */
-		unsigned int vertexCount();
+		inline unsigned int verticesCount() { return vertexCount; }
+
+		/**
+		 * Vraci pocet facu modelu (soucet vsech meshi)
+		 */
+		inline unsigned int facesCount() { return faceCount; }
+
 
 	protected:
 		std::vector<Mesh*> meshes;
-
+		
+		unsigned int vertexCount;
+		unsigned int faceCount;
 };
 
 #endif

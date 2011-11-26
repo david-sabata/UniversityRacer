@@ -12,10 +12,9 @@
 
 #include "Exceptions.h"
 
+#ifndef M_PI
 #define M_PI 3.14159265358979323846264338327950288419716939937510
-
-void SurfaceImage2D(GLenum target, GLint level, GLint internalformat, SDL_Surface * surface);
-
+#endif
 
 void updateFPS(unsigned int newTime);
 double getFPS();

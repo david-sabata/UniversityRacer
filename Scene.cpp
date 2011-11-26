@@ -54,10 +54,18 @@ void Scene::init()
 	buildBufferObjects();
 
 
-	// !!! tmp pro testovani !!!
-	glEnable(GL_LIGHT0);
-	GLfloat lightPos[] = { 0, 2, 0, 1 }; // homogenni souradnice
-	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+	// najit vsechna svetla a aktivovat je
+	for (vector<ModelContainer*>::iterator it = containers.begin(); it != containers.end(); it++)
+	{
+		GLenum lightEnums[] = { GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3, GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7 };
+		unsigned int i = 0;
+		if ((*it)->getLights().size() > 0 && i < 8)
+		{
+			glEnable(lightEnums[i]);
+			Light l = (*it)->getLights().at(i);
+			glLightfv(lightEnums[i], GL_POSITION, &l.Position().x);
+		}
+	}
 
 
 #if 0
@@ -77,7 +85,7 @@ void Scene::buildBufferObjects()
 	for (vector<ModelContainer*>::iterator it = containers.begin(); it != containers.end(); it++)
 	{
 		ModelContainer* container = (*it);
-		map<string, BaseModel*> models = container->getModels();
+		vector<BaseModel*> models = container->getModels();
 		
 		// VBO /////////////////////////////////////////////////////////
 		{
@@ -93,9 +101,9 @@ void Scene::buildBufferObjects()
 			VBOENTRY* mapping = (VBOENTRY*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
 			// naplneni daty
-			for (map<string, BaseModel*>::iterator modelit = models.begin(); modelit != models.end(); modelit++)
+			for (vector<BaseModel*>::iterator modelit = models.begin(); modelit != models.end(); modelit++)
 			{
-				BaseModel* model = (*modelit).second;
+				BaseModel* model = (*modelit);
 
 				for (vector<Mesh*>::iterator meshit = model->getMeshes().begin(); meshit != model->getMeshes().end(); meshit++)
 				{
@@ -111,19 +119,20 @@ void Scene::buildBufferObjects()
 
 						glm::vec2 tex(0, 0);
 						if (mesh->getTexCoords().size() > i)
-							tex = mesh->getTexCoords()[i];				
+							tex = mesh->getTexCoords()[i];
 
 						// zapsat data a posunout ukazatel na nasledujici volne misto
 						VBOENTRY e = {
 							vert.x, vert.y, vert.z, 
 							norm.x, norm.y, norm.z, 
-							tex.r, tex.s
+							tex.x, tex.y
 						};
 						
 						*mapping = e;
 						mapping++;
 
 						//cout << "v[" << i << "]\t" << vert.x << "\t" << vert.y << "\t" << vert.z << endl;
+						//cout << "n[" << i << "]\t" << norm.x << "\t" << norm.y << "\t" << norm.z << endl;
 					}
 				}
 			}
@@ -145,40 +154,38 @@ void Scene::buildBufferObjects()
 			// mapovani pameti
 			unsigned int* mapping = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
 			unsigned int writingIndex = 0; // index do mapovane pameti, kam se bude zapisovat
-
-			unsigned int modelIndexOffset = 0; // kolik indexu uz zapsaly predchozi modely
-			unsigned int meshIndexOffset = 0; // kolik indexu uz zapsaly predchozi meshe tohoto modelu
+			unsigned int indexOffset = 0; // kolik indexu uz bylo zapsano; nutno pricitat pocty vrcholu (!) predchozich meshi
 
 			// naplneni daty
-			for (map<string, BaseModel*>::iterator modelit = models.begin(); modelit != models.end(); modelit++)
+			for (vector<BaseModel*>::iterator modelit = models.begin(); modelit != models.end(); modelit++)
 			{
-				BaseModel* model = (*modelit).second;
-			
+				BaseModel* model = (*modelit);
+				
 				for (unsigned int mi = 0; mi < model->getMeshes().size(); mi++)
 				{
-					Mesh* mesh = model->getMeshes()[mi];					
+					// kazda mesh ma indexy cislovane od 0
+					Mesh* mesh = model->getMeshes()[mi];
 
 					for (unsigned int i = 0; i < mesh->getFaces().size(); i++)
 					{
 						glm::vec3 face = mesh->getFaces().at(i);
+						
+						// zapsat data a posunout ukazatel na nasledujici volne misto
+						mapping[writingIndex + 0] = (unsigned int)face.x + indexOffset;
+						mapping[writingIndex + 1] = (unsigned int)face.y + indexOffset;
+						mapping[writingIndex + 2] = (unsigned int)face.z + indexOffset;
 
-						// zapsat data a posunout ukazatel na nasledujici volne misto					
-						mapping[writingIndex + 0] = (unsigned int)face.x + modelIndexOffset + meshIndexOffset;
-						mapping[writingIndex + 1] = (unsigned int)face.y + modelIndexOffset + meshIndexOffset;
-						mapping[writingIndex + 2] = (unsigned int)face.z + modelIndexOffset + meshIndexOffset;
-
-						//cout << "i\t" << mapping[writingIndex + 0] << "\t" << mapping[writingIndex + 1] << "\t" << mapping[writingIndex + 2] << endl;
-
+						if (0) {
+							cout << "writingIndex " << writingIndex << "\t" << mapping[writingIndex + 0] << "\t" << mapping[writingIndex + 1] << "\t" << mapping[writingIndex + 2] << endl;
+							cout << "original     " << writingIndex << "\t" << (unsigned int)face.x << "\t" << (unsigned int)face.y << "\t" << (unsigned int)face.z << endl;
+						}
+						
 						writingIndex += 3;					
 					}	
 					
-					// pricist pocet vrcholu teto meshe; pristi musi nalezite precislovat indexy
-					meshIndexOffset += mesh->getVertices().size();
-				}
-				
-				// pricist pocet vrcholu tohoto modelu
-				modelIndexOffset += model->vertexCount();
-				meshIndexOffset = 0;
+					// pricist pocet vrcholu (!) teto meshe; pristi mesh musi nalezite precislovat indexy
+					indexOffset += mesh->getVertices().size();
+				}				
 			}
 
 			// presun dat do graficke pameti
@@ -193,20 +200,73 @@ void Scene::buildBufferObjects()
 
 void Scene::draw() 
 {
-	ShaderManager::MATERIAL mat = ShaderManager::useMaterial("default");
-	GLuint program = ShaderManager::getCurrentMaterial().program;
-	
+	string activeMaterial = "?_dummy_?";
+	ShaderManager::PROGRAMBINDING activeBinding;
+
+	for (unsigned int i = 0; i < containers.size(); i++)
+	{						
+		glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[i]);
+
+		// postupne provadet kreslici frontu kontejneru, slozenou z kresleneho modelu a jeho matice
+		// kazdy model se pak sklada z meshi, kde kazda ma nejaky material (shader)
+		vector<ModelContainer::DRAWINGQUEUEITEM> drawingQueue = containers[i]->getDrawingQueue();
+
+		for (vector<ModelContainer::DRAWINGQUEUEITEM>::iterator it = drawingQueue.begin(); it != drawingQueue.end(); it++)
+		{
+			
+			unsigned int meshOffset = 0;
+
+			for (vector<Mesh*>::iterator meshIt = (*it).model->getMeshes().begin(); meshIt != (*it).model->getMeshes().end(); meshIt++)
+			{
+				// prepinat shadery jen pokud je treba
+				if (activeMaterial != (*meshIt)->getMaterialName())
+				{				
+					activeMaterial = (*meshIt)->getMaterialName();
+					activeBinding = ShaderManager::useProgram(activeMaterial);
+				}
+
+				// nastavi pohledove matice, kameru, atd.
+				setProgramUniforms(activeBinding);
+
+				glEnableVertexAttribArray(activeBinding.positionAttrib);
+				glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, x));
+
+				glEnableVertexAttribArray(activeBinding.normalAttrib);
+				glVertexAttribPointer(activeBinding.normalAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, nx));
+
+				glEnableVertexAttribArray(activeBinding.texposAttrib);
+				glVertexAttribPointer(activeBinding.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
+
+				glUniformMatrix4fv(activeBinding.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix) );
+						
+				unsigned int count = (*meshIt)->getFaces().size() * 3;
+				unsigned int offset = containers[i]->getModelIndexOffset((*it).model) + meshOffset;
+			
+				glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, (void*)(offset * sizeof(GLuint)) );
+
+				meshOffset += count;
+			}
+			
+		}		
+
+	}
+
+}
+
+
+
+void Scene::setProgramUniforms(ShaderManager::PROGRAMBINDING binding)
+{
+	GLuint program = binding.program;
+
     // pohledova matice
 	glm::mat4 mView = application.getCamera()->GetMatrix();
-	glUniformMatrix4fv(mat.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
+	glUniformMatrix4fv(binding.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
 
 	// projekcni matice
 	glm::mat4 mProjection = glm::perspective(45.0f, (float)application.getWindowAspectRatio(), 1.0f, 1000.0f);
-	glUniformMatrix4fv(mat.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
-
-	// modelova matice - !!! tmp reseni !!!
-	glm::mat4 mModel(1.0);
-	glUniformMatrix4fv(mat.mModelUniform, 1, GL_FALSE, glm::value_ptr(mModel));
+	glUniformMatrix4fv(binding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
 
 	// nastaveni svetel - !!! tmp reseni !!!
 	GLint lights[] = {
@@ -222,24 +282,4 @@ void Scene::draw()
 	GLuint sightUniform = glGetUniformLocation(program, "sight");
 	glUniform3f(eyeUniform, eye.x, eye.y, eye.z);
 	glUniform3f(sightUniform, sight.x, sight.y, sight.z);
-
-	for (unsigned int i = 0; i < containers.size(); i++)
-	{
-		glEnableVertexAttribArray(mat.positionAttrib);
-		glEnableVertexAttribArray(mat.texposAttrib);
-	
-		glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
-
-		glVertexAttribPointer(mat.positionAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, x));
-		glVertexAttribPointer(mat.normalAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, nx));
-		glVertexAttribPointer(mat.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[i]);
-
-		glDrawElements(GL_TRIANGLES, containers[i]->facesCount() * 3, GL_UNSIGNED_INT, NULL);	
-		//glDrawElements(GL_TRIANGLES, 4 * 3, GL_UNSIGNED_INT, (void*)(10 * 3 * sizeof(unsigned int)));
-
-		break;
-	}
-
 }

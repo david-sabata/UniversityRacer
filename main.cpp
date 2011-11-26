@@ -4,11 +4,8 @@
 using namespace std;
 
 
-
 // Pointer to active application instance, which will recieve and handle SDL events
 BaseApp* application = NULL;
-
-
 
 SDL_Surface * init(unsigned width, unsigned height, unsigned color, unsigned depth, unsigned stencil)
 {
@@ -107,47 +104,13 @@ void mainLoop()
 
         // Optionally redraw window
         if (active && redraw) application->onWindowRedraw();
+
+		// immediately fire redraw event
+		SDL_Event nextFrameEvent;
+		nextFrameEvent.type = SDL_VIDEOEXPOSE;
+		if(SDL_PushEvent(&nextFrameEvent) < 0) throw SDL_Exception();
     }
 }
-
-
-
-// Animation main loop
-// period - maximum time between redraws in ms
-void mainLoop(unsigned int period)
-{
-    // This main loop requires timer support
-    if(SDL_InitSubSystem(SDL_INIT_TIMER) < 0) throw SDL_Exception();
-
-    // Create redraw timer
-    class RedrawTimer
-    {
-        private :
-            SDL_TimerID id;
-            static Uint32 callback(Uint32 interval, void *)
-            {
-                SDL_Event event;
-				event.type = SDL_VIDEOEXPOSE;
-				if(SDL_PushEvent(&event) < 0) throw SDL_Exception();
-
-                return interval;
-            }
-        public :
-            RedrawTimer(unsigned interval)
-                : id(SDL_AddTimer(interval, callback, NULL))
-            {
-                if(id == NULL) throw SDL_Exception();
-            }
-            ~RedrawTimer()
-            {
-                if(id != NULL) SDL_RemoveTimer(id);
-            }
-    } redrawTimer(period);
-
-    // Start simple main loop
-    mainLoop();
-}
-
 
 
 
@@ -165,7 +128,7 @@ int main(int /*argc*/, char ** /*argv*/)
         init(800, 600, 24, 24, 8);
 
 		// start the main loop
-		mainLoop(16); // 16ms = cca 60fps
+		mainLoop();
 
 		// cleanup
 		delete application;
@@ -179,10 +142,6 @@ int main(int /*argc*/, char ** /*argv*/)
 	//system("pause");
     return EXIT_SUCCESS;
 }
-
-
-
-
 
 /**
  * Pomocna funkce pro GLEE/GLEW kompatibilitu

@@ -1,11 +1,14 @@
 #include "mesh3dsobject.h"
 
+#include <string>
 #include <iostream>
 using namespace std;
 
 Mesh3DSObject::Mesh3DSObject(const string &nname , Model3DSChunk c)
-: name(nname)
 {
+	// parsovaci fce vraci retezec obsahujici \0 na konci, prestoze jde o std::string
+	name = string(nname.c_str());
+
 	for(Model3DSChunk cc = c.Child() ; cc ; cc = cc.Sibling())
 	{
 		switch(cc.ID())
@@ -163,6 +166,10 @@ void Mesh3DSObject::ParseFaces(Model3DSChunk c)
 void Mesh3DSObject::ParseFacesMaterials(Model3DSChunk c)
 {
 	string material_name = c.Str();
+	
+	// parsovaci fce vraci retezec obsahujici \0 na konci, prestoze jde o std::string
+	material_name = string(material_name.c_str());
+
 	vector<int> faces_applied;
 
 	//cout << "\t\t\t\tmaterial name = (" << material_name << ")\n";

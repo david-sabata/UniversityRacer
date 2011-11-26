@@ -34,3 +34,5 @@ glm/
 main.h~
 .gitignore~
 GLee.c
+materials/default.frag~
+materials/default.vert~

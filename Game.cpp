@@ -4,7 +4,14 @@ using namespace std;
 
 
 
-#define WALK_SPEED 0.01
+#define WALK_SPEED 50
+
+
+// pomocna promenna pro moznost kreslit wireframe (TAB)
+bool drawWireframe = false;
+
+// pomocna promenna pro zapamatovani si polozky kreslici fronty
+ModelContainer::DRAWINGQUEUEITEM* superChair;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -31,17 +38,60 @@ void Game::onInit()
 {
 	BaseApp::onInit();
 
-	ModelContainer* container = new ModelContainer;
-	//container->load3DS("models/car.3ds");
-	container->load3DS("models/box.3DS");
+	cout << "The Game is loading:" << endl;
+
+	cout << "- loading models" << endl;
+
+	// nacist modely	
+	ModelContainer* container = new ModelContainer;	
+	BaseModel* chairs = container->load3DS("models/chairs.3ds");
+	BaseModel* e112 = container->load3DS("models/e112.3ds");
+
+	/*
+	CachedModel* e112 = CachedModel::load("models/e112.3ds~");
+	if (e112 == NULL) {
+		BaseModel* tmp = container->load3DS("models/e112.3ds");
+		e112 = new CachedModel(tmp, "models/e112.3ds~");
+	}
+	*/
+	
+	cout << "- setting up drawing queue" << endl;
+	
+	// vykresli E112 zmensenou na 20%
+	if (1) {
+		container->addModel("e112", e112);
+		glm::mat4 modelmat = glm::scale(glm::vec3(0.2));
+		container->queueDraw(e112, modelmat);
+	}
+
+	// vykresli zidle
+	{
+		glm::mat4 scale = glm::scale(glm::vec3(0.2));
+		glm::mat4 row0 = glm::translate(scale, glm::vec3(0, 19, -70));
+
+		container->addModel("chairs", chairs);
+		
+		for (unsigned int i = 0; i < 4; i++)
+		{
+			glm::mat4 col = glm::translate(row0, glm::vec3(110 * i, 0, 0));
+			superChair = &(container->queueDraw(chairs, col)); // jen testovaci; ulozi se ukazatel na posledni pridanou zidli
+		}		
+	}
+
+
+	cout << "- constructing scene" << endl;
 
 	// vyrobit scenu
 	scene = new Scene(*this);
 	scene->addModelContainer(container);
 	scene->init();
+	
+	cout << "- done!" << endl;
 
 	// nacist vsechny materialy
-	ShaderManager::loadMaterial("default");	
+	ShaderManager::loadPrograms();
+
+	glEnable(GL_CULL_FACE);
 }
  
 
@@ -58,25 +108,10 @@ void Game::onWindowRedraw()
     glEnable(GL_DEPTH_TEST);    
     glDepthFunc(GL_LESS);
 	
-	/*
-	float aspect = (float)windowWidth/(float)windowHeight;
+	// kazdy snimek upravuju modelovou matici
+	superChair->matrix = glm::rotate(superChair->matrix, 1.0f, glm::vec3(0, 1, 0));
 
-	projection = glm::perspective(10.0f*mouseWheel, aspect, 1.0f, 1000.0f);
-    
-    glm::mat4 mvp = glm::rotate(
-            glm::rotate(
-                glm::translate(
-                    projection,
-                    glm::vec3(0, 0, pz)
-                    ),
-                mouseRY, glm::vec3(1, 0, 0)
-                ),
-            mouseRX, glm::vec3(0, 1, 0)
-            );
-
-    //glUniformMatrix4fv(mvpUniform, 1, GL_FALSE, glm::value_ptr(mvp));
-	*/
-
+	// vykreslit scenu
 	scene->draw();
 
     SDL_GL_SwapBuffers(); 
@@ -93,8 +128,9 @@ void Game::handleActiveKeys()
 	bool dDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_d) != activeKeys.end() );
 	
 	// chceme aby byla rychlost pohybu nezavisla na fps
-	float f_fps = float(1 / getFPS());
-	float f_step = float(WALK_SPEED / f_fps);
+	//float f_fps = float(1 / getFPS());
+	//float f_step = float(WALK_SPEED / f_fps);
+	float f_step = float(WALK_SPEED / getFPS());
 
 	// vysledkem jsou slozky vektoru ve smerech X ("strafe", ne otaceni) a Z
 	float x = -( (-1.0f * aDown) + (1.0f * dDown) ) * f_step;	
@@ -119,6 +155,16 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 			SDL_WM_GrabInput(SDL_GRAB_ON);
 		else
 			SDL_WM_GrabInput(SDL_GRAB_OFF);
+	}
+
+	// TAB prepina mezi vyplnenym kreslenim a wireframe
+	if (key == SDLK_TAB) {
+		drawWireframe = !drawWireframe;
+
+		if (drawWireframe)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		else
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 }
 
