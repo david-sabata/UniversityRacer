@@ -1,12 +1,12 @@
 #version 130
 
-// @LOAD materials/textures/color_map.bmp
+// @LOAD materials/textures/carpet.bmp
 uniform sampler2D tex;
 
-// @LOAD materials/textures/normal_map.bmp
+// @LOAD materials/textures/carpetn.bmp
 uniform sampler2D texNormal;
 
-// @LOAD materials/textures/height_map.bmp
+// @LOAD materials/textures/carpeth.bmp
 uniform sampler2D texHeight;
 
 varying vec3 lightVTan;

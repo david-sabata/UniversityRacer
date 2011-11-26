@@ -7,6 +7,7 @@ in vec3 position;
 in vec3 normal;
 in vec2 texpos;
 
+out vec2 t;
 uniform mat4 model;
 uniform mat4 projection;
 uniform mat4 view;
@@ -27,7 +28,7 @@ struct Material {
 out	vec4 ambientF;
 out	vec4 diffuseF;
 out	vec4 specularF;
-varying	int shininessF;
+out	int shininessF;
 
 uniform Material material;
 /////////////////////////////////////////////////
@@ -65,4 +66,6 @@ void main() {
   
 	mat4 mvp = projection * view * model;
 	gl_Position = mvp * vec4(position,1);
+	
+	t = texpos;
 }

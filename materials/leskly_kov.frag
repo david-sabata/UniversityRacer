@@ -1,5 +1,8 @@
 #version 130
 
+
+
+
 varying vec3 normF, halfVector;
 varying vec3 vertexF;
 varying vec3 lightDir;
@@ -9,7 +12,9 @@ varying float distance;
 in vec4 ambientF;
 in vec4 diffuseF;
 in vec4 specularF;
-varying int shininessF;
+in int shininessF;
+
+in vec2 t;
 
 void main() {
 
@@ -34,6 +39,7 @@ void main() {
 	vec4 spec = specularF * pow(normDotHV, 64); //shininess - 64
 	spec = clamp(spec, 0.0 , 1.0);
 	
+	
 	//vysledna barva
-	gl_FragColor =  amb + diff + spec;
+	gl_FragColor =  (amb + diff + spec);
 }
