@@ -10,9 +10,10 @@ using namespace std;
 // pomocna promenna pro moznost kreslit wireframe (TAB)
 bool drawWireframe = false;
 
-// pomocna promenna pro zapamatovani si polozky kreslici fronty
-ModelContainer::DRAWINGQUEUEITEM* superChair;
-
+// pomocna promenna pro zapamatovani si indexu polozky kreslici fronty
+unsigned int superChair;
+// ukazatel na frontu ve ktere se zidle nachazi
+const vector<ModelContainer::DRAWINGQUEUEITEM>* superQueue = NULL;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -74,10 +75,13 @@ void Game::onInit()
 		for (unsigned int i = 0; i < 4; i++)
 		{
 			glm::mat4 col = glm::translate(row0, glm::vec3(110 * i, 0, 0));
-			superChair = &(container->queueDraw(chairs, col)); // jen testovaci; ulozi se ukazatel na posledni pridanou zidli
+			superChair = container->queueDraw(chairs, col); // jen testovaci; ulozi se index na posledni pridanou zidli
 		}		
 	}
 
+
+	// zapamatovat si frontu
+	superQueue = &(container->getDrawingQueue());
 
 	cout << "- constructing scene" << endl;
 
@@ -109,7 +113,9 @@ void Game::onWindowRedraw()
     glDepthFunc(GL_LESS);
 	
 	// kazdy snimek upravuju modelovou matici
-	superChair->matrix = glm::rotate(superChair->matrix, 1.0f, glm::vec3(0, 1, 0));
+	// zidli musime ziskavat vzdy znovu, ptz mohlo dojit k realokaci kreslici fronty a ukazatele by nemusely platit
+	ModelContainer::DRAWINGQUEUEITEM chair = superQueue->at(superChair);
+	chair.matrix = glm::rotate(chair.matrix, 1.0f, glm::vec3(0, 1, 0));
 
 	// vykreslit scenu
 	scene->draw();

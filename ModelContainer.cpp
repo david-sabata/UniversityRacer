@@ -60,12 +60,12 @@ void ModelContainer::addModel(string name, BaseModel *model)
 
 
 
-ModelContainer::DRAWINGQUEUEITEM & ModelContainer::queueDraw(string modelName)
+unsigned int ModelContainer::queueDraw(string modelName)
 {
 	return queueDraw(modelName, glm::mat4(1.0));
 }
 
-ModelContainer::DRAWINGQUEUEITEM & ModelContainer::queueDraw(string modelName, glm::mat4 mat)
+unsigned int ModelContainer::queueDraw(string modelName, glm::mat4 mat)
 {
 	map<string, unsigned int>::iterator it = modelNames.find(modelName);
 	if (it == modelNames.end())
@@ -74,16 +74,16 @@ ModelContainer::DRAWINGQUEUEITEM & ModelContainer::queueDraw(string modelName, g
 	return queueDraw(models.at((*it).second), mat);
 }
 
-ModelContainer::DRAWINGQUEUEITEM & ModelContainer::queueDraw(BaseModel* model)
+unsigned int ModelContainer::queueDraw(BaseModel* model)
 {
 	return queueDraw(model, glm::mat4(1.0));
 }
 
-ModelContainer::DRAWINGQUEUEITEM & ModelContainer::queueDraw(BaseModel* model, glm::mat4 mat)
+unsigned int ModelContainer::queueDraw(BaseModel* model, glm::mat4 mat)
 {
 	DRAWINGQUEUEITEM item = {model, mat};
 	drawingQueue.push_back(item);
-	return drawingQueue.back();
+	return drawingQueue.size() - 1;
 }
 
 
@@ -247,12 +247,13 @@ BaseModel* ModelContainer::load3DS(string filename)
 		glm::vec4 glmvert(pos.x, pos.y, pos.z, 1);				
 		glm::mat4 rotate = glm::rotate(glm::mat4(), 90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 		glmvert = glmvert * rotate;
-				
-		Light l(glmvert.x, glmvert.y, glmvert.z);
+
+		// pridat svetla s defaultnimi barevnymi vlastnostmi (bile)
+		Light l = Light(glmvert);		
 		addLight(l);
 
 #if 1
-		cout << "Light position: " << pos.x << "\t" << pos.y << "\t" << pos.z << endl;
+		cout << "Light position: " << glmvert.x << "\t" << glmvert.y << "\t" << glmvert.z << endl;
 #endif
 	}
 
