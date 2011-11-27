@@ -30,7 +30,7 @@ vector<BaseModel*> const &ModelContainer::getModels()
 }
 
 
-vector<ModelContainer::DRAWINGQUEUEITEM> const &ModelContainer::getDrawingQueue()
+vector<ModelContainer::DRAWINGQUEUEITEM> &ModelContainer::getDrawingQueue()
 {
 	return drawingQueue;
 }

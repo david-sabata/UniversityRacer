@@ -13,7 +13,7 @@ bool drawWireframe = false;
 // pomocna promenna pro zapamatovani si indexu polozky kreslici fronty
 unsigned int superChair;
 // ukazatel na frontu ve ktere se zidle nachazi
-const vector<ModelContainer::DRAWINGQUEUEITEM>* superQueue = NULL;
+vector<ModelContainer::DRAWINGQUEUEITEM>* superQueue = NULL;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -81,7 +81,7 @@ void Game::onInit()
 
 
 	// zapamatovat si frontu
-	superQueue = &(container->getDrawingQueue());
+	superQueue = &container->getDrawingQueue();
 
 	cout << "- constructing scene" << endl;
 
@@ -114,7 +114,7 @@ void Game::onWindowRedraw()
 	
 	// kazdy snimek upravuju modelovou matici
 	// zidli musime ziskavat vzdy znovu, ptz mohlo dojit k realokaci kreslici fronty a ukazatele by nemusely platit
-	ModelContainer::DRAWINGQUEUEITEM chair = superQueue->at(superChair);
+	ModelContainer::DRAWINGQUEUEITEM &chair = superQueue->at(superChair);
 	chair.matrix = glm::rotate(chair.matrix, 1.0f, glm::vec3(0, 1, 0));
 
 	// vykreslit scenu
