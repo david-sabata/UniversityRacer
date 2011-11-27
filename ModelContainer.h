@@ -88,7 +88,7 @@ class ModelContainer
 		 * Vraci referenci na kreslici frontu
 		 * Pro pridavani modelu do fronty slouzi metoda queueDraw().
 		 */
-		std::vector<DRAWINGQUEUEITEM> const &getDrawingQueue();
+		std::vector<DRAWINGQUEUEITEM> &getDrawingQueue();
 
 
 
