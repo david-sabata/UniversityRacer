@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Light.h"
 
 using namespace std;
 
@@ -13,6 +14,7 @@ bool drawWireframe = false;
 // pomocna promenna pro zapamatovani si polozky kreslici fronty
 ModelContainer::DRAWINGQUEUEITEM* superChair;
 
+ModelContainer * pohybSvetla;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -46,7 +48,7 @@ void Game::onInit()
 	ModelContainer* container = new ModelContainer;	
 	BaseModel* chairs = container->load3DS("models/chairs.3ds");
 	BaseModel* e112 = container->load3DS("models/e112.3ds");
-
+	pohybSvetla = container;
 	/*
 	CachedModel* e112 = CachedModel::load("models/e112.3ds~");
 	if (e112 == NULL) {
@@ -126,6 +128,21 @@ void Game::handleActiveKeys()
 	bool sDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_s) != activeKeys.end() );
 	bool aDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_a) != activeKeys.end() );
 	bool dDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_d) != activeKeys.end() );
+	
+	//TMP - pohyb svetla !!!
+	bool iDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_i) != activeKeys.end() );
+	bool kDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_k) != activeKeys.end() );
+	bool jDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_j) != activeKeys.end() );
+	bool lDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_l) != activeKeys.end() );
+	
+		//TMP!!!!!!
+	Light l = (*pohybSvetla->getLights().begin());
+	if(iDown) pohybSvetla->getLights().at(0).Position().z+=40.0f;
+	if(kDown) pohybSvetla->getLights().at(0).Position().z-=40.0f;
+	if(jDown) pohybSvetla->getLights().at(0).Position().x-=40.0f;
+	if(lDown) pohybSvetla->getLights().at(0).Position().x+=40.0f;
+	
+	cout << "Pozice svetla Z: " << l.position.z << "X: " << l.position.x << endl;
 	
 	// chceme aby byla rychlost pohybu nezavisla na fps
 	//float f_fps = float(1 / getFPS());

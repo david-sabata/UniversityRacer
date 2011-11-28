@@ -203,6 +203,19 @@ void Scene::draw()
 	string activeMaterial = "?_dummy_?";
 	ShaderManager::PROGRAMBINDING activeBinding;
 
+	for (vector<ModelContainer*>::iterator it = containers.begin(); it != containers.end(); it++)
+	{
+		GLenum lightEnums[] = { GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3, GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7 };
+		unsigned int i = 0;
+		if ((*it)->getLights().size() > 0 && i < 8)
+		{
+			glEnable(lightEnums[i]);
+			Light l = (*it)->getLights().at(i);
+			glLightfv(lightEnums[i], GL_POSITION, &l.Position().x);
+		}
+	}
+	
+	
 	for (unsigned int i = 0; i < containers.size(); i++)
 	{						
 		glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);

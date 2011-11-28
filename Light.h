@@ -13,9 +13,9 @@ class Light {
 
 		Light(float x, float y, float z);
 
-		const POSITION &Position();
+		POSITION &Position();
 
-	protected:
+	public: //zmeni na protected
 		POSITION position;
 };
 

@@ -10,7 +10,7 @@ Light::Light(float x, float y, float z)
 }
 
 
-const Light::POSITION &Light::Position()
+Light::POSITION &Light::Position()
 {
 	return position;
 }

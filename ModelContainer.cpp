@@ -141,7 +141,7 @@ void ModelContainer::addLight(Light light)
 }
 
 
-const vector<Light> &ModelContainer::getLights()
+vector<Light> &ModelContainer::getLights()
 {
 	return lights;
 }
