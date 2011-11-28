@@ -12,7 +12,7 @@ varying float distance;
 in vec4 ambientF;
 in vec4 diffuseF;
 in vec4 specularF;
-in int shininessF;
+flat in int shininessF;
 
 in vec2 t;
 
@@ -36,7 +36,7 @@ void main() {
 	float normDotHV = max(dot(nF,halfV),0.0);
 	
 	//TODO nejak sem dostat odrazivost materialu !!!!!!!
-	vec4 spec = specularF * pow(normDotHV, 64); //shininess - 64
+	vec4 spec = specularF * pow(normDotHV, shininessF); //shininess - 64
 	spec = clamp(spec, 0.0 , 1.0);
 	
 	

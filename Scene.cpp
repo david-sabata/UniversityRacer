@@ -262,8 +262,14 @@ void Scene::draw()
 				}				
 
 				// modelova matice
-				glUniformMatrix4fv(activeBinding.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix) );
-										
+				glUniformMatrix4fv(activeBinding.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix));
+								
+				// pomocna matice pro vypocty osvetleni - znacne snizeni fps!
+				//glm::mat4 mMVInverseTranspose = glm::transpose(glm::inverse( application.getCamera()->GetMatrix() * (*it).matrix )); // transpose(inverse(view * model))
+				//glUniformMatrix4fv(activeBinding.mMVInverseTranspose, 1, GL_FALSE, glm::value_ptr(mMVInverseTranspose));
+
+
+				// samotne vykresleni
 				unsigned int count = (*meshIt)->getFaces().size() * 3;
 				unsigned int offset = containers[i]->getModelIndexOffset((*it).model) + meshOffset;
 			
@@ -294,16 +300,7 @@ void Scene::setProgramUniforms(ShaderManager::PROGRAMBINDING binding)
 	// projekcni matice
 	glm::mat4 mProjection = glm::perspective(45.0f, (float)application.getWindowAspectRatio(), 1.0f, 1000.0f);
 	glUniformMatrix4fv(binding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
-
-	/*
-	// nastaveni svetel - !!! tmp reseni !!!
-	GLint lights[] = {
-		1, 0, 0, 0, 0, 0, 0, 0
-	};
-	GLuint enabledLightsUniform = glGetUniformLocation(program, "enabledLights");
-	glUniform1iv(enabledLightsUniform, 8, lights);
-	*/
-
+	
 	// nastaveni kamery
 	glm::vec3 eye = application.getCamera()->getEye();
 	glm::vec3 sight = application.getCamera()->getTarget();

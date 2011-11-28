@@ -14,15 +14,16 @@ uniform mat4 view;
 uniform vec3 eye;
 uniform vec3 sight;
 
-#define MAX_LIGHTS 8
-uniform int enabledLights[MAX_LIGHTS]; // flagy pro jednotliva svetla [0/1]
-
 struct Material {
 	vec4 ambient;
 	vec4 diffuse;
 	vec4 specular;
 	int shininess;
 };
+
+uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
+uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
+
 
 uniform Material material;
 /////////////////////////////////////////////////
@@ -35,7 +36,7 @@ out vec2 texCoord;
 out	vec4 ambientF;
 out	vec4 diffuseF;
 out	vec4 specularF;
-varying	int shininessF;
+flat out int shininessF;
 
 
 //provizorni reseni!!!!!!Nutno spolecne s normalami dodavat tangenty - jak to udelat je zde:
@@ -43,14 +44,17 @@ varying	int shininessF;
 
 
 void main() {
-   //vlastnosti svetla
-  vec4 lightDiffuse = vec4(1.0,1.0,1.0,1.0);
-	vec4 lightAmbient = vec4(0.2,0.2,0.2,1.0);
+
+	// predpokladame enabledLights > 0
+	vec4 lightPosition = lights[0]; // 0 == prvni hodnota prvniho svetla == pozice
+	vec4 lightDiffuse = lights[1]; // 1 == druha hodnota prvniho svetla == difuzni slozka
+	vec4 lightAmbient = lights[2]; // 2 == treti hodnota prvniho svetla == ambientni slozka
 	
+
 	//spocitani halfvectoru
 	vec3 eyePosition = eye;
 	vec3 V = normalize(-eyePosition);
-	vec3 L = normalize(gl_LightSource[0].position.xyz - eyePosition);
+	vec3 L = normalize(lightPosition.xyz - eyePosition);
 	halfVector = normalize(L + V);
 	
   //////////////////PARALLAX///////////////////////////	
@@ -69,7 +73,7 @@ void main() {
 	);
 	
 	//vypocitame vektor svetla pro dany vertex od zdroje
-	vec3 lightVector = gl_LightSource[0].position.xyz;
+	vec3 lightVector = lightPosition.xyz;
 	//prevedeme vektor svetla do tangent space
 	lightVTan = lightVector * tanMatrix;
 	
@@ -77,15 +81,15 @@ void main() {
 	halfVector = halfVector * tanMatrix;
 	
 	
-		//difuzni barva
-  diffuseF = material.diffuse * lightDiffuse;
+	//difuzni barva
+	diffuseF = material.diffuse * lightDiffuse;
   
-  //ambientni barva
-  ambientF = material.ambient * lightAmbient;
+	//ambientni barva
+	ambientF = material.ambient * lightAmbient;
   
-  //prevod hodnot
-  specularF = material.specular;
-  shininessF = material.shininess;
+	//prevod hodnot
+	specularF = material.specular;
+	shininessF = material.shininess;
   
   
 	//predavani promennych do fragment schaderu

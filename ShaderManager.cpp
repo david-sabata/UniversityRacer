@@ -39,7 +39,7 @@ void ShaderManager::loadPrograms()
 bool ShaderManager::loadProgram(string material)
 {
 	PROGRAMBINDING mat;
-
+	
 	// VS
 	string vsPath = "materials/" + material + ".vert";
 	string vsSource;
@@ -71,6 +71,7 @@ bool ShaderManager::loadProgram(string material)
 	mat.mViewUniform = glGetUniformLocation(mat.program, "view");
 	mat.mProjectionUniform = glGetUniformLocation(mat.program, "projection");
 	mat.mModelUniform = glGetUniformLocation(mat.program, "model");
+	mat.mMVInverseTranspose = glGetUniformLocation(mat.program, "mv_inverse_transpose");
 
 	mat.iEnabledLightsUniform = glGetUniformLocation(mat.program, "enabledLights");
 	mat.vLightsUniform = glGetUniformLocation(mat.program, "lights");

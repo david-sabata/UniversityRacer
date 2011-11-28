@@ -17,7 +17,7 @@ in vec2 texCoord;
 in vec4 ambientF;
 in vec4 diffuseF;
 in vec4 specularF;
-varying int shininessF;
+flat in int shininessF;
 
 
 void main() {

@@ -79,6 +79,7 @@ class ShaderManager
 			GLuint mViewUniform;
 			GLuint mProjectionUniform;
 			GLuint mModelUniform;
+			GLuint mMVInverseTranspose;
 			GLuint iEnabledLightsUniform;
 			GLuint vLightsUniform;
 			struct {
