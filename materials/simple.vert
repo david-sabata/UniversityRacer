@@ -10,7 +10,7 @@ in vec2 texpos;
 uniform mat4 model;
 uniform mat4 projection;
 uniform mat4 view;
-uniform mat4 mv_inverse_transpose;
+uniform mat3 mv_inverse_transpose;
 
 uniform vec3 eye;
 uniform vec3 sight;
@@ -61,10 +61,10 @@ void main() {
 	
 	//transformuje normaly do eyespace
 	//~ normF = vec3((view * model) * vec4(normal,0.0));
-	normF = normalize(vec3( mv_inverse_transpose * vec4(normal, 0) ));
+	normF = normalize(mv_inverse_transpose * normal);
 	
 	//normalizujeme svetlo - u directional je pozice s vetla, rovnou smer
-	vec3 eyeVertex = (mv_inverse_transpose * vec4(position, 1.0)).xyz;
+	vec3 eyeVertex = (mv_inverse_transpose * position);
 	vec3 vertLightDist = lightPosition.xyz - eyeVertex;	
   
   //vektor svetla dopadajiciho na konkretni vertex

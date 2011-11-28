@@ -275,15 +275,29 @@ void Scene::draw()
 					// ? glUniform4fv(activeBinding.vLightsUniform, lights.size() * 4, &(lights[0].x));
 				}				
 
-				// nastavi pohledove matice, kameru, atd.
-				setProgramUniforms(activeBinding);
+				// pohledova matice
+				glm::mat4 mView = application.getCamera()->GetMatrix();
+				glUniformMatrix4fv(activeBinding.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
+
+				// projekcni matice
+				glm::mat4 mProjection = glm::perspective(45.0f, (float)application.getWindowAspectRatio(), 1.0f, 1000.0f);
+				glUniformMatrix4fv(activeBinding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
+	
+				// nastaveni kamery
+				glm::vec3 eye = application.getCamera()->getEye();
+				glm::vec3 sight = application.getCamera()->getTarget();
+				GLuint eyeUniform = glGetUniformLocation(activeBinding.program, "eye");
+				GLuint sightUniform = glGetUniformLocation(activeBinding.program, "sight");
+				glUniform3f(eyeUniform, eye.x, eye.y, eye.z);
+				glUniform3f(sightUniform, sight.x, sight.y, sight.z);
 
 				// modelova matice
 				glUniformMatrix4fv(activeBinding.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix));
-								
+
 				// pomocna matice pro vypocty osvetleni - znacne snizeni fps!
-				glm::mat4 mMVInverseTranspose = glm::transpose(glm::inverse( application.getCamera()->GetMatrix() * (*it).matrix )); // transpose(inverse(view * model))
-				glUniformMatrix4fv(activeBinding.mMVInverseTranspose, 1, GL_FALSE, glm::value_ptr(mMVInverseTranspose));
+				glm::mat3 mSubModelView = glm::mat3(mView) * glm::mat3((*it).matrix);
+				glm::mat3 mMVInverseTranspose = glm::transpose(mSubModelView); // transpose(inverse(modelview))
+				glUniformMatrix3fv(activeBinding.mMVInverseTranspose, 1, GL_FALSE, glm::value_ptr(mMVInverseTranspose));
 
 				// samotne vykresleni
 				unsigned int count = (*meshIt)->getFaces().size() * 3;
@@ -301,27 +315,4 @@ void Scene::draw()
 
 	}
 
-}
-
-
-
-void Scene::setProgramUniforms(ShaderManager::PROGRAMBINDING binding)
-{
-	GLuint program = binding.program;
-
-    // pohledova matice
-	glm::mat4 mView = application.getCamera()->GetMatrix();
-	glUniformMatrix4fv(binding.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
-
-	// projekcni matice
-	glm::mat4 mProjection = glm::perspective(45.0f, (float)application.getWindowAspectRatio(), 1.0f, 1000.0f);
-	glUniformMatrix4fv(binding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
-	
-	// nastaveni kamery
-	glm::vec3 eye = application.getCamera()->getEye();
-	glm::vec3 sight = application.getCamera()->getTarget();
-	GLuint eyeUniform = glGetUniformLocation(program, "eye");
-	GLuint sightUniform = glGetUniformLocation(program, "sight");
-	glUniform3f(eyeUniform, eye.x, eye.y, eye.z);
-	glUniform3f(sightUniform, sight.x, sight.y, sight.z);
 }

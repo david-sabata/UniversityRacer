@@ -41,11 +41,11 @@ void main() {
 	vec3 HV = normalize(halfVector);
 	float normDotHV = max(dot(nF, HV), 0.0);
 		
-	vec4 spec = specularF * pow(normDotHV, shininessF);
+	vec4 spec = specularF * pow(normDotHV, 64);
 			
 	
 	//vysledna barva
-	gl_FragColor =  (amb + diff + spec);
+	gl_FragColor =  attenuation * (amb + diff + spec);
 	//~ gl_FragColor =  vec4(attenuation,attenuation,attenuation,1.0);
 	
 	
