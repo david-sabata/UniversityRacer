@@ -248,6 +248,11 @@ BaseModel* ModelContainer::load3DS(string filename)
 		glm::mat4 rotate = glm::rotate(glm::mat4(), 90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 		glmvert = glmvert * rotate;
 
+		// TMP: scalovat svetlo stejne jako se bude scalovat ucebna
+		// TODO: globalni matice kontejneru ktera ovlivni i svetla
+		glm::mat4 modelmat = glm::scale(glm::mat4(), glm::vec3(0.2));
+		glmvert = glmvert * modelmat;
+
 		// pridat svetla s defaultnimi barevnymi vlastnostmi (bile)
 		Light l = Light(glmvert);		
 		addLight(l);

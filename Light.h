@@ -12,8 +12,8 @@
 #endif
 
 
-#define DEFAULT_AMBIENT glm::vec4(1, 1, 1, 1)
-#define DEFAULT_DIFFUSE glm::vec4(0.1, 0.1, 0.1, 1)
+#define DEFAULT_AMBIENT glm::vec4(0.1, 0.1, 0.1, 1)
+#define DEFAULT_DIFFUSE glm::vec4(1, 1, 1, 1)
 
 
 
