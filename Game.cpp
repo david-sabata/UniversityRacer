@@ -96,20 +96,22 @@ void Game::onInit()
     physics = new Physics();
     btTransform transform;
     transform.setIdentity();
+    transform.setOrigin(btVector3(0, -5, 0));  //-10
+    physics->AddRigidBody(0., transform, physics->CreateTriMeshGround());
+
     transform.setOrigin(btVector3(0, 3, 1));
     physics->AddRigidBody(5., transform, new btBoxShape(btVector3(0.75,0.75,0.75)))->setAngularVelocity(btVector3(1,1,1));
     physics->AddStaticModel(superQueue->at(e112QueueItem).model);
 
 }
- 
 
-
+glm::vec4 tvec4_from_t(const float *arr) { return glm::vec4(arr[0], arr[1], arr[2], arr[3]); }
+glm::mat4 tmat4_from_t(const float *arr) { return glm::mat4(tvec4_from_t(arr), tvec4_from_t(arr + 4), tvec4_from_t(arr + 8), tvec4_from_t(arr + 12)); }
 
 void Game::onWindowRedraw(const GameTime & gameTime) 
 {	
 	BaseApp::onWindowRedraw(gameTime);
-
-	handleActiveKeys(gameTime);
+    handleActiveKeys(gameTime);
 
     physics->StepSimulation(gameTime.Elapsed() * 0.001f);
 
@@ -117,18 +119,52 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
     glEnable(GL_DEPTH_TEST);    
     glDepthFunc(GL_LESS);
-	
+   
 	// kazdy snimek upravuju modelovou matici
 	// zidli musime ziskavat vzdy znovu, ptz mohlo dojit k realokaci kreslici fronty a ukazatele by nemusely platit
 	//ModelContainer::DRAWINGQUEUEITEM &chair = superQueue->at(superChair);
 	//chair.matrix = glm::rotate(chair.matrix, 1.0f, glm::vec3(0, 1, 0));
+    
     superQueue->at(superChair).matrix = glm::rotate(superQueue->at(superChair).matrix, gameTime.Elapsed() * 0.1f, glm::vec3(0, 1, 0));
 
-	// vykreslit scenu
+	btScalar m[16];
+    btTransform ct = physics->GetCar()->GetVehicle()->getChassisWorldTransform();
+    ct.getOpenGLMatrix(m);    
+
+    /*glm::mat4 mat(m[0], m[1], m[2], m[3],
+                  m[4], m[5], m[6], m[7],
+                  m[8], m[9], m[10], m[11],
+                  m[12], m[13], m[14], m[15]);*/
+
+    superQueue->at(carQueueItem).matrix = tmat4_from_t(m);
+        
+      //  = tmat4_from_t(m);
+        
+        
+        //tmat4_from_t(m);
+    
+    
+    
+    
+    // TODO set car transform  
+    //carQueueItem->matrix = mat;
+   
+    for (int i = 0; i < physics->GetCar()->GetVehicle()->getNumWheels(); i++)
+    {
+        btScalar m[16];
+        physics->GetCar()->GetVehicle()->updateWheelTransform(i, true); //synchronize the wheels with the (interpolated) chassis worldtransform        
+        physics->GetCar()->GetVehicle()->getWheelInfo(i).m_worldTransform.getOpenGLMatrix(m); //draw wheels (cylinders)
+        
+        // TODO set wheel transform        
+        //PhysicsDebugDraw::DrawCylinder(m, physics->GetCar()->GetVehicle()->getWheelInfo(i).m_wheelsRadius, physics->GetCar()->GetVehicle()->getWheelInfo(i).m_wheelsRadius/2);            
+    }
+    
+    
+    // vykreslit scenu
 	scene->draw();
 
     // vykreslit fyziku
-    physics->DebugDrawWorld();
+  //  physics->DebugDrawWorld();
 
     SDL_GL_SwapBuffers(); 
 }

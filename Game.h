@@ -24,8 +24,6 @@ class Game : public BaseApp
 		void onKeyDown(SDLKey key, Uint16 mod);
 		void onMouseMove(unsigned x, unsigned y, int xrel, int yrel, Uint8 buttons);
 
-        void onWindowResized(int w, int h) { BaseApp::onWindowResized(w, h); }  	// TODO update perspective
-
 	protected:
 		Scene* scene;
         Physics *physics;
