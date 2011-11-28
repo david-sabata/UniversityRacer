@@ -14,9 +14,6 @@ uniform mat4 view;
 uniform vec3 eye;
 uniform vec3 sight;
 
-#define MAX_LIGHTS 8
-uniform int enabledLights[MAX_LIGHTS]; // flagy pro jednotliva svetla [0/1]
-
 struct Material {
 	vec4 ambient;
 	vec4 diffuse;
@@ -27,7 +24,10 @@ struct Material {
 out	vec4 ambientF;
 out	vec4 diffuseF;
 out	vec4 specularF;
-varying	int shininessF;
+flat out int shininessF;
+
+uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
+uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
 uniform Material material;
 /////////////////////////////////////////////////
@@ -40,27 +40,28 @@ varying float distance;
 
 void main() {
 	
+	// predpokladame enabledLights > 0
+	vec4 lightPosition = lights[0]; // 0 == prvni hodnota prvniho svetla == pozice
+	vec4 lightDiffuse = lights[1]; // 1 == druha hodnota prvniho svetla == difuzni slozka
+	vec4 lightAmbient = lights[2]; // 2 == treti hodnota prvniho svetla == ambientni slozka
+
 	//transformuje normaly do eyespace
 	normF = vec3((view * model) * vec4(normal,0.0));
 	
 	//normalizujeme svetlo - u directional je pozice s vetla, rovnou smer
-	vec3 lightDir = normalize(gl_LightSource[0].position.xyz);	
+	vec3 lightDir = normalize(lightPosition.xyz);	
 
-  halfVector = normalize(gl_LightSource[0].halfVector.xyz);
+	halfVector = normalize(normalize(lightPosition.xyz) + normalize(eye)); // TODO: je tohle spravny vypocet halfvectoru? podle wiki by mel
   
-  //vlastnosti svetla
-  vec4 lightDiffuse = vec4(1.0,1.0,1.0,1.0);
-	vec4 lightAmbient = vec4(0.2,0.2,0.2,1.0);
-	
 	//difuzni barva
-  diffuseF = material.diffuse * lightDiffuse;
+	diffuseF = material.diffuse * lightDiffuse;
   
-  //ambientni barva
-  ambientF = material.ambient * lightAmbient;
+	//ambientni barva
+	ambientF = material.ambient * lightAmbient;
   
-  //prevod hodnot
-  specularF = material.specular;
-  shininessF = material.shininess;
+	//prevod hodnot
+	specularF = material.specular;
+	shininessF = material.shininess;
 
   
 	mat4 mvp = projection * view * model;

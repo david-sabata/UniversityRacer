@@ -79,6 +79,8 @@ class ShaderManager
 			GLuint mViewUniform;
 			GLuint mProjectionUniform;
 			GLuint mModelUniform;
+			GLuint iEnabledLightsUniform;
+			GLuint vLightsUniform;
 			struct {
 				GLuint ambient;
 				GLuint diffuse;

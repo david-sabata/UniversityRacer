@@ -199,10 +199,26 @@ void Scene::buildBufferObjects()
 
 
 void Scene::draw() 
-{
+{	
 	string activeMaterial = "?_dummy_?";
 	ShaderManager::PROGRAMBINDING activeBinding;
+	
+	// pripravit si pole svetel ze vsech kontejneru
+	vector<glm::vec4> lights;
 
+	for (unsigned int i = 0; i < containers.size(); i++)
+	{
+		vector<Light> containerLights = containers.at(i)->getLights();
+		for (vector<Light>::iterator it = containerLights.begin(); it != containerLights.end(); it++)
+		{
+			lights.push_back((*it).Position());
+			lights.push_back((*it).Diffuse());
+			lights.push_back((*it).Ambient());
+		}
+	}
+
+
+	// samotne kresleni
 	for (unsigned int i = 0; i < containers.size(); i++)
 	{						
 		glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
@@ -224,22 +240,30 @@ void Scene::draw()
 				{				
 					activeMaterial = (*meshIt)->getMaterialName();
 					activeBinding = ShaderManager::useProgram(activeMaterial);
-				}
 
-				// nastavi pohledove matice, kameru, atd.
-				setProgramUniforms(activeBinding);
+					// nastavi pohledove matice, kameru, atd.
+					setProgramUniforms(activeBinding);
 
-				glEnableVertexAttribArray(activeBinding.positionAttrib);
-				glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, x));
+					// nastavit buffery
+					glEnableVertexAttribArray(activeBinding.positionAttrib);
+					glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, x));
 
-				glEnableVertexAttribArray(activeBinding.normalAttrib);
-				glVertexAttribPointer(activeBinding.normalAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, nx));
+					glEnableVertexAttribArray(activeBinding.normalAttrib);
+					glVertexAttribPointer(activeBinding.normalAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, nx));
 
-				glEnableVertexAttribArray(activeBinding.texposAttrib);
-				glVertexAttribPointer(activeBinding.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
+					glEnableVertexAttribArray(activeBinding.texposAttrib);
+					glVertexAttribPointer(activeBinding.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
 
+					// nastavit svetla
+					glUniform1i(activeBinding.iEnabledLightsUniform, (unsigned int)(lights.size() / 3));
+					glUniform4fv(activeBinding.vLightsUniform, lights.size(), &(lights[0].x));
+
+					// ? glUniform4fv(activeBinding.vLightsUniform, lights.size() * 4, &(lights[0].x));
+				}				
+
+				// modelova matice
 				glUniformMatrix4fv(activeBinding.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix) );
-						
+										
 				unsigned int count = (*meshIt)->getFaces().size() * 3;
 				unsigned int offset = containers[i]->getModelIndexOffset((*it).model) + meshOffset;
 			
@@ -248,6 +272,9 @@ void Scene::draw()
 				meshOffset += count;
 			}
 			
+			// vynuti opetovne nastaveni shaderu pro kazdy kontejner,
+			// muze byt totiz nutne prenastavit ukazatele do bufferu atp.
+			activeMaterial = "?_dummy_?";
 		}		
 
 	}
@@ -268,12 +295,14 @@ void Scene::setProgramUniforms(ShaderManager::PROGRAMBINDING binding)
 	glm::mat4 mProjection = glm::perspective(45.0f, (float)application.getWindowAspectRatio(), 1.0f, 1000.0f);
 	glUniformMatrix4fv(binding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
 
+	/*
 	// nastaveni svetel - !!! tmp reseni !!!
 	GLint lights[] = {
 		1, 0, 0, 0, 0, 0, 0, 0
 	};
 	GLuint enabledLightsUniform = glGetUniformLocation(program, "enabledLights");
 	glUniform1iv(enabledLightsUniform, 8, lights);
+	*/
 
 	// nastaveni kamery
 	glm::vec3 eye = application.getCamera()->getEye();
