@@ -67,9 +67,13 @@ bool ShaderManager::loadProgram(string material)
 	mat.positionAttrib = glGetAttribLocation(mat.program, "position");
 	mat.normalAttrib = glGetAttribLocation(mat.program, "normal");
 	mat.texposAttrib = glGetAttribLocation(mat.program, "texpos");
+
 	mat.mViewUniform = glGetUniformLocation(mat.program, "view");
 	mat.mProjectionUniform = glGetUniformLocation(mat.program, "projection");
 	mat.mModelUniform = glGetUniformLocation(mat.program, "model");
+
+	mat.iEnabledLightsUniform = glGetUniformLocation(mat.program, "enabledLights");
+	mat.vLightsUniform = glGetUniformLocation(mat.program, "lights");
 	
 	mat.matParams.ambient = glGetUniformLocation(mat.program, "material.ambient");
 	mat.matParams.diffuse = glGetUniformLocation(mat.program, "material.diffuse");
