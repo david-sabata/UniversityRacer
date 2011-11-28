@@ -26,9 +26,9 @@ class Mesh
 		/////////////////////////////////////////////////////////////////////////
 
 		/**
-		 * Spocita per-vertex normaly
+		 * Spocita per-vertex tangenty a normaly
 		 */
-		void computeNormals();
+		void computeTangentsAndNormals();
 
 
 		/**
@@ -37,29 +37,34 @@ class Mesh
 		std::string const &getName();
 
 		/**
-		 * Vraci ukazatel pole trojuhelniku. Kazdy bod
+		 * Vraci referenci na pole trojuhelniku. Kazdy bod
 		 * pole slouzi jako index do pole vrcholu
 		 */
 		std::vector<glm::vec3> const &getFaces();
 
 		/**
-		 * Vraci ukazatel na pole vrcholu modelu
+		 * Vraci referenci na pole vrcholu modelu
 		 */
 		std::vector<glm::vec3> const& getVertices();
 
 		/**
-		 * Vraci ukazatel na pole normal odpovidajicich vrcholum
+		 * Vraci referenci na pole normal odpovidajicich vrcholum
 		 */
 		std::vector<glm::vec3> const& getNormals();
 
 		/**
-		 * Vraci ukazatel na pole souradnic textur. Indexy
+		 * Vraci referenci na pole tangent odpovidajici vrcholum
+		 */
+		std::vector<glm::vec3> const& getTangents();
+
+		/**
+		 * Vraci referenci na pole souradnic textur. Indexy
 		 * odpovidaji indexum do pole vrcholu
 		 */
 		std::vector<glm::vec2> const& getTexCoords();
 
 		/**
-		 * Vraci retezec identifikujici material
+		 * Vraci referenci na nazev materialu
 		 */
 		std::string const& getMaterialName();
 		
@@ -70,6 +75,8 @@ class Mesh
 		std::vector<glm::vec3> vertices;
 
 		std::vector<glm::vec3> normals;
+
+		std::vector<glm::vec3> tangents;
 
 		std::vector<glm::vec2> texcoords;
 

@@ -9,6 +9,7 @@ using namespace std;
 typedef struct VBOENTRY {
 	float x, y, z;		// souradnice
 	float nx, ny, nz;	// normala
+	float tx, ty, tz;	// tangenta
 	float u, v;			// textura
 } VBOENTRY;
 
@@ -109,8 +110,8 @@ void Scene::buildBufferObjects()
 				{
 					Mesh* mesh = (*meshit);
 
-					// spocitat normaly
-					mesh->computeNormals();
+					// spocitat tangenty a normaly
+					mesh->computeTangentsAndNormals();
 
 					for (unsigned int i = 0; i < mesh->getVertices().size(); i++)
 					{
@@ -239,10 +240,7 @@ void Scene::draw()
 				if (activeMaterial != (*meshIt)->getMaterialName())
 				{				
 					activeMaterial = (*meshIt)->getMaterialName();
-					activeBinding = ShaderManager::useProgram(activeMaterial);
-
-					// nastavi pohledove matice, kameru, atd.
-					setProgramUniforms(activeBinding);
+					activeBinding = ShaderManager::useProgram(activeMaterial);					
 
 					// nastavit buffery
 					glEnableVertexAttribArray(activeBinding.positionAttrib);
@@ -250,6 +248,9 @@ void Scene::draw()
 
 					glEnableVertexAttribArray(activeBinding.normalAttrib);
 					glVertexAttribPointer(activeBinding.normalAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, nx));
+
+					glEnableVertexAttribArray(activeBinding.tangentAttrib);
+					glVertexAttribPointer(activeBinding.tangentAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, tx));
 
 					glEnableVertexAttribArray(activeBinding.texposAttrib);
 					glVertexAttribPointer(activeBinding.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
@@ -261,13 +262,15 @@ void Scene::draw()
 					// ? glUniform4fv(activeBinding.vLightsUniform, lights.size() * 4, &(lights[0].x));
 				}				
 
+				// nastavi pohledove matice, kameru, atd.
+				setProgramUniforms(activeBinding);
+
 				// modelova matice
 				glUniformMatrix4fv(activeBinding.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix));
 								
 				// pomocna matice pro vypocty osvetleni - znacne snizeni fps!
-				//glm::mat4 mMVInverseTranspose = glm::transpose(glm::inverse( application.getCamera()->GetMatrix() * (*it).matrix )); // transpose(inverse(view * model))
-				//glUniformMatrix4fv(activeBinding.mMVInverseTranspose, 1, GL_FALSE, glm::value_ptr(mMVInverseTranspose));
-
+				glm::mat4 mMVInverseTranspose = glm::transpose(glm::inverse( application.getCamera()->GetMatrix() * (*it).matrix )); // transpose(inverse(view * model))
+				glUniformMatrix4fv(activeBinding.mMVInverseTranspose, 1, GL_FALSE, glm::value_ptr(mMVInverseTranspose));
 
 				// samotne vykresleni
 				unsigned int count = (*meshIt)->getFaces().size() * 3;

@@ -250,7 +250,7 @@ BaseModel* ModelContainer::load3DS(string filename)
 
 		// TMP: scalovat svetlo stejne jako se bude scalovat ucebna
 		// TODO: globalni matice kontejneru ktera ovlivni i svetla
-		glm::mat4 modelmat = glm::scale(glm::mat4(), glm::vec3(0.2));
+		glm::mat4 modelmat = glm::scale(glm::mat4(), glm::vec3(0.1));
 		glmvert = glmvert * modelmat;
 
 		// pridat svetla s defaultnimi barevnymi vlastnostmi (bile)

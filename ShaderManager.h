@@ -75,7 +75,7 @@ class ShaderManager
 			// --------------------------------
 
 			// vyuziva vykreslujici scena -----
-			GLuint positionAttrib, normalAttrib, texposAttrib;
+			GLuint positionAttrib, normalAttrib, tangentAttrib, texposAttrib;
 			GLuint mViewUniform;
 			GLuint mProjectionUniform;
 			GLuint mModelUniform;

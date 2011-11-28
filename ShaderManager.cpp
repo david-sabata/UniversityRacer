@@ -66,6 +66,7 @@ bool ShaderManager::loadProgram(string material)
 	// Vstupy
 	mat.positionAttrib = glGetAttribLocation(mat.program, "position");
 	mat.normalAttrib = glGetAttribLocation(mat.program, "normal");
+	mat.tangentAttrib = glGetAttribLocation(mat.program, "tangent");
 	mat.texposAttrib = glGetAttribLocation(mat.program, "texpos");
 
 	mat.mViewUniform = glGetUniformLocation(mat.program, "view");

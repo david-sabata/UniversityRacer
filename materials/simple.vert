@@ -58,7 +58,8 @@ void main() {
 
 	
 	//transformuje normaly do eyespace
-	normF = vec3((view * model) * vec4(normal,0.0));
+	//normF = vec3((view * model) * vec4(normal,0.0));
+	normF = vec3( mv_inverse_transpose * vec4(normal, 0) );
 	
 	//normalizujeme svetlo - u directional je pozice s vetla, rovnou smer
 	lightDir = normalize(lightPosition.xyz);	
