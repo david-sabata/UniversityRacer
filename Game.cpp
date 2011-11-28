@@ -51,13 +51,9 @@ void Game::onInit()
 	// nacist modely	
 	ModelContainer* container = new ModelContainer;	
 
-	BaseModel* room = container->load3DS("models/test.3ds");
-	container->addModel("room", room);
 	
-	glm::mat4 mat = glm::scale(glm::vec3(0.1));
-	container->queueDraw(room, mat);
 	pohybSvetla = container;
-#if 0
+#if 1
 	BaseModel* chairs = container->load3DS("models/chairs.3ds");
 	BaseModel* e112 = container->load3DS("models/e112.3ds");
 
