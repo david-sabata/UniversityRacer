@@ -75,7 +75,7 @@ class ModelContainer
 		/**
 		 * Vraci pole vsech svetel v kontejneru
 		 */
-		const std::vector<Light> &getLights();
+	 std::vector<Light> &getLights();
 
 
 

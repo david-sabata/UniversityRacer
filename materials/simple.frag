@@ -3,48 +3,51 @@
 
 varying vec3 normF;
 varying vec3 halfVector;
-varying vec3 lightDir;
-
+varying vec3 lightVec;
+varying float distance;
 
 in vec4 ambientF;
 in vec4 diffuseF;
 in vec4 specularF;
 flat in int shininessF;
 
-/*
-in vec4 lightAmbient;
-in vec4 lightDiffuse;
-
-varying vec3 normalVec;
-varying vec3 lightDir;
-varying vec3 eyeVec;
-*/
-
 void main() {
 	
 	//lambert - diffuse
-	vec3 lam = normalize(lightDir);
+	vec3 lam = normalize(lightVec);
 	vec3 nF = normalize(normF);
-	
+
 	//pod jakym uhlem dopada svetlo na plosku
 	float normDotLam = max(dot(nF, lam), 0.0);
 	
+	//ztrata intenzity svetla zavisla na vzdalenosti
+	float attenuation;
+	
+	//pro Range 100 - zdroj : http://www.ogre3d.org/tikiwiki/-Point+Light+Attenuation
+	float constantAtt = 1.0;
+	float linearAtt = 0.0014;
+	float quadraticAtt = 0.000007;
+	attenuation = 1.0 / (constantAtt + linearAtt * distance +
+										 quadraticAtt * distance * distance);
+		  
 	//upravime barvu plosky dle odrazivosti
 	vec4 diff =  diffuseF * normDotLam;
-	diff = clamp(diff, 0.0, 1.0);
-	
+
+			
 	//ambient - okolni svetlo
 	vec4 amb =  ambientF;
 	
 	//specular - reflection
-	vec3 halfV = normalize(halfVector);
-	float normDotHV = max(dot(nF, halfV), 0.0);
+	vec3 HV = normalize(halfVector);
+	float normDotHV = max(dot(nF, HV), 0.0);
 		
-	vec4 spec = specularF * pow(normDotHV, shininessF);
-	spec = clamp(spec, 0.0 , 1.0);
+	vec4 spec = specularF * pow(normDotHV, 64);
+			
 	
 	//vysledna barva
-	gl_FragColor =  amb + diff + spec;
+	gl_FragColor =  attenuation * (amb + diff + spec);
+	//~ gl_FragColor =  vec4(attenuation,attenuation,attenuation,1.0);
+	
 	
 
 	/*

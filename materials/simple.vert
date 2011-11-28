@@ -10,7 +10,7 @@ in vec2 texpos;
 uniform mat4 model;
 uniform mat4 projection;
 uniform mat4 view;
-uniform mat4 mv_inverse_transpose;
+uniform mat3 mv_inverse_transpose;
 
 uniform vec3 eye;
 uniform vec3 sight;
@@ -37,7 +37,9 @@ flat out int shininessF;
 
 varying vec3 normF;
 varying vec3 halfVector;
-varying vec3 lightDir;
+varying vec3 lightVec;
+
+varying float distance;
 
 
 /*
@@ -58,13 +60,19 @@ void main() {
 
 	
 	//transformuje normaly do eyespace
-	//normF = vec3((view * model) * vec4(normal,0.0));
-	normF = vec3( mv_inverse_transpose * vec4(normal, 0) );
+	//~ normF = vec3((view * model) * vec4(normal,0.0));
+	normF = normalize(mv_inverse_transpose * normal);
 	
 	//normalizujeme svetlo - u directional je pozice s vetla, rovnou smer
-	lightDir = normalize(lightPosition.xyz);	
-
-	halfVector = normalize(lightDir + eye); // TODO: je tohle spravny vypocet halfvectoru? podle wiki by mel
+	vec3 eyeVertex = (mv_inverse_transpose * position);
+	vec3 vertLightDist = lightPosition.xyz - eyeVertex;	
+  
+  //vektor svetla dopadajiciho na konkretni vertex
+  lightVec = normalize(vertLightDist);
+  //vzdalenost mezi svetlem a vertexem
+  distance = length(vertLightDist);
+  
+	halfVector = normalize(lightVec + eye); // TODO: je tohle spravny vypocet halfvectoru? podle wiki by mel
   
 	//difuzni barva
 	diffuseF = material.diffuse * lightDiffuse;
@@ -84,11 +92,4 @@ void main() {
 	mat4 mvp = projection * view * model;
 	gl_Position = mvp * pos;
 	
-	/*
-	normalVec = vec3( mv_inverse_transpose * vec4(normal, 1) );
-
-	vec3 vVertex = (mv * pos).xyz;
-	lightDir = vec3(lightPosition.xyz - vVertex);
-	eyeVec = -vVertex;
-	*/
 }

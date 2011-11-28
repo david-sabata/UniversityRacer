@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Light.h"
 
 using namespace std;
 
@@ -10,10 +11,14 @@ using namespace std;
 // pomocna promenna pro moznost kreslit wireframe (TAB)
 bool drawWireframe = false;
 
+
+
+ModelContainer * pohybSvetla;
 // pomocna promenna pro zapamatovani si indexu polozky kreslici fronty
 unsigned int superChair;
 // ukazatel na frontu ve ktere se zidle nachazi
 vector<ModelContainer::DRAWINGQUEUEITEM>* superQueue = NULL;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -46,13 +51,9 @@ void Game::onInit()
 	// nacist modely	
 	ModelContainer* container = new ModelContainer;	
 
-	BaseModel* room = container->load3DS("models/test.3ds");
-	container->addModel("room", room);
 	
-	glm::mat4 mat = glm::scale(glm::vec3(0.1));
-	container->queueDraw(room, mat);
-
-#if 0
+	pohybSvetla = container;
+#if 1
 	BaseModel* chairs = container->load3DS("models/chairs.3ds");
 	BaseModel* e112 = container->load3DS("models/e112.3ds");
 
@@ -159,6 +160,21 @@ void Game::handleActiveKeys()
 	bool sDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_s) != activeKeys.end() );
 	bool aDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_a) != activeKeys.end() );
 	bool dDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_d) != activeKeys.end() );
+	
+	//TMP - pohyb svetla !!!
+	bool iDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_i) != activeKeys.end() );
+	bool kDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_k) != activeKeys.end() );
+	bool jDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_j) != activeKeys.end() );
+	bool lDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_l) != activeKeys.end() );
+	
+		//TMP!!!!!!
+	Light l = (*pohybSvetla->getLights().begin());
+	if(iDown) pohybSvetla->getLights().at(0).Position().z+=40.0f;
+	if(kDown) pohybSvetla->getLights().at(0).Position().z-=40.0f;
+	if(jDown) pohybSvetla->getLights().at(0).Position().x-=40.0f;
+	if(lDown) pohybSvetla->getLights().at(0).Position().x+=40.0f;
+	
+	cout << "Pozice svetla Z: " << l.position.z << "X: " << l.position.x << endl;
 	
 	// chceme aby byla rychlost pohybu nezavisla na fps
 	//float f_fps = float(1 / getFPS());

@@ -29,19 +29,20 @@ class Light {
 		/**
 		 * Gettery jednotlivych vlastnosti svetla
 		 */
-		inline const glm::vec4 &Position()
+		inline  glm::vec4 &Position()
 			{ return position; }
 
-		inline const glm::vec4 &Diffuse()
+		inline  glm::vec4 &Diffuse()
 			{ return diffuse; }
 
-		inline const glm::vec4 &Ambient()
+		inline  glm::vec4 &Ambient()
 			{ return ambient; }
 
-	protected:
+	public:
 		glm::vec4 position;
 		glm::vec4 diffuse;
 		glm::vec4 ambient;
+
 };
 
 
