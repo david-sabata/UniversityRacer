@@ -44,7 +44,7 @@ class BaseApp {
 		// Vraci pomer stran okna aplikace
 		inline double getWindowAspectRatio()
 		{
-			return windowWidth / windowHeight;
+			return static_cast<double>(windowWidth) / windowHeight;
 		}
 
 

@@ -11,8 +11,9 @@ Mesh::Mesh(string name, string materialName, vector<glm::vec3> vertices,
 	name(name), materialName(materialName), vertices(vertices), faces(faces),
 		texcoords(texcoords)
 {
-	// vynulovat normaly
+	// vynulovat normaly a tangenty
 	normals = vector<glm::vec3>(vertices.size(), glm::vec3(0.0f));
+	tangents = vector<glm::vec3>(vertices.size(), glm::vec3(0.0f));
 	normalsComputed = false;
 
 #if 0
@@ -26,7 +27,7 @@ Mesh::Mesh(string name, string materialName, vector<glm::vec3> vertices,
 /**
  * http://www.lighthouse3d.com/opengl/terrain/index.php3?normals
  */
-void Mesh::computeNormals()
+void Mesh::computeTangentsAndNormals()
 {
 	if (normalsComputed)
 		return;

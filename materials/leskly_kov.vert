@@ -28,7 +28,7 @@ struct Material {
 out	vec4 ambientF;
 out	vec4 diffuseF;
 out	vec4 specularF;
-out	int shininessF;
+flat out int shininessF;
 
 uniform Material material;
 /////////////////////////////////////////////////

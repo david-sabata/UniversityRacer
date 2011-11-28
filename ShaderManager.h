@@ -75,10 +75,13 @@ class ShaderManager
 			// --------------------------------
 
 			// vyuziva vykreslujici scena -----
-			GLuint positionAttrib, normalAttrib, texposAttrib;
+			GLuint positionAttrib, normalAttrib, tangentAttrib, texposAttrib;
 			GLuint mViewUniform;
 			GLuint mProjectionUniform;
 			GLuint mModelUniform;
+			GLuint mMVInverseTranspose;
+			GLuint iEnabledLightsUniform;
+			GLuint vLightsUniform;
 			struct {
 				GLuint ambient;
 				GLuint diffuse;

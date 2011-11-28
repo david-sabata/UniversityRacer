@@ -38,7 +38,7 @@ class ModelContainer
 		} DRAWINGQUEUEITEM;
 
 		/**
-		 * Prida model do vykreslovaci fronty a vraci referenci na novy zaznam. Tato fronta se v kazdem
+		 * Prida model do vykreslovaci fronty a vraci index pridaneho zaznamu. Tato fronta se v kazdem
 		 * snimku postupne prochazi a modely se s prislusnymi maticemi vykresluji.
 		 * Model je mozne pridat podle jeho jmena anebo ukazatele, ale vzdy
 		 * musi byt nejdrive 'fyzicky pridan' do kontejneru (metoda addModel).
@@ -49,10 +49,10 @@ class ModelContainer
 		 *
 		 * Modelovou matici je mozne vynechat; v takovem pripade se pouzije identita.
 		 */
-		DRAWINGQUEUEITEM &queueDraw(std::string modelName);
-		DRAWINGQUEUEITEM &queueDraw(std::string modelName, glm::mat4 mat);
-		DRAWINGQUEUEITEM &queueDraw(BaseModel* model);
-		DRAWINGQUEUEITEM &queueDraw(BaseModel* model, glm::mat4 mat);
+		unsigned int queueDraw(std::string modelName);
+		unsigned int queueDraw(std::string modelName, glm::mat4 mat);
+		unsigned int queueDraw(BaseModel* model);
+		unsigned int queueDraw(BaseModel* model, glm::mat4 mat);
 
 
 		/**
@@ -88,7 +88,7 @@ class ModelContainer
 		 * Vraci referenci na kreslici frontu
 		 * Pro pridavani modelu do fronty slouzi metoda queueDraw().
 		 */
-		std::vector<DRAWINGQUEUEITEM> const &getDrawingQueue();
+		std::vector<DRAWINGQUEUEITEM> &getDrawingQueue();
 
 
 

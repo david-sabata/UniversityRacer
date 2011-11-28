@@ -35,7 +35,7 @@ out vec2 texCoord;
 out	vec4 ambientF;
 out	vec4 diffuseF;
 out	vec4 specularF;
-varying	int shininessF;
+flat out int shininessF;
 
 
 //provizorni reseni!!!!!!Nutno spolecne s normalami dodavat tangenty - jak to udelat je zde:
