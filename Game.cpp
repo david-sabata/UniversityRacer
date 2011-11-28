@@ -3,24 +3,12 @@
 using namespace std;
 
 
-
-#define WALK_SPEED 50
-
-
-// pomocna promenna pro moznost kreslit wireframe (TAB)
-bool drawWireframe = false;
-
-// pomocna promenna pro zapamatovani si indexu polozky kreslici fronty
-unsigned int superChair;
-// ukazatel na frontu ve ktere se zidle nachazi
-vector<ModelContainer::DRAWINGQUEUEITEM>* superQueue = NULL;
-
 ////////////////////////////////////////////////////////////////////////////////
 
 
-Game::Game()
+Game::Game(): mouseCaptured(false), drawWireframe(false), superQueue(NULL)
 {
-	mouseCaptured = false;
+
 }
 
 Game::~Game()
@@ -47,6 +35,7 @@ void Game::onInit()
 	ModelContainer* container = new ModelContainer;	
 	BaseModel* chairs = container->load3DS("models/chairs.3ds");
 	BaseModel* e112 = container->load3DS("models/e112.3ds");
+    BaseModel* car =  container->load3DS("models/car.3ds");
 
 	/*
 	CachedModel* e112 = CachedModel::load("models/e112.3ds~");
@@ -62,7 +51,7 @@ void Game::onInit()
 	if (1) {
 		container->addModel("e112", e112);
 		glm::mat4 modelmat = glm::scale(glm::vec3(0.2));
-		container->queueDraw(e112, modelmat);
+		e112QueueItem = container->queueDraw(e112, modelmat);
 	}
 
 	// vykresli zidle
@@ -77,6 +66,11 @@ void Game::onInit()
 			glm::mat4 col = glm::translate(row0, glm::vec3(110 * i, 0, 0));
 			superChair = container->queueDraw(chairs, col); // jen testovaci; ulozi se index na posledni pridanou zidli
 		}		
+	}
+
+    {
+		container->addModel("car", car);
+		carQueueItem = container->queueDraw(car);
 	}
 
 
@@ -96,16 +90,28 @@ void Game::onInit()
 	ShaderManager::loadPrograms();
 
 	glEnable(GL_CULL_FACE);
+
+    cout << "- initializing physics" << endl;
+
+    physics = new Physics();
+    btTransform transform;
+    transform.setIdentity();
+    transform.setOrigin(btVector3(0, 3, 1));
+    physics->AddRigidBody(5., transform, new btBoxShape(btVector3(0.75,0.75,0.75)))->setAngularVelocity(btVector3(1,1,1));
+    physics->AddStaticModel(superQueue->at(e112QueueItem).model);
+
 }
  
 
 
 
-void Game::onWindowRedraw() 
+void Game::onWindowRedraw(const GameTime & gameTime) 
 {	
-	BaseApp::onWindowRedraw();
+	BaseApp::onWindowRedraw(gameTime);
 
-	handleActiveKeys();
+	handleActiveKeys(gameTime);
+
+    physics->StepSimulation(gameTime.Elapsed() * 0.001f);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -114,11 +120,15 @@ void Game::onWindowRedraw()
 	
 	// kazdy snimek upravuju modelovou matici
 	// zidli musime ziskavat vzdy znovu, ptz mohlo dojit k realokaci kreslici fronty a ukazatele by nemusely platit
-	ModelContainer::DRAWINGQUEUEITEM &chair = superQueue->at(superChair);
-	chair.matrix = glm::rotate(chair.matrix, 1.0f, glm::vec3(0, 1, 0));
+	//ModelContainer::DRAWINGQUEUEITEM &chair = superQueue->at(superChair);
+	//chair.matrix = glm::rotate(chair.matrix, 1.0f, glm::vec3(0, 1, 0));
+    superQueue->at(superChair).matrix = glm::rotate(superQueue->at(superChair).matrix, gameTime.Elapsed() * 0.1f, glm::vec3(0, 1, 0));
 
 	// vykreslit scenu
 	scene->draw();
+
+    // vykreslit fyziku
+    physics->DebugDrawWorld();
 
     SDL_GL_SwapBuffers(); 
 }
@@ -126,7 +136,7 @@ void Game::onWindowRedraw()
 
 
 
-void Game::handleActiveKeys()
+void Game::handleActiveKeys(const GameTime & gameTime)
 {
 	bool wDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_w) != activeKeys.end() );
 	bool sDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_s) != activeKeys.end() );
@@ -136,14 +146,25 @@ void Game::handleActiveKeys()
 	// chceme aby byla rychlost pohybu nezavisla na fps
 	//float f_fps = float(1 / getFPS());
 	//float f_step = float(WALK_SPEED / f_fps);
-	float f_step = float(WALK_SPEED / getFPS());
+	//float f_step = float(WALK_SPEED / getFPS());
+    float f_step = static_cast<float>(gameTime.Elapsed()) * WALK_SPEED;
 
 	// vysledkem jsou slozky vektoru ve smerech X ("strafe", ne otaceni) a Z
 	float x = -( (-1.0f * aDown) + (1.0f * dDown) ) * f_step;	
 	float z = ( (-1.0f * sDown) + (1.0f * wDown) ) * f_step;		
 
 	camera.Move(x, 0.0f, z);
-	
+
+     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_UP) != activeKeys.end() )
+        physics->GetCar()->Forward();
+    if ( find(activeKeys.begin(), activeKeys.end(), SDLK_DOWN) != activeKeys.end() )
+        physics->GetCar()->Backward();
+    if ( find(activeKeys.begin(), activeKeys.end(), SDLK_b) != activeKeys.end() ) 
+        physics->GetCar()->HandBrake();
+    if ( find(activeKeys.begin(), activeKeys.end(), SDLK_LEFT) != activeKeys.end() )
+        physics->GetCar()->TurnLeft();
+    if ( find(activeKeys.begin(), activeKeys.end(), SDLK_RIGHT) != activeKeys.end() )
+        physics->GetCar()->TurnRight();		
 }
 
 
@@ -172,6 +193,10 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 		else
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
+
+    if (key == SDLK_RETURN) {
+        physics->GetCar()->Reset();
+    }
 }
 
 

@@ -32,7 +32,7 @@ class BaseApp {
 		virtual void handleEvent(SDL_Event);
 		
 		virtual void onInit();
-		virtual void onWindowRedraw();		
+		virtual void onWindowRedraw(const GameTime & gameTime);		
 
 		virtual void onWindowResized(int w, int h);
 		virtual void onKeyDown(SDLKey key, Uint16 /*mod*/);

@@ -1,6 +1,6 @@
 #include "Utils.h"
 
-
+/*
 unsigned int oldTime;
 double fps;
 
@@ -14,3 +14,4 @@ double getFPS()
 {
 	return fps;
 }
+*/
