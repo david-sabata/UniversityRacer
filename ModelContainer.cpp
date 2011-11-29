@@ -36,6 +36,12 @@ vector<ModelContainer::DRAWINGQUEUEITEM> &ModelContainer::getDrawingQueue()
 }
 
 
+void ModelContainer::optimizeDrawingQueue()
+{
+
+}
+
+
 
 
 
