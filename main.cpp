@@ -49,6 +49,10 @@ void mainLoop()
     // Window is not minimized
     bool active = true;
 
+    GameTime gameTime;
+    gameTime.Init(SDL_GetTicks());
+    FpsCounter fpsCounter;
+
     for(;;) // Infinite loop
     {
         SDL_Event event;
@@ -60,10 +64,13 @@ void mainLoop()
         bool redraw = false;
 		
 		// aktualizovat FPS
-		updateFPS(SDL_GetTicks());
+		//updateFPS(SDL_GetTicks());
+        gameTime.Update(SDL_GetTicks());
+        fpsCounter.Update(gameTime);
 		ostringstream text;
-		text << "University Racer - " << setiosflags(ios::fixed) << setprecision(0) << getFPS() << " fps";
-		SDL_WM_SetCaption(text.str().c_str(), text.str().c_str());
+		//text << "University Racer - " << setiosflags(ios::fixed) << setprecision(0) << getFPS() << " fps";
+        text << "University Racer - Diff:" << gameTime << ", FPS - " << fpsCounter;
+        SDL_WM_SetCaption(text.str().c_str(), NULL);
 
         // Handle all waiting events
         do
@@ -103,7 +110,7 @@ void mainLoop()
         } while(SDL_PollEvent(&event) == 1);
 
         // Optionally redraw window
-        if (active && redraw) application->onWindowRedraw();
+        if (active && redraw) application->onWindowRedraw(gameTime);
 
 		// immediately fire redraw event
 		SDL_Event nextFrameEvent;
