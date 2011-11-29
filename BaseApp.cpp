@@ -49,9 +49,9 @@ void BaseApp::handleEvent(SDL_Event event)
 		case SDL_VIDEORESIZE:
 			onWindowResized(event.resize.w, event.resize.h);
 			break;
-		case SDL_VIDEOEXPOSE:
+		/*case SDL_VIDEOEXPOSE:
 			onWindowRedraw();
-			break;
+			break;*/
 		default :
 			break;
 	}
@@ -124,7 +124,7 @@ void BaseApp::onMouseUp(Uint8 /*button*/, unsigned /*x*/, unsigned /*y*/)
 }
 
 
-void BaseApp::onWindowRedraw()
+void BaseApp::onWindowRedraw(const GameTime & gameTime)
 {	
 }
 

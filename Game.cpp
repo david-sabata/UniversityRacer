@@ -4,14 +4,7 @@
 using namespace std;
 
 
-
-#define WALK_SPEED 50
-
-
-// pomocna promenna pro moznost kreslit wireframe (TAB)
-bool drawWireframe = false;
-
-
+#define WALK_SPEED 0.1f
 
 // pole pomocnych car k vykresleni - caru definuji dva body a barva
 struct LINE {
@@ -30,9 +23,9 @@ GLuint linesEBO;
 ////////////////////////////////////////////////////////////////////////////////
 
 
-Game::Game()
+Game::Game(): mouseCaptured(false), drawingQueue(NULL), drawWireframe(false)
 {
-	mouseCaptured = false;
+
 }
 
 Game::~Game()
@@ -149,11 +142,11 @@ void Game::onInit()
 
 
 
-void Game::onWindowRedraw() 
+void Game::onWindowRedraw(const GameTime & gameTime) 
 {	
-	BaseApp::onWindowRedraw();
+	BaseApp::onWindowRedraw(gameTime);
 
-	handleActiveKeys();
+	handleActiveKeys(gameTime);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -251,7 +244,7 @@ void Game::drawLine(glm::vec3 a, glm::vec3 b, glm::vec3 color)
 
 
 
-void Game::handleActiveKeys()
+void Game::handleActiveKeys(const GameTime & gameTime)
 {
 	bool wDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_w) != activeKeys.end() );
 	bool sDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_s) != activeKeys.end() );
@@ -261,7 +254,8 @@ void Game::handleActiveKeys()
 	// chceme aby byla rychlost pohybu nezavisla na fps
 	//float f_fps = float(1 / getFPS());
 	//float f_step = float(WALK_SPEED / f_fps);
-	float f_step = float(WALK_SPEED / getFPS());
+	//float f_step = float(WALK_SPEED / getFPS());
+    float f_step = gameTime.Elapsed() * WALK_SPEED;
 
 	// vysledkem jsou slozky vektoru ve smerech X ("strafe", ne otaceni) a Z
 	float x = -( (-1.0f * aDown) + (1.0f * dDown) ) * f_step;	
