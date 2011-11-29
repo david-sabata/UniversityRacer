@@ -28,6 +28,7 @@ uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 uniform Material material;
 
 
+//export vlastnosti materialu
 out	vec4 ambientF;
 out	vec4 diffuseF;
 out	vec4 specularF;
@@ -35,21 +36,10 @@ flat out int shininessF;
 
 /////////////////////////////////////////////////
 
-varying vec3 normF;
-varying vec3 halfVector;
-varying vec3 lightVec;
+varying vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
+varying vec3 eyeLightVector; // vektor ze svetla do zkoumaneho bodu v prostoru OKA
+varying vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
 
-varying float distance;
-
-
-/*
-varying vec3 normalVec;
-varying vec3 lightDir;
-varying vec3 eyeVec;
-
-out vec4 lightAmbient;
-out vec4 lightDiffuse;
-*/
 
 void main() {
 
@@ -58,34 +48,22 @@ void main() {
 	vec4 lightDiffuse = lights[1]; // 1 == druha hodnota prvniho svetla == difuzni slozka
 	vec4 lightAmbient = lights[2]; // 2 == treti hodnota prvniho svetla == ambientni slozka
 
+	//transformace normaly do prostoru OKA
+	eyeNormal = normalize(mv_inverse_transpose * normal);
 	
-	//transformuje normaly do eyespace
-	//~ normF = vec3((view * model) * vec4(normal,0.0));
-	normF = normalize(mv_inverse_transpose * normal);
+	//transformace zkoumaneho bodu do prostoru OKA
+	eyePosition = vec3((view * model) * vec4(position,1.0));
 	
-	//normalizujeme svetlo - u directional je pozice s vetla, rovnou smer
-	vec3 eyeVertex = (mv_inverse_transpose * position);
-	vec3 vertLightDist = lightPosition.xyz - eyeVertex;	
-  
-  //vektor svetla dopadajiciho na konkretni vertex
-  lightVec = normalize(vertLightDist);
-  //vzdalenost mezi svetlem a vertexem
-  distance = length(vertLightDist);
-  
-	halfVector = normalize(lightVec + eye); // TODO: je tohle spravny vypocet halfvectoru? podle wiki by mel
-  
-	//difuzni barva
-	diffuseF = material.diffuse * lightDiffuse;
-  
-	//ambientni barva
-	ambientF = material.ambient * lightAmbient;
+	//vektor svetla mezi okem a zkoumanym bodem
+	eyeLightVector = vec3(lightPosition.xyz - eyePosition);	
+   
   
 	//prevod hodnot
+	diffuseF = material.diffuse * lightDiffuse;
+	ambientF = material.ambient * lightAmbient;
 	specularF = material.specular;
 	shininessF = material.shininess;
 	
-		
-
 	vec4 pos = vec4(position, 1);
 
 	mat4 mv = view * model;
