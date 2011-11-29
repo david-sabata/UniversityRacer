@@ -169,7 +169,7 @@ void Scene::buildBufferObjects()
 
 					for (unsigned int i = 0; i < mesh->getFaces().size(); i++)
 					{
-						glm::vec3 face = mesh->getFaces().at(i);
+						glm::ivec3 face = mesh->getFaces().at(i);
 						
 						// zapsat data a posunout ukazatel na nasledujici volne misto
 						mapping[writingIndex + 0] = (unsigned int)face.x + indexOffset;

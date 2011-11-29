@@ -191,11 +191,11 @@ BaseModel* ModelContainer::load3DS(string filename)
 		}
 
 		// indexy
-		vector<glm::vec3> faces;
+		vector<glm::ivec3> faces;
 		for (unsigned int i = 0; i < mesh.Faces().size(); i++)
 		{
 			Mesh3DSFace face = mesh.Faces()[i];
-			faces.push_back( glm::vec3(face.a, face.b, face.c) );
+			faces.push_back( glm::ivec3(face.a, face.b, face.c) );
 		}
 
 		// texturovaci souradnice
