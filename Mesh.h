@@ -21,7 +21,7 @@ class Mesh
 	public:
 		
 		Mesh(std::string name, std::string materialName, std::vector<glm::vec3> vertices, 
-			std::vector<glm::vec3> faces, std::vector<glm::vec2> texcoords);
+			std::vector<glm::ivec3> faces, std::vector<glm::vec2> texcoords);
 		
 		/////////////////////////////////////////////////////////////////////////
 
@@ -40,7 +40,7 @@ class Mesh
 		 * Vraci referenci na pole trojuhelniku. Kazdy bod
 		 * pole slouzi jako index do pole vrcholu
 		 */
-		std::vector<glm::vec3> const &getFaces();
+		std::vector<glm::ivec3> const &getFaces();
 
 		/**
 		 * Vraci referenci na pole vrcholu modelu
@@ -70,7 +70,7 @@ class Mesh
 		
 
 	protected:
-		std::vector<glm::vec3> faces;
+		std::vector<glm::ivec3> faces;
 
 		std::vector<glm::vec3> vertices;
 

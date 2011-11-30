@@ -32,6 +32,11 @@ class Scene
 		void addModelContainer(ModelContainer* container);
 
 		/**
+		 * Vraci referenci na kontejnery jiz pridane do sceny
+		 */
+		std::vector<ModelContainer*> &getModelContainers();
+
+		/**
 		 * Inicializace sceny;
 		 * Po inicializaci se jiz neprojevi nove pridana data!
 		 */

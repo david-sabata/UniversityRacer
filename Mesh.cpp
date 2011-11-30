@@ -7,7 +7,7 @@ using namespace std;
 
 
 Mesh::Mesh(string name, string materialName, vector<glm::vec3> vertices, 
-			vector<glm::vec3> faces, vector<glm::vec2> texcoords) : 
+			vector<glm::ivec3> faces, vector<glm::vec2> texcoords) : 
 	name(name), materialName(materialName), vertices(vertices), faces(faces),
 		texcoords(texcoords)
 {
@@ -76,7 +76,7 @@ std::string const &Mesh::getName()
 	return name;
 }
 
-std::vector<glm::vec3> const &Mesh::getFaces()
+std::vector<glm::ivec3> const &Mesh::getFaces()
 {
 	return faces;
 }

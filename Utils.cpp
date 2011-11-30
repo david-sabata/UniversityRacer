@@ -1,7 +1,7 @@
 #include "Utils.h"
 
 
-unsigned int oldTime;
+/*unsigned int oldTime;
 double fps;
 
 void updateFPS(unsigned int newTime)
@@ -13,4 +13,4 @@ void updateFPS(unsigned int newTime)
 double getFPS()
 {
 	return fps;
-}
+}*/

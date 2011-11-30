@@ -4,28 +4,28 @@
 using namespace std;
 
 
+#define WALK_SPEED 0.1f
 
-#define WALK_SPEED 50
+// pole pomocnych car k vykresleni - caru definuji dva body a barva
+struct LINE {
+	LINE(glm::vec3 a, glm::vec3 b, glm::vec3 color) : a(a), b(b), color(color) {};
 
+	glm::vec3 a;
+	glm::vec3 b;
+	glm::vec3 color;
+};
+vector<LINE> lines;
 
-// pomocna promenna pro moznost kreslit wireframe (TAB)
-bool drawWireframe = false;
-
-
-
-ModelContainer * pohybSvetla;
-// pomocna promenna pro zapamatovani si indexu polozky kreslici fronty
-unsigned int superChair;
-// ukazatel na frontu ve ktere se zidle nachazi
-vector<ModelContainer::DRAWINGQUEUEITEM>* superQueue = NULL;
+GLuint linesVBO;
+GLuint linesEBO;
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
 
-Game::Game()
+Game::Game(): mouseCaptured(false), drawingQueue(NULL), drawWireframe(false)
 {
-	mouseCaptured = false;
+
 }
 
 Game::~Game()
@@ -51,8 +51,6 @@ void Game::onInit()
 	// nacist modely	
 	ModelContainer* container = new ModelContainer;	
 
-	
-	pohybSvetla = container;
 #if 1
 	BaseModel* chairs = container->load3DS("models/chairs.3ds");
 	BaseModel* e112 = container->load3DS("models/e112.3ds");
@@ -79,20 +77,35 @@ void Game::onInit()
 	// vykresli zidle
 	{
 		glm::mat4 scale = glm::scale(glm::vec3(0.2));
-		glm::mat4 row0 = glm::translate(scale, glm::vec3(0, 19, -70));
+		glm::mat4 rows[] = {
+			glm::translate(scale, glm::vec3(-740, 19, -70)),
+			glm::translate(scale, glm::vec3(-740, 39, -170)),
+			glm::translate(scale, glm::vec3(-740, 59, -270)),
+			glm::translate(scale, glm::vec3(-740, 79, -370)),
+			glm::translate(scale, glm::vec3(-740, 99, -470))
+		};
 
 		container->addModel("chairs", chairs);
 		
-		for (unsigned int i = 0; i < 4; i++)
+		for (unsigned int rowI = 0; rowI < 5; rowI++)
 		{
-			glm::mat4 col = glm::translate(row0, glm::vec3(110 * i, 0, 0));
-			superChair = container->queueDraw(chairs, col); // jen testovaci; ulozi se index na posledni pridanou zidli
-		}		
+			int offsetX = 0; // posunuti zidle na radku
+
+			for (unsigned int i = 0; i < 13; i++)
+			{				
+				if (i == 3 || i == 10)
+					offsetX += 100;
+
+				glm::mat4 col = glm::translate(rows[rowI], glm::vec3(offsetX, 0, 0));
+				container->queueDraw(chairs, col);
+			
+				offsetX += 105;
+			}		
+		}
 	}
-#endif
 
 	// pro kazde svetlo v kontejneru pridat kouli, ktera ho znazornuje
-	{
+	if (0) {
 		BaseModel* sphere = container->load3DS("models/sphere.3ds");
 		container->addModel("lightsphere", sphere);
 
@@ -106,47 +119,112 @@ void Game::onInit()
 			container->queueDraw(sphere, mat);
 		}
 	}
-
-
-	// zapamatovat si frontu
-	superQueue = &container->getDrawingQueue();
+#endif
 
 	cout << "- constructing scene" << endl;
-
+	
 	// vyrobit scenu
 	scene = new Scene(*this);
 	scene->addModelContainer(container);
 	scene->init();
 	
 	cout << "- done!" << endl;
-
-	// nacist vsechny materialy
+	
+	// nacist vsechny materialy	
 	ShaderManager::loadPrograms();
 
-	glEnable(GL_CULL_FACE);
+
+	ShaderManager::loadProgram("line");
+
+	drawLine(glm::vec3(1, 1, 1), glm::vec3(10, 10, 10), glm::vec3(1, 1, 1));	
 }
  
 
 
 
-void Game::onWindowRedraw() 
+void Game::onWindowRedraw(const GameTime & gameTime) 
 {	
-	BaseApp::onWindowRedraw();
+	BaseApp::onWindowRedraw(gameTime);
 
-	handleActiveKeys();
+	handleActiveKeys(gameTime);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_DEPTH_TEST);    
+	glEnable(GL_CULL_FACE);
+
     glDepthFunc(GL_LESS);
 	
-	// kazdy snimek upravuju modelovou matici
-	// zidli musime ziskavat vzdy znovu, ptz mohlo dojit k realokaci kreslici fronty a ukazatele by nemusely platit
-	//ModelContainer::DRAWINGQUEUEITEM &chair = superQueue->at(superChair);
-	//chair.matrix = glm::rotate(chair.matrix, 1.0f, glm::vec3(0, 1, 0));
-
 	// vykreslit scenu
 	scene->draw();
+
+
+#if 0
+	// vykresleni car -----------------------
+	glDisable(GL_CULL_FACE);
+
+	vector<GLfloat> vertices;
+	vector<GLuint> indices;
+	unsigned int indexI = 0;
+
+	for (vector<LINE>::iterator it = lines.begin(); it != lines.end(); it++)
+	{
+		LINE l = (*it);
+		vertices.push_back(l.a.x);
+		vertices.push_back(l.a.y);
+		vertices.push_back(l.a.z);
+
+		vertices.push_back(l.b.x);
+		vertices.push_back(l.b.y);
+		vertices.push_back(l.b.z);
+
+		indices.push_back(indexI);
+		indices.push_back(indexI + 1);
+		indexI += 2;
+	}
+	
+	ShaderManager::PROGRAMBINDING activeBinding = ShaderManager::useProgram("line");
+	glDisableVertexAttribArray(activeBinding.iEnabledLightsUniform);
+	glDisableVertexAttribArray(activeBinding.vLightsUniform);
+	glDisableVertexAttribArray(activeBinding.mMVInverseTranspose);
+	glDisableVertexAttribArray(activeBinding.normalAttrib);
+	glDisableVertexAttribArray(activeBinding.tangentAttrib);
+	glDisableVertexAttribArray(activeBinding.texposAttrib);
+	glDisableVertexAttribArray(activeBinding.matParams.ambient);
+	glDisableVertexAttribArray(activeBinding.matParams.diffuse);
+	glDisableVertexAttribArray(activeBinding.matParams.specular);
+	glDisableVertexAttribArray(activeBinding.matParams.shininess);
+
+	// vrcholy
+	glEnableVertexAttribArray(activeBinding.positionAttrib);
+	glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)&(vertices.begin()));
+
+	// modelova matice
+	glm::mat4 modelmat = glm::mat4(1.0);
+	glUniformMatrix4fv(activeBinding.mModelUniform, 1, GL_FALSE, glm::value_ptr(modelmat));
+
+	// pohledova matice
+	glm::mat4 mView = getCamera()->GetMatrix();
+	glUniformMatrix4fv(activeBinding.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
+
+	// projekcni matice
+	glm::mat4 mProjection = glm::perspective(45.0f, (float)getWindowAspectRatio(), 1.0f, 1000.0f);
+	glUniformMatrix4fv(activeBinding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
+	
+	// nastaveni kamery
+	glm::vec3 eye = getCamera()->getEye();
+	glm::vec3 sight = getCamera()->getTarget();
+	GLuint eyeUniform = glGetUniformLocation(activeBinding.program, "eye");
+	GLuint sightUniform = glGetUniformLocation(activeBinding.program, "sight");
+	glUniform3f(eyeUniform, eye.x, eye.y, eye.z);
+	glUniform3f(sightUniform, sight.x, sight.y, sight.z);
+
+	// kresleni car
+	glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, (void*)&(indices.at(0)));
+#endif
+	
+
+	// ---------------------------------------
 
     SDL_GL_SwapBuffers(); 
 }
@@ -154,32 +232,30 @@ void Game::onWindowRedraw()
 
 
 
-void Game::handleActiveKeys()
+
+void Game::drawLine(glm::vec3 a, glm::vec3 b, glm::vec3 color)
+{
+	LINE l(a, b, color);
+	lines.push_back(l);
+}
+
+
+
+
+
+
+void Game::handleActiveKeys(const GameTime & gameTime)
 {
 	bool wDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_w) != activeKeys.end() );
 	bool sDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_s) != activeKeys.end() );
 	bool aDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_a) != activeKeys.end() );
-	bool dDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_d) != activeKeys.end() );
-	
-	//TMP - pohyb svetla !!!
-	bool iDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_i) != activeKeys.end() );
-	bool kDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_k) != activeKeys.end() );
-	bool jDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_j) != activeKeys.end() );
-	bool lDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_l) != activeKeys.end() );
-	
-		//TMP!!!!!!
-	Light l = (*pohybSvetla->getLights().begin());
-	if(iDown) pohybSvetla->getLights().at(0).Position().z+=40.0f;
-	if(kDown) pohybSvetla->getLights().at(0).Position().z-=40.0f;
-	if(jDown) pohybSvetla->getLights().at(0).Position().x-=40.0f;
-	if(lDown) pohybSvetla->getLights().at(0).Position().x+=40.0f;
-	
-	cout << "Pozice svetla Z: " << l.position.z << "X: " << l.position.x << endl;
+	bool dDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_d) != activeKeys.end() );	
 	
 	// chceme aby byla rychlost pohybu nezavisla na fps
 	//float f_fps = float(1 / getFPS());
 	//float f_step = float(WALK_SPEED / f_fps);
-	float f_step = float(WALK_SPEED / getFPS());
+	//float f_step = float(WALK_SPEED / getFPS());
+    float f_step = gameTime.Elapsed() * WALK_SPEED;
 
 	// vysledkem jsou slozky vektoru ve smerech X ("strafe", ne otaceni) a Z
 	float x = -( (-1.0f * aDown) + (1.0f * dDown) ) * f_step;	
@@ -188,7 +264,6 @@ void Game::handleActiveKeys()
 	camera.Move(x, 0.0f, z);
 	
 }
-
 
 
 void Game::onKeyDown(SDLKey key, Uint16 mod)
@@ -236,3 +311,25 @@ void Game::onMouseMove(unsigned x, unsigned y, int xrel, int yrel, Uint8 buttons
 	}
 }
 
+
+string Game::statsString()
+{
+	static unsigned int vertCount = 0;
+	static unsigned int faceCount = 0;
+
+	if (vertCount > 0 && faceCount > 0) {
+		ostringstream out;
+		out << vertCount << " vertices, " << faceCount << " faces";
+		return string(out.str());
+	}
+
+	if (scene->getModelContainers().size() > 0) {
+		for (vector<ModelContainer*>::iterator it = scene->getModelContainers().begin(); it != scene->getModelContainers().end(); it++)
+		{
+			vertCount += (*it)->verticesCount();
+			faceCount += (*it)->facesCount();
+		}
+	}
+
+	return "---";
+}
