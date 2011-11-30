@@ -65,6 +65,7 @@ class ModelContainer
 
 
 
+
 		/**
 		 * Prida do kontejneru svetlo
 		 * @param positioin pozice svetla
@@ -75,13 +76,17 @@ class ModelContainer
 		/**
 		 * Vraci pole vsech svetel v kontejneru
 		 */
-	 std::vector<Light> &getLights();
+		std::vector<Light> &getLights();
 
 
 
 
 
-
+		/**
+		 * Zoptimalizuje kreslici frontu - muze presouvat polozky a 
+		 * indexy ziskane pred timto volanim nejsou platne!!!
+		 */
+		void optimizeDrawingQueue();
 
 		
 		/**

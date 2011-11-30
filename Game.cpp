@@ -4,7 +4,6 @@
 using namespace std;
 
 
-
 #define WALK_SPEED 0.1f
 
 // pole pomocnych car k vykresleni - caru definuji dva body a barva
@@ -78,15 +77,31 @@ void Game::onInit()
 	// vykresli zidle
 	{
 		glm::mat4 scale = glm::scale(glm::vec3(0.2));
-		glm::mat4 row0 = glm::translate(scale, glm::vec3(0, 19, -70));
+		glm::mat4 rows[] = {
+			glm::translate(scale, glm::vec3(-740, 19, -70)),
+			glm::translate(scale, glm::vec3(-740, 39, -170)),
+			glm::translate(scale, glm::vec3(-740, 59, -270)),
+			glm::translate(scale, glm::vec3(-740, 79, -370)),
+			glm::translate(scale, glm::vec3(-740, 99, -470))
+		};
 
 		container->addModel("chairs", chairs);
 		
-		for (unsigned int i = 0; i < 4; i++)
+		for (unsigned int rowI = 0; rowI < 5; rowI++)
 		{
-			glm::mat4 col = glm::translate(row0, glm::vec3(110 * i, 0, 0));
-			container->queueDraw(chairs, col);
-		}		
+			int offsetX = 0; // posunuti zidle na radku
+
+			for (unsigned int i = 0; i < 13; i++)
+			{				
+				if (i == 3 || i == 10)
+					offsetX += 100;
+
+				glm::mat4 col = glm::translate(rows[rowI], glm::vec3(offsetX, 0, 0));
+				container->queueDraw(chairs, col); // jen testovaci; ulozi se index na posledni pridanou zidli
+			
+				offsetX += 105;
+			}		
+		}
 	}
 
 	// pro kazde svetlo v kontejneru pridat kouli, ktera ho znazornuje
@@ -105,9 +120,6 @@ void Game::onInit()
 		}
 	}
 #endif
-
-	// zapamatovat si frontu
-	//superQueue = &container->getDrawingQueue();
 
 	cout << "- constructing scene" << endl;
 
@@ -143,16 +155,11 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
     glDepthFunc(GL_LESS);
 	
-	// kazdy snimek upravuju modelovou matici
-	// zidli musime ziskavat vzdy znovu, ptz mohlo dojit k realokaci kreslici fronty a ukazatele by nemusely platit
-//	ModelContainer::DRAWINGQUEUEITEM &chair = superQueue->at(superChair);
-//	chair.matrix = glm::rotate(chair.matrix, 1.0f, glm::vec3(0, 1, 0));
-
 	// vykreslit scenu
 	scene->draw();
 
 
-
+#if 0
 	// vykresleni car -----------------------
 	glDisable(GL_CULL_FACE);
 
@@ -214,7 +221,7 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
 	// kresleni car
 	glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, (void*)&(indices.at(0)));
-
+#endif
 	
 
 	// ---------------------------------------
