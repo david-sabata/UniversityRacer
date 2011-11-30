@@ -308,7 +308,7 @@ void Scene::draw()
 
 			// pomocna matice pro vypocty osvetleni - znacne snizeni fps!
 			glm::mat3 mSubModelView = glm::mat3(mView) * glm::mat3((*it).matrix);
-			glm::mat3 mMVInverseTranspose = glm::transpose(mSubModelView); // transpose(inverse(modelview))
+			glm::mat3 mMVInverseTranspose = glm::transpose(glm::inverse(mSubModelView)); // transpose(inverse(modelview))
 			glUniformMatrix3fv(activeBinding.mMVInverseTranspose, 1, GL_FALSE, glm::value_ptr(mMVInverseTranspose));
 
 			// samotne vykresleni
