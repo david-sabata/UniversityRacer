@@ -6,19 +6,6 @@ using namespace std;
 
 #define WALK_SPEED 0.1f
 
-// pole pomocnych car k vykresleni - caru definuji dva body a barva
-struct LINE {
-	LINE(glm::vec3 a, glm::vec3 b, glm::vec3 color) : a(a), b(b), color(color) {};
-
-	glm::vec3 a;
-	glm::vec3 b;
-	glm::vec3 color;
-};
-vector<LINE> lines;
-
-GLuint linesVBO;
-GLuint linesEBO;
-
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -54,6 +41,8 @@ void Game::onInit()
 #if 1
 	BaseModel* chairs = container->load3DS("models/chairs.3ds");
 	BaseModel* e112 = container->load3DS("models/e112.3ds");
+    BaseModel* car =  container->load3DS("models/car.3ds");
+    BaseModel* wheel =  container->load3DS("models/wheel.3ds");
 
 	/*
 	CachedModel* e112 = CachedModel::load("models/e112.3ds~");
@@ -71,11 +60,11 @@ void Game::onInit()
 	if (1) {
 		container->addModel("e112", e112);
 		glm::mat4 modelmat = glm::scale(glm::vec3(0.2));
-		container->queueDraw(e112, modelmat);
+		e112QueueItem = container->queueDraw(e112, modelmat);
 	}
 
 	// vykresli zidle
-	{
+/*	{
 		glm::mat4 scale = glm::scale(glm::vec3(0.2));
 		glm::mat4 rows[] = {
 			glm::translate(scale, glm::vec3(-740, 19, -70)),
@@ -103,7 +92,7 @@ void Game::onInit()
 			}		
 		}
 	}
-
+*/
 	// pro kazde svetlo v kontejneru pridat kouli, ktera ho znazornuje
 	{
 		BaseModel* sphere = container->load3DS("models/sphere.3ds");
@@ -119,7 +108,23 @@ void Game::onInit()
 			container->queueDraw(sphere, mat);
 		}
 	}
+
+    {
+		container->addModel("car", car);
+		carQueueItem = container->queueDraw(car);
+	}
+
+    {
+		container->addModel("wheel", wheel);
+		for (unsigned int i = 0; i < 4; i++)
+        {
+            wheelQueueItem[i] = container->queueDraw(wheel);
+        }
+	}
 #endif
+
+    // zapamatovat si frontu
+	drawingQueue = &container->getDrawingQueue();
 
 	cout << "- constructing scene" << endl;
 
@@ -136,7 +141,14 @@ void Game::onInit()
 
 	ShaderManager::loadProgram("line");
 
-	drawLine(glm::vec3(1, 1, 1), glm::vec3(10, 10, 10), glm::vec3(1, 1, 1));	
+    cout << "- initializing physics" << endl;
+
+    physics = new Physics();
+    btTransform transform;
+    transform.setIdentity();
+    transform.setOrigin(btVector3(0, 3, 1));
+   // physics->AddRigidBody(5., transform, new btBoxShape(btVector3(0.75,0.75,0.75)))->setAngularVelocity(btVector3(1,1,1));
+    physics->AddStaticModel(drawingQueue->at(e112QueueItem).model, 0.2f, false);
 }
  
 
@@ -148,28 +160,63 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
 	handleActiveKeys(gameTime);
 
+    physics->StepSimulation(gameTime.Elapsed() * 0.001f);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_DEPTH_TEST);    
 	glEnable(GL_CULL_FACE);
 
     glDepthFunc(GL_LESS);
+
+    drawingQueue->at(carQueueItem).matrix = physics->GetCar()->GetWorldTransform();   
+    
+ 
+    for (int i = 0; i < physics->GetCar()->GetVehicle()->getNumWheels(); i++)
+    {
+        btScalar m[16];
+        physics->GetCar()->GetVehicle()->updateWheelTransform(i, true); //synchronize the wheels with the (interpolated) chassis worldtransform        
+        physics->GetCar()->GetVehicle()->getWheelInfo(i).m_worldTransform.getOpenGLMatrix(m); //draw wheels (cylinders)
+        
+        drawingQueue->at(wheelQueueItem[i]).matrix = mat4_from_arr(m);
+
+        if (i == 1 || i == 3)
+            drawingQueue->at(wheelQueueItem[i]).matrix = glm::rotate(drawingQueue->at(wheelQueueItem[i]).matrix, 180.f, 0.f, 1.f, 0.f);
+
+        //PhysicsDebugDraw::DrawCylinder(m, physics->GetCar()->GetVehicle()->getWheelInfo(i).m_wheelsRadius, physics->GetCar()->GetVehicle()->getWheelInfo(i).m_wheelsRadius/2);            
+    }
 	
 	// vykreslit scenu
 	scene->draw();
 
+    // vykreslit fyziku
+    physics->DebugDrawWorld();
 
-#if 0
-	// vykresleni car -----------------------
+    /*for (int i = 0; i < 100000; i++)
+    {
+        physics->GetDebugDrawer()->drawLine(btVector3(0,0,0), btVector3(5,5,5), btVector3(1,0,0));
+        physics->GetDebugDrawer()->drawLine(btVector3(6,6,6), btVector3(11,11,11), btVector3(0,1,0));
+    }*/
+
+    drawLines(physics->GetDebugDrawer()->GetLines());
+    
+	// ---------------------------------------
+
+    SDL_GL_SwapBuffers(); 
+}
+
+void Game::drawLines(vector<PhysicsDebugDraw::LINE> & lines)
+{
+    // vykresleni car -----------------------
 	glDisable(GL_CULL_FACE);
 
 	vector<GLfloat> vertices;
 	vector<GLuint> indices;
 	unsigned int indexI = 0;
 
-	for (vector<LINE>::iterator it = lines.begin(); it != lines.end(); it++)
+	for (vector<PhysicsDebugDraw::LINE>::iterator it = lines.begin(); it != lines.end(); it++)
 	{
-		LINE l = (*it);
+		PhysicsDebugDraw::LINE l = (*it);
 		vertices.push_back(l.a.x);
 		vertices.push_back(l.a.y);
 		vertices.push_back(l.a.z);
@@ -197,7 +244,7 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
 	// vrcholy
 	glEnableVertexAttribArray(activeBinding.positionAttrib);
-	glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)&(vertices.begin()));
+	glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)&(vertices.at(0)));
 
 	// modelova matice
 	glm::mat4 modelmat = glm::mat4(1.0);
@@ -221,28 +268,9 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
 	// kresleni car
 	glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, (void*)&(indices.at(0)));
-#endif
-	
 
-	// ---------------------------------------
-
-    SDL_GL_SwapBuffers(); 
+    lines.clear();
 }
-
-
-
-
-
-void Game::drawLine(glm::vec3 a, glm::vec3 b, glm::vec3 color)
-{
-	LINE l(a, b, color);
-	lines.push_back(l);
-}
-
-
-
-
-
 
 void Game::handleActiveKeys(const GameTime & gameTime)
 {
@@ -262,7 +290,17 @@ void Game::handleActiveKeys(const GameTime & gameTime)
 	float z = ( (-1.0f * sDown) + (1.0f * wDown) ) * f_step;		
 
 	camera.Move(x, 0.0f, z);
-	
+
+    if ( find(activeKeys.begin(), activeKeys.end(), SDLK_UP) != activeKeys.end() )
+        physics->GetCar()->Forward();
+    if ( find(activeKeys.begin(), activeKeys.end(), SDLK_DOWN) != activeKeys.end() )
+        physics->GetCar()->Backward();
+    if ( find(activeKeys.begin(), activeKeys.end(), SDLK_b) != activeKeys.end() ) 
+        physics->GetCar()->HandBrake();
+    if ( find(activeKeys.begin(), activeKeys.end(), SDLK_LEFT) != activeKeys.end() )
+        physics->GetCar()->TurnLeft();
+    if ( find(activeKeys.begin(), activeKeys.end(), SDLK_RIGHT) != activeKeys.end() )
+        physics->GetCar()->TurnRight();			
 }
 
 
@@ -290,6 +328,10 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 		else
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
+
+    if (key == SDLK_RETURN) {
+        physics->GetCar()->Reset();
+    }
 }
 
 

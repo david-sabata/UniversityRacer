@@ -2,10 +2,12 @@
 #define GAME_H
 
 #include <algorithm>
+#include <vector>
 
 #include "BaseApp.h"
 #include "Scene.h"
 #include "CachedModel.h"
+#include "Physics.h"
 
 class Game : public BaseApp
 {
@@ -16,8 +18,8 @@ class Game : public BaseApp
 		void onInit();
 		void onWindowRedraw(const GameTime & gameTime);
 		
-		// vykresli usecku mezi dvema body (souradnice jsou v prostoru sceny)
-		void drawLine(glm::vec3 a, glm::vec3 b, glm::vec3 color);
+		// vykresli usecky
+        void drawLines(std::vector<PhysicsDebugDraw::LINE> & lines);
 
 		void handleActiveKeys(const GameTime & gameTime);		
 		void onKeyDown(SDLKey key, Uint16 mod);
@@ -25,11 +27,17 @@ class Game : public BaseApp
 
 	protected:
 		Scene* scene;
+        Physics *physics;
 
 		bool mouseCaptured;
 
         // ukazatel na frontu kreslenych objektu
         std::vector<ModelContainer::DRAWINGQUEUEITEM>* drawingQueue;
+
+        // indexy polozek v kreslici fronte
+        unsigned int carQueueItem, e112QueueItem;
+        unsigned int wheelQueueItem[4]; // z pohledu ridice: 0 - predni leve, 3 - zadni prave
+
         // pomocna promenna pro moznost kreslit wireframe (TAB)
         bool drawWireframe;
 

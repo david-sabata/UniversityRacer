@@ -148,8 +148,9 @@ btRigidBody * Physics::AddRigidBody(float mass, const btTransform & startTransfo
     return body;
 }
 
-void Physics::AddStaticModel(BaseModel * model, float scale)
+void Physics::AddStaticModel(BaseModel * model, float scale, bool debugDraw)
 {
+        
     for (unsigned int i = 0; i < model->getMeshes().size(); i++)
     {
         Mesh *m = model->getMeshes()[i];
@@ -170,6 +171,8 @@ void Physics::AddStaticModel(BaseModel * model, float scale)
         tr.setIdentity();
         tr.setOrigin(btVector3(0, 0, 0));
         
-        AddRigidBody(0, tr, shape);
+        btRigidBody *tmp = AddRigidBody(0, tr, shape); //->getCollisionFlags;
+        if (!debugDraw)
+            tmp->setCollisionFlags(tmp->getCollisionFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
     }
 }

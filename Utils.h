@@ -9,12 +9,16 @@
 #else
 # include <GL/glew.h>
 #endif
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Exceptions.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338327950288419716939937510
 #endif
+
+static glm::vec4 vec4_from_arr(const float *arr) { return glm::vec4(arr[0], arr[1], arr[2], arr[3]); }
+static glm::mat4 mat4_from_arr(const float *arr) { return glm::mat4(vec4_from_arr(arr), vec4_from_arr(arr + 4), vec4_from_arr(arr + 8), vec4_from_arr(arr + 12)); }
 
 /*void updateFPS(unsigned int newTime);
 double getFPS();*/

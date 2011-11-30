@@ -29,7 +29,8 @@ public:
 
     btCollisionShape* CreateTriMeshGround();
 
-    void AddStaticModel(BaseModel *model, float scale);
+    void AddStaticModel(BaseModel *model, float scale, bool debugDraw = true);
+    PhysicsDebugDraw *GetDebugDrawer() { return m_debugDraw; }
 
 private:
 
