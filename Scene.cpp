@@ -48,6 +48,10 @@ void Scene::addModelContainer(ModelContainer* container)
 }
 
 
+std::vector<ModelContainer*> &Scene::getModelContainers()
+{
+	return containers;
+}
 
 
 void Scene::init()
