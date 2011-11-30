@@ -37,5 +37,5 @@ void main() {
 	//~ attenuation = 1.0 / (constantAtt + linearAtt * distance +
 											 //~ quadraticAtt * distance * distance);
 				
-	//gl_FragColor = finalColor;
+	gl_FragColor = finalColor;
 }

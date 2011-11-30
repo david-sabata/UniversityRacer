@@ -57,7 +57,7 @@ void main() {
 	//vektor svetla mezi okem a zkoumanym bodem
 	eyeLightVector = vec3(lightPosition.xyz - eyePosition.xyz);	
    
-    color = vec4(dot(eyeNormal, eyePosition),0.0,0.0,1.0);
+	
 
 	//prevod hodnot
 	diffuseF = material.diffuse * lightDiffuse;
