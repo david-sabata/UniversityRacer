@@ -97,7 +97,7 @@ void Game::onInit()
 					offsetX += 100;
 
 				glm::mat4 col = glm::translate(rows[rowI], glm::vec3(offsetX, 0, 0));
-				container->queueDraw(chairs, col); // jen testovaci; ulozi se index na posledni pridanou zidli
+				container->queueDraw(chairs, col);
 			
 				offsetX += 105;
 			}		
@@ -105,7 +105,7 @@ void Game::onInit()
 	}
 
 	// pro kazde svetlo v kontejneru pridat kouli, ktera ho znazornuje
-	{
+	if (0) {
 		BaseModel* sphere = container->load3DS("models/sphere.3ds");
 		container->addModel("lightsphere", sphere);
 
@@ -122,7 +122,7 @@ void Game::onInit()
 #endif
 
 	cout << "- constructing scene" << endl;
-
+	
 	// vyrobit scenu
 	scene = new Scene(*this);
 	scene->addModelContainer(container);
