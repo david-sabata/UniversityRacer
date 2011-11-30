@@ -39,7 +39,7 @@ flat out int shininessF;
 varying vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 varying vec3 eyeLightVector; // vektor ze svetla do zkoumaneho bodu v prostoru OKA
 varying vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
-
+out vec4 color;
 
 void main() {
 
@@ -49,15 +49,16 @@ void main() {
 	vec4 lightAmbient = lights[2]; // 2 == treti hodnota prvniho svetla == ambientni slozka
 
 	//transformace normaly do prostoru OKA
-	eyeNormal = normalize(mv_inverse_transpose * normal);
+	eyeNormal = normalize(mv_inverse_transpose *  normal);
 	
 	//transformace zkoumaneho bodu do prostoru OKA
-	eyePosition = vec3((view * model) * vec4(position,1.0));
-	
+	eyePosition = vec3(( view *  model) * vec4(position,1.0));
+
 	//vektor svetla mezi okem a zkoumanym bodem
-	eyeLightVector = vec3(lightPosition.xyz - eyePosition);	
+	eyeLightVector = vec3(lightPosition.xyz - eyePosition.xyz);	
    
-  
+    color = vec4(dot(eyeNormal, eyePosition),0.0,0.0,1.0);
+
 	//prevod hodnot
 	diffuseF = material.diffuse * lightDiffuse;
 	ambientF = material.ambient * lightAmbient;

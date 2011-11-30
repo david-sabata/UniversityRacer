@@ -15,6 +15,8 @@ in vec4 diffuseF;
 in vec4 specularF;
 flat in int shininessF;
 
+in vec4 color;
+
 void main() {
 	
 	vec4 finalColor = ambientF; //ambientF obsahuje i ambientni slozku svetla
@@ -35,6 +37,5 @@ void main() {
 	//~ attenuation = 1.0 / (constantAtt + linearAtt * distance +
 											 //~ quadraticAtt * distance * distance);
 				
-
-	gl_FragColor = finalColor;
+	//gl_FragColor = finalColor;
 }
