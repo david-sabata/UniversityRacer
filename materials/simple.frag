@@ -154,7 +154,7 @@ void main() {
 		H = normalize(L + V);
 	
 		//spocitame spekularni odlesk
-	    specular = pow(dot(N,H), 64);
+	    specular = pow(dot(N,H), shininessF);
 	
 		//pricteme spekulární složku k výsledné barvì
 		if(specular >= 0.0)

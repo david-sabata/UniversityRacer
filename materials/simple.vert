@@ -57,23 +57,74 @@ void main() {
 	eyePosition = eyePosition4.xyz / eyePosition4.w;
 
 	// predpokladame enabledLights > 0
-	for(int i = 0; i < enabledLights ; i++) {
+	////////////////////////////SVETLO 1 /////////////////////////////////////
 
-		vec4 lightPosition = lights[i * 3 + 0]; // 0 == prvni hodnota prvniho svetla == pozice
-		vec4 lightDiffuse = lights[i * 3 + 1]; // 1 == druha hodnota prvniho svetla == difuzni slozka
-		vec4 lightAmbient = lights[i * 3 + 2]; // 2 == treti hodnota prvniho svetla == ambientni slozka
+	vec4 lightPosition = lights[0 * 3 + 0]; // 0 == prvni hodnota prvniho svetla == pozice
+	vec4 lightDiffuse = lights[0 * 3 + 1]; // 1 == druha hodnota prvniho svetla == difuzni slozka
+	vec4 lightAmbient = lights[0 * 3 + 2]; // 2 == treti hodnota prvniho svetla == ambientni slozka
 
-		//transformace svetla do eyespace (TODO : zeptat se Davida kam ho umistil : pravdepodobne je ve worldspace?)
-		vec4 lightPos4 = view * lightPosition;
-		eyeLightPos[i] = lightPos4.xyz / lightPos4.w ;
+	//transformace svetla do eyespace (TODO : zeptat se Davida kam ho umistil : pravdepodobne je ve worldspace?)
+	vec4 lightPos4 = view * lightPosition;
+	eyeLightPos[0] = lightPos4.xyz / lightPos4.w ;
 	
-		//smer paprsku dopadajiciho na plosku
-		lightDir[i] = eyeLightPos[i] - eyePosition;
+	//smer paprsku dopadajiciho na plosku
+	lightDir[0] = eyeLightPos[0] - eyePosition;
 
-		//prevod hodnot
-		diffuseF[i] = material.diffuse * lightDiffuse;
-		ambientF[i] = material.ambient * lightAmbient;
-	}
+	//prevod hodnot
+	diffuseF[0] = material.diffuse * lightDiffuse;
+	ambientF[0] = material.ambient * lightAmbient;
+	
+	////////////////////////////SVETLO 2 /////////////////////////////////////
+
+	lightPosition = lights[1 * 3 + 0]; // 0 == prvni hodnota prvniho svetla == pozice
+	lightDiffuse = lights[1 * 3 + 1]; // 1 == druha hodnota prvniho svetla == difuzni slozka
+	lightAmbient = lights[1 * 3 + 2]; // 2 == treti hodnota prvniho svetla == ambientni slozka
+
+	//transformace svetla do eyespace (TODO : zeptat se Davida kam ho umistil : pravdepodobne je ve worldspace?)
+	lightPos4 = view * lightPosition;
+	eyeLightPos[1] = lightPos4.xyz / lightPos4.w ;
+	
+	//smer paprsku dopadajiciho na plosku
+	lightDir[1] = eyeLightPos[1] - eyePosition;
+
+	//prevod hodnot
+	diffuseF[1] = material.diffuse * lightDiffuse;
+	ambientF[1] = material.ambient * lightAmbient;
+
+	////////////////////////////SVETLO 3 /////////////////////////////////////
+
+	lightPosition = lights[2 * 3 + 0]; // 0 == prvni hodnota prvniho svetla == pozice
+	lightDiffuse = lights[2 * 3 + 1]; // 1 == druha hodnota prvniho svetla == difuzni slozka
+	lightAmbient = lights[2 * 3 + 2]; // 2 == treti hodnota prvniho svetla == ambientni slozka
+
+	//transformace svetla do eyespace (TODO : zeptat se Davida kam ho umistil : pravdepodobne je ve worldspace?)
+	lightPos4 = view * lightPosition;
+	eyeLightPos[2] = lightPos4.xyz / lightPos4.w ;
+	
+	//smer paprsku dopadajiciho na plosku
+	lightDir[2] = eyeLightPos[2] - eyePosition;
+	
+	//prevod hodnot
+	diffuseF[2] = material.diffuse * lightDiffuse;
+	ambientF[2] = material.ambient * lightAmbient;
+
+	////////////////////////////SVETLO 4 /////////////////////////////////////
+
+	lightPosition = lights[3 * 3 + 0]; // 0 == prvni hodnota prvniho svetla == pozice
+	lightDiffuse = lights[3 * 3 + 1]; // 1 == druha hodnota prvniho svetla == difuzni slozka
+	lightAmbient = lights[3 * 3 + 2]; // 2 == treti hodnota prvniho svetla == ambientni slozka
+
+	//transformace svetla do eyespace (TODO : zeptat se Davida kam ho umistil : pravdepodobne je ve worldspace?)
+	lightPos4 = view * lightPosition;
+	eyeLightPos[3] = lightPos4.xyz / lightPos4.w ;
+	
+	//smer paprsku dopadajiciho na plosku
+	lightDir[3] = eyeLightPos[3] - eyePosition;
+
+	//prevod hodnot
+	diffuseF[3] = material.diffuse * lightDiffuse;
+	ambientF[3] = material.ambient * lightAmbient;
+
 
 	specularF = material.specular;
 	shininessF = material.shininess;
