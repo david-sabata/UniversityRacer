@@ -68,8 +68,7 @@ void mainLoop()
         gameTime.Update(SDL_GetTicks());
         fpsCounter.Update(gameTime);
 		ostringstream text;
-		//text << "University Racer - " << setiosflags(ios::fixed) << setprecision(0) << getFPS() << " fps";
-        text << "University Racer - Diff:" << gameTime << ", FPS - " << fpsCounter;
+        text << "University Racer - Diff:" << gameTime << ", FPS - " << fpsCounter << "; " << ((Game *)application)->statsString();
         SDL_WM_SetCaption(text.str().c_str(), NULL);
 
         // Handle all waiting events

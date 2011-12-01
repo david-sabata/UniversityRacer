@@ -48,6 +48,10 @@ void Scene::addModelContainer(ModelContainer* container)
 }
 
 
+std::vector<ModelContainer*> &Scene::getModelContainers()
+{
+	return containers;
+}
 
 
 void Scene::init()
@@ -66,6 +70,13 @@ void Scene::init()
 			Light l = (*it)->getLights().at(i);
 			glLightfv(lightEnums[i], GL_POSITION, &l.Position().x);
 		}
+	}
+
+
+	// zoptimalizovat vsechny konterjnery
+	for (vector<ModelContainer*>::iterator it = containers.begin(); it != containers.end(); it++)
+	{
+		(*it)->optimizeDrawingQueue();
 	}
 
 
@@ -218,8 +229,7 @@ void Scene::draw()
 			glLightfv(lightEnums[i], GL_POSITION, &l.Position().x);
 		}
 	}
-	
-	
+		
 	for (unsigned int i = 0; i < containers.size(); i++)
 	{
 		vector<Light> containerLights = containers.at(i)->getLights();
@@ -232,88 +242,88 @@ void Scene::draw()
 	}
 
 
+
 	// samotne kresleni
 	for (unsigned int i = 0; i < containers.size(); i++)
 	{						
 		glBindBuffer(GL_ARRAY_BUFFER, VBOs[i]);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[i]);
 
-		// postupne provadet kreslici frontu kontejneru, slozenou z kresleneho modelu a jeho matice
-		// kazdy model se pak sklada z meshi, kde kazda ma nejaky material (shader)
-		vector<ModelContainer::DRAWINGQUEUEITEM> drawingQueue = containers[i]->getDrawingQueue();
+		// postupne provadet kreslici frontu meshi kontejneru, slozenou z kreslene meshe a jeji matice;
+		// pokud probehla optimalizace, budou meshe navic serazene podle pouzivaneho materialu
+		vector<ModelContainer::MESHDRAWINGQUEUEITEM> drawingQueue = containers[i]->getMeshDrawingQueue();
+		
+		unsigned int counter = 0;
 
-		for (vector<ModelContainer::DRAWINGQUEUEITEM>::iterator it = drawingQueue.begin(); it != drawingQueue.end(); it++)
+		for (vector<ModelContainer::MESHDRAWINGQUEUEITEM>::iterator it = drawingQueue.begin(); it != drawingQueue.end(); it++)
 		{
-			
-			unsigned int meshOffset = 0;
+			Mesh* mesh = (*it).mesh;
 
-			for (vector<Mesh*>::iterator meshIt = (*it).model->getMeshes().begin(); meshIt != (*it).model->getMeshes().end(); meshIt++)
-			{
-				// prepinat shadery jen pokud je treba
-				if (activeMaterial != (*meshIt)->getMaterialName())
-				{				
-					activeMaterial = (*meshIt)->getMaterialName();
-					activeBinding = ShaderManager::useProgram(activeMaterial);					
+			// prepinat shadery jen pokud je treba
+			if (activeMaterial != mesh->getMaterialName())
+			{				
+				activeMaterial = mesh->getMaterialName();
+				activeBinding = ShaderManager::useProgram(activeMaterial);					
 
-					// nastavit buffery
-					glEnableVertexAttribArray(activeBinding.positionAttrib);
-					glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, x));
+				// nastavit buffery
+				glEnableVertexAttribArray(activeBinding.positionAttrib);
+				glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, x));
 
-					glEnableVertexAttribArray(activeBinding.normalAttrib);
-					glVertexAttribPointer(activeBinding.normalAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, nx));
+				glEnableVertexAttribArray(activeBinding.normalAttrib);
+				glVertexAttribPointer(activeBinding.normalAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, nx));
 
-					glEnableVertexAttribArray(activeBinding.tangentAttrib);
-					glVertexAttribPointer(activeBinding.tangentAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, tx));
+				glEnableVertexAttribArray(activeBinding.tangentAttrib);
+				glVertexAttribPointer(activeBinding.tangentAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, tx));
 
-					glEnableVertexAttribArray(activeBinding.texposAttrib);
-					glVertexAttribPointer(activeBinding.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
+				glEnableVertexAttribArray(activeBinding.texposAttrib);
+				glVertexAttribPointer(activeBinding.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
 
-					// nastavit svetla
-					glUniform1i(activeBinding.iEnabledLightsUniform, (unsigned int)(lights.size() / 3));
-					glUniform4fv(activeBinding.vLightsUniform, lights.size(), &(lights[0].x));
+				// nastavit svetla
+				glUniform1i(activeBinding.iEnabledLightsUniform, (unsigned int)(lights.size() / 3));
+				glUniform4fv(activeBinding.vLightsUniform, lights.size(), &(lights[0].x));
 
-					// ? glUniform4fv(activeBinding.vLightsUniform, lights.size() * 4, &(lights[0].x));
-				}				
+				// ? glUniform4fv(activeBinding.vLightsUniform, lights.size() * 4, &(lights[0].x));
 
-				// pohledova matice
-				glm::mat4 mView = application.getCamera()->GetMatrix();
-				glUniformMatrix4fv(activeBinding.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
+				counter++; // pomocne pocitadlo zmen shaderu v jednom snimku
+			}				
 
-				// projekcni matice
-				glm::mat4 mProjection = glm::perspective(45.0f, (float)application.getWindowAspectRatio(), 1.0f, 1000.0f);
-				glUniformMatrix4fv(activeBinding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
+			// pohledova matice
+			glm::mat4 mView = application.getCamera()->GetMatrix();
+			glUniformMatrix4fv(activeBinding.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
+
+			// projekcni matice
+			glm::mat4 mProjection = glm::perspective(45.0f, (float)application.getWindowAspectRatio(), 1.0f, 1000.0f);
+			glUniformMatrix4fv(activeBinding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
 	
-				// nastaveni kamery
-				glm::vec3 eye = application.getCamera()->getEye();
-				glm::vec3 sight = application.getCamera()->getTarget();
-				GLuint eyeUniform = glGetUniformLocation(activeBinding.program, "eye");
-				GLuint sightUniform = glGetUniformLocation(activeBinding.program, "sight");
-				glUniform3f(eyeUniform, eye.x, eye.y, eye.z);
-				glUniform3f(sightUniform, sight.x, sight.y, sight.z);
+			// nastaveni kamery
+			glm::vec3 eye = application.getCamera()->getEye();
+			glm::vec3 sight = application.getCamera()->getTarget();
+			GLuint eyeUniform = glGetUniformLocation(activeBinding.program, "eye");
+			GLuint sightUniform = glGetUniformLocation(activeBinding.program, "sight");
+			glUniform3f(eyeUniform, eye.x, eye.y, eye.z);
+			glUniform3f(sightUniform, sight.x, sight.y, sight.z);
 
-				// modelova matice
-				glUniformMatrix4fv(activeBinding.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix));
+			// modelova matice
+			glUniformMatrix4fv(activeBinding.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix));
 
-				// pomocna matice pro vypocty osvetleni - znacne snizeni fps!
-				glm::mat3 mSubModelView = glm::mat3(mView) * glm::mat3((*it).matrix);
-				glm::mat3 mMVInverseTranspose = glm::transpose(mSubModelView); // transpose(inverse(modelview))
-				glUniformMatrix3fv(activeBinding.mMVInverseTranspose, 1, GL_FALSE, glm::value_ptr(mMVInverseTranspose));
+			// pomocna matice pro vypocty osvetleni - znacne snizeni fps!
+			glm::mat3 mSubModelView = glm::mat3(mView) * glm::mat3((*it).matrix);
+			glm::mat3 mMVInverseTranspose = glm::transpose(glm::inverse(mSubModelView)); // transpose(inverse(modelview))
+			glUniformMatrix3fv(activeBinding.mMVInverseTranspose, 1, GL_FALSE, glm::value_ptr(mMVInverseTranspose));
 
-				// samotne vykresleni
-				unsigned int count = (*meshIt)->getFaces().size() * 3;
-				unsigned int offset = containers[i]->getModelIndexOffset((*it).model) + meshOffset;
+			// samotne vykresleni
+			unsigned int count = mesh->getFaces().size() * 3;
+			unsigned int offset = containers[i]->getMeshIndexOffset(mesh);
 			
-				glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, (void*)(offset * sizeof(GLuint)) );
-
-				meshOffset += count;
-			}
-			
-			// vynuti opetovne nastaveni shaderu pro kazdy kontejner,
-			// muze byt totiz nutne prenastavit ukazatele do bufferu atp.
-			activeMaterial = "?_dummy_?";
+			glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, (void*)(offset * sizeof(GLuint)) );			
 		}		
+		
+		// vynuti opetovne nastaveni shaderu pro kazdy kontejner,
+		// muze byt totiz nutne prenastavit ukazatele do bufferu atp.
+		activeMaterial = "?_dummy_?";
 
-	}
+		//cout << "prepnuti krat " << counter << endl;
+	}	
 
 	// obnovit vychozi binding bufferu
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

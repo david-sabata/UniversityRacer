@@ -30,15 +30,86 @@ vector<BaseModel*> const &ModelContainer::getModels()
 }
 
 
-vector<ModelContainer::DRAWINGQUEUEITEM> &ModelContainer::getDrawingQueue()
+vector<ModelContainer::DRAWINGQUEUEITEM> const &ModelContainer::getDrawingQueue()
 {
 	return drawingQueue;
 }
 
+vector<ModelContainer::MESHDRAWINGQUEUEITEM> const &ModelContainer::getMeshDrawingQueue()
+{
+	return meshDrawingQueue;
+}
+
+
+
+
 
 void ModelContainer::optimizeDrawingQueue()
 {
+	/**
+	 * [material] => [
+	 *       [Mesh*] => index do kreslici fronty
+	 *       [Mesh*] => ...
+	 * ],
+	 * [material] => ...
+	 */	
+	typedef map<string, vector<pair<Mesh*, unsigned int>>> MATERIALMAP;
 
+	// asociativni pole materialu ve scene a meshi (s vazbou na puvodni model) ktere je pouzivaji
+	MATERIALMAP materials;
+
+	// rozskatulkovat meshe podle pouziteho materialu
+	for (unsigned int i = 0; i < drawingQueue.size(); i++)
+	{
+		BaseModel* model = drawingQueue[i].model;		
+
+		for (vector<Mesh*>::iterator meshIt = model->getMeshes().begin(); meshIt != model->getMeshes().end(); meshIt++)
+		{
+			Mesh* mesh = (*meshIt);
+			
+			// najit material
+			MATERIALMAP::iterator matIt = materials.find( mesh->getMaterialName() );
+			
+			// pokud material neexistuje, vyrobit novy zaznam
+			if (matIt == materials.end()) {
+				// vlozi prazdny zaznam a vraci jeho iterator
+				matIt = materials.insert( 
+							pair<string, vector<pair<Mesh*, unsigned int>>>( mesh->getMaterialName(), vector<pair<Mesh*, unsigned int>>() ) 
+						).first;
+			}
+
+			// pridat mesh do spravne 'skatulky' a zapamatovat si index puvodni polozky
+			(*matIt).second.push_back(pair<Mesh*, unsigned int>(mesh, i));
+		}
+	}
+	
+	// prochazet postupne materialy
+	for (MATERIALMAP::iterator matIt = materials.begin(); matIt != materials.end(); matIt++)
+	{
+		// a jimi kreslene meshe
+		for (vector<pair<Mesh*, unsigned int>>::iterator meshIt = (*matIt).second.begin(); meshIt != (*matIt).second.end(); meshIt++)
+		{
+			Mesh* mesh = (*meshIt).first;
+			unsigned int drawingQueueIndex = (*meshIt).second;
+
+			// pridat do kreslici fronty meshi
+			MESHDRAWINGQUEUEITEM item = { mesh, drawingQueue[drawingQueueIndex].matrix };
+			meshDrawingQueue.push_back(item);
+
+			// najit model v mapovani
+			map<unsigned int, vector<unsigned int>>::iterator mappingIt = drawingQueuesMapping.find(drawingQueueIndex);
+			
+			// vytvorit zaznam pokud neni
+			if (mappingIt == drawingQueuesMapping.end()) {
+				mappingIt = drawingQueuesMapping.insert( pair<unsigned int, vector<unsigned int>>( drawingQueueIndex, vector<unsigned int>() ) ).first;
+			}
+
+			// zapamatovat si, kteremu modelu tato mesh patrila (pro naslednou upravu matic) - index do meshDrawingQueue
+			(*mappingIt).second.push_back( meshDrawingQueue.size() - 1 );
+		}		
+	}
+
+	cout << "mats " << materials.size() << endl;
 }
 
 
@@ -57,6 +128,14 @@ void ModelContainer::addModel(string name, BaseModel *model)
 	// pridame info o offsetu jeho indexu
 	modelsIndexOffsets.insert(pair<BaseModel*, unsigned int>(model, totalFacesCount * 3));
 	
+	// info o indexech meshi
+	unsigned int offset = totalFacesCount * 3;
+	for (vector<Mesh*>::iterator it = model->getMeshes().begin(); it != model->getMeshes().end(); it++)
+	{
+		meshesIndexOffsets.insert(pair<Mesh*, unsigned int>((*it), offset));
+		offset += (*it)->getFaces().size() * 3;
+	}
+
 	// a aktualizujeme pocet facu v kontejneru
 	totalFacesCount += model->facesCount();
 }
@@ -87,13 +166,27 @@ unsigned int ModelContainer::queueDraw(BaseModel* model)
 
 unsigned int ModelContainer::queueDraw(BaseModel* model, glm::mat4 mat)
 {
+	// zaradit do modelove fronty
 	DRAWINGQUEUEITEM item = {model, mat};
 	drawingQueue.push_back(item);
+	
 	return drawingQueue.size() - 1;
 }
 
 
 
+
+void ModelContainer::updateDrawingMatrix(unsigned int drawingQueueIndex, glm::mat4 matrix)
+{
+	// najit indexy ve fronte meshi
+	vector<unsigned int> meshIndices = drawingQueuesMapping[drawingQueueIndex];
+
+	// aktualizovat vsem matice
+	for (vector<unsigned int>::iterator it = meshIndices.begin(); it != meshIndices.end(); it++)
+	{
+		meshDrawingQueue[(*it)].matrix = matrix;
+	}
+}
 
 
 
@@ -103,6 +196,11 @@ unsigned int ModelContainer::getModelIndexOffset(BaseModel* model)
 	return modelsIndexOffsets[model];
 }
 
+
+unsigned int ModelContainer::getMeshIndexOffset(Mesh* mesh)
+{
+	return meshesIndexOffsets[mesh];
+}
 
 
 
