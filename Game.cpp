@@ -51,22 +51,13 @@ void Game::onInit()
 	// nacist modely	
 	ModelContainer* container = new ModelContainer;	
 
-#if 1
+
 	BaseModel* chairs = container->load3DS("models/chairs.3ds");
 	BaseModel* e112 = container->load3DS("models/e112.3ds");
-
-	/*
-	CachedModel* e112 = CachedModel::load("models/e112.3ds~");
-	if (e112 == NULL) {
-		BaseModel* tmp = container->load3DS("models/e112.3ds");
-		e112 = new CachedModel(tmp, "models/e112.3ds~");
-	}
-	*/
-	
+	BaseModel* middesk = container->load3DS("models/desk-mid.3ds");
+		
 	cout << "- setting up drawing queue" << endl;
-
-
-	
+		
 	// vykresli E112 zmensenou na 20%
 	if (1) {
 		container->addModel("e112", e112);
@@ -76,6 +67,8 @@ void Game::onInit()
 
 	// vykresli zidle
 	{
+		container->addModel("chairs", chairs);
+
 		glm::mat4 scale = glm::scale(glm::vec3(0.2));
 		glm::mat4 rows[] = {
 			glm::translate(scale, glm::vec3(-740, 19, -70)),
@@ -84,8 +77,6 @@ void Game::onInit()
 			glm::translate(scale, glm::vec3(-740, 79, -370)),
 			glm::translate(scale, glm::vec3(-740, 99, -470))
 		};
-
-		container->addModel("chairs", chairs);
 		
 		for (unsigned int rowI = 0; rowI < 5; rowI++)
 		{
@@ -104,6 +95,27 @@ void Game::onInit()
 		}
 	}
 
+	// vykreslit lavice
+	{
+		container->addModel("middesk", middesk);
+
+		glm::mat4 scale = glm::scale(glm::vec3(0.2));
+		glm::mat4 rows[] = {
+			glm::translate(scale, glm::vec3(-365, 13, -43)),
+			glm::translate(scale, glm::vec3(-365, 33, -143)),
+			glm::translate(scale, glm::vec3(-365, 53, -243)),
+			glm::translate(scale, glm::vec3(-365, 73, -343)),
+			glm::translate(scale, glm::vec3(-365, 93, -443))
+		};
+
+		for (unsigned int rowI = 0; rowI < 5; rowI++)
+		{
+			glm::mat4 col = glm::translate(rows[rowI], glm::vec3(0, 0, 0));
+			container->queueDraw(middesk, col);
+		}
+	}
+
+
 	// pro kazde svetlo v kontejneru pridat kouli, ktera ho znazornuje
 	if (0) {
 		BaseModel* sphere = container->load3DS("models/sphere.3ds");
@@ -119,7 +131,7 @@ void Game::onInit()
 			container->queueDraw(sphere, mat);
 		}
 	}
-#endif
+
 
 	cout << "- constructing scene" << endl;
 	
@@ -223,6 +235,11 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 	glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, (void*)&(indices.at(0)));
 #endif
 	
+	// ---------------------------------------
+	// Vykresleni ingame gui
+	
+
+
 
 	// ---------------------------------------
 

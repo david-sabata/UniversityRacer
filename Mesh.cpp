@@ -33,37 +33,56 @@ void Mesh::computeTangentsAndNormals()
 		return;
 
 	vector<glm::vec3> faceNormals(faces.size());
-
-	// spocitat per-face normaly
+	
 	for (unsigned int i = 0; i < faces.size(); i++)
 	{
-		faceNormals[i] = glm::cross(
+		// spocitat per-face normaly
+		glm::vec3 normal = glm::cross(
 			vertices[ (unsigned int)faces[i].y ] - vertices[ (unsigned int)faces[i].x ],
 			vertices[ (unsigned int)faces[i].z ] - vertices[ (unsigned int)faces[i].x ]
+		);		
+
+		normals[ (unsigned int)faces[i].x ] += normal;
+		normals[ (unsigned int)faces[i].y ] += normal;
+		normals[ (unsigned int)faces[i].z ] += normal;
+
+
+		// spocitat per-face tangenty
+		unsigned int iv1 = faces[i].y;
+		unsigned int iv2 = faces[i].x;
+
+		glm::vec2 tc1(0, 0);
+		if (texcoords.size() > iv1) tc1 = texcoords[iv1];
+
+		glm::vec2 tc2(0, 0);
+		if (texcoords.size() > iv1) tc2 = texcoords[iv2];
+
+		float frac = tc1.x * tc2.y - tc2.x * tc1.y;
+		float coef = 1;
+		if (frac != 0)
+			coef = 1 / frac;
+		
+		glm::vec3 tangent = glm::vec3(
+			coef * ((vertices[iv1].x * tc2.x)  + (vertices[iv2].x * -tc1.y)),
+			coef * ((vertices[iv1].y * tc2.x)  + (vertices[iv2].y * -tc1.y)),
+			coef * ((vertices[iv1].z * tc2.x)  + (vertices[iv2].z * -tc1.y))
 		);
-		faceNormals[i] = glm::normalize(faceNormals[i]);
 
-		/*
-		glm::vec3 v0 = vertices[ (unsigned int)faces[i].x ];
-		glm::vec3 v1 = vertices[ (unsigned int)faces[i].y ];
-		glm::vec3 v2 = vertices[ (unsigned int)faces[i].z ];
-		cout << "vert 0: " << v0.x << "\t" << v0.y << "\t" << v0.z << endl;
-		cout << "vert 1: " << v1.x << "\t" << v1.y << "\t" << v1.z << endl;
-		cout << "vert 2: " << v2.x << "\t" << v2.y << "\t" << v2.z << endl;
-		cout << "face normal: " << faceNormals[i].x << "\t" << faceNormals[i].y << "\t" << faceNormals[i].z << endl;
-		*/
-
-		// akumulovat normaly ve vrcholech
-		normals[ (unsigned int)faces[i].x ] += faceNormals[i];
-		normals[ (unsigned int)faces[i].y ] += faceNormals[i];
-		normals[ (unsigned int)faces[i].z ] += faceNormals[i];
+		tangents[ faces[i].x ] += tangent;
+		tangents[ faces[i].y ] += tangent;
+		tangents[ faces[i].z ] += tangent;
 	}
 
 	// spocitat per-vertex normaly
 	for (vector<glm::vec3>::iterator it = normals.begin(); it != normals.end(); it++)
 	{
-		(*it) = glm::normalize(*it);
-		//~ cout << (*it).x << "," << (*it).y << "," << (*it).z << endl;
+		(*it) = glm::normalize(*it);		
+	}
+
+	// spocitat per-vertex tangenty
+	for (vector<glm::vec3>::iterator it = tangents.begin(); it != tangents.end(); it++)
+	{
+		(*it) = glm::normalize(*it);		
 	}
 
 	normalsComputed = true;
@@ -89,6 +108,11 @@ std::vector<glm::vec3> const &Mesh::getVertices()
 std::vector<glm::vec3> const &Mesh::getNormals() 
 {
 	return normals;
+}
+
+std::vector<glm::vec3> const &Mesh::getTangents()
+{
+	return tangents;
 }
 
 std::vector<glm::vec2> const &Mesh::getTexCoords()
