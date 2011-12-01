@@ -10,6 +10,7 @@
 # include <GL/glew.h>
 #endif
 
+#include "Debug.h"
 #include "Exceptions.h"
 
 #ifndef M_PI

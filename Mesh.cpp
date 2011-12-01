@@ -1,6 +1,9 @@
-
-#include "Mesh.h"
 #include <iostream>
+#include "Mesh.h"
+
+#ifdef _DEBUG
+	#define new MYDEBUG_NEW
+#endif
 
 using namespace std;
 

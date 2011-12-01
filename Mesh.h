@@ -14,6 +14,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #endif
 
+#include "Debug.h"
+
 
 class Mesh
 {	

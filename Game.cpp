@@ -1,6 +1,10 @@
 #include "Game.h"
 #include "Light.h"
 
+#ifdef _DEBUG
+	#define new MYDEBUG_NEW
+#endif
+
 using namespace std;
 
 
