@@ -35,40 +35,43 @@ out	vec4 specularF;
 flat out int shininessF;
 
 /////////////////////////////////////////////////
+out vec3 eyeLightPos;
+out vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
+out vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
+out vec3 lightDir;
 
-varying vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
-varying vec3 eyeLightVector; // vektor ze svetla do zkoumaneho bodu v prostoru OKA
-varying vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
 out vec4 color;
 
 void main() {
+	vec4 pos = vec4(position, 1.0);
+	mat4 mv = view * model;
+	mat4 mvp = projection * view * model;
+	gl_Position = mvp * pos;
+
 
 	// predpokladame enabledLights > 0
 	vec4 lightPosition = lights[0]; // 0 == prvni hodnota prvniho svetla == pozice
 	vec4 lightDiffuse = lights[1]; // 1 == druha hodnota prvniho svetla == difuzni slozka
 	vec4 lightAmbient = lights[2]; // 2 == treti hodnota prvniho svetla == ambientni slozka
 
-	//transformace normaly do prostoru OKA
-	eyeNormal = normalize(mv_inverse_transpose *  normal);
+	//transformace normaly do eyespace
+	eyeNormal = normalize(mv_inverse_transpose * normal);
 	
-	//transformace zkoumaneho bodu do prostoru OKA
-	eyePosition = vec3(( view *  model) * vec4(position,1.0));
+	//transformace zkoumaneho bodu do eyespace
+	vec4 eyePosition4 = mv * pos;
+	eyePosition = eyePosition4.xyz / eyePosition4.w;
 
-	//vektor svetla mezi okem a zkoumanym bodem
-	eyeLightVector = vec3(lightPosition.xyz - eyePosition.xyz);	
-   
+	//transformace svetla do eyespace (TODO : zeptat se Davida kam ho umistil : pravdepodobne je ve worldspace?)
+	vec4 lightPos4 = view * lightPosition;
+	eyeLightPos = lightPos4.xyz / lightPos4.w ;
 	
+	//smer paprsku dopadajiciho na plosku
+	lightDir = eyeLightPos - eyePosition;
 
 	//prevod hodnot
 	diffuseF = material.diffuse * lightDiffuse;
 	ambientF = material.ambient * lightAmbient;
 	specularF = material.specular;
 	shininessF = material.shininess;
-	
-	vec4 pos = vec4(position, 1);
-
-	mat4 mv = view * model;
-	mat4 mvp = projection * view * model;
-	gl_Position = mvp * pos;
-	
+		
 }
