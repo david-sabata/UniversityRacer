@@ -39,6 +39,7 @@ out vec3 eyeLightPos;
 out vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 out vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
 out vec3 lightDir;
+out vec2 t;
 
 out vec4 color;
 
@@ -74,4 +75,5 @@ void main() {
 	specularF = material.specular;
 	shininessF = material.shininess;
 		
+	t = texpos;
 }

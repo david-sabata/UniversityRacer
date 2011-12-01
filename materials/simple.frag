@@ -5,6 +5,7 @@ in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
 in vec3 eyeLightPos;
 in vec3 lightDir;
+in vec2 t;
 
 //potreba pro spekularni odlesky
 varying vec3 halfVector;
@@ -16,7 +17,8 @@ in vec4 diffuseF;
 in vec4 specularF;
 flat in int shininessF;
 
-
+// @LOAD materials/textures/carpet.bmp
+uniform sampler2D tex;
 
 in vec4 color;
 
@@ -58,7 +60,7 @@ void main() {
 	//spocitame spekularni odlesk
 	float specular = pow(dot(N,H), 64);
 	
-	//pricteme spekulární složku k výsledné barvì
+	//pricteme spekularni slozku k vysledne barve
 	if(specular >= 0.0)
 		finalColor += attenuation * specularF * specular;
 		  
