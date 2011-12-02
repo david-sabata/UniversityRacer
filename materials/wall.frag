@@ -1,6 +1,6 @@
 #version 130
 
-#define MAX_LIGHTS 2
+#define MAX_LIGHTS 4
 
 // @LOAD materials/textures/color_map.bmp
 uniform sampler2D tex;
@@ -54,14 +54,15 @@ void main() {
 
 	//////////////////////////////OSVETLENI////////////////////////////////
 	//Nastaveni fyzikalnich konstant pro slabnuti svetla se vzdalenosti
-	float attenuation, distance; 
+	float attenuation, distance, radius; 
+	radius = 0.4;
 	//pro Range 100 - zdroj : http://www.ogre3d.org/tikiwiki/-Point+Light+Attenuation
 	float constantAtt = 1.0;
 	float linearAtt = 0.0014;
 	float quadraticAtt = 0.000007;
 	vec4 diffuseF;
 	for(int i = 0; i < MAX_LIGHTS; i++) { 
-		distance = length(tanLightDir[i]);	
+		distance = length(tanLightDir[i] / radius);	
 		attenuation = 1.0 / (constantAtt + linearAtt * distance +
 										   quadraticAtt * distance * distance);
 									   
