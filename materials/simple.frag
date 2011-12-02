@@ -1,6 +1,6 @@
 #version 130
 
-#define MAX_LIGHT 4
+#define MAX_LIGHTS 2
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
@@ -17,11 +17,11 @@ uniform Material material;
 
 in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
-in vec3 eyeLightPos[MAX_LIGHT];
+in vec3 eyeLightPos[MAX_LIGHTS];
 
 in vec4 specularF;
-
 in vec4 color;
+in vec2 t;
 
 void main() {
 	
@@ -40,7 +40,7 @@ void main() {
 	vec3 V = normalize(-eyePosition);
 
 	//////////////////////////////////////SVETLA/////////////////////////////////////
-	for(int i = 0; i < 4 ; i=i+2) {
+	for(int i = 0; i < MAX_LIGHTS ; i++) {
 		
 		finalColor += material.ambient * lights[i * 3 + 2];
 
@@ -77,7 +77,6 @@ void main() {
 		finalColor +=  diff +  spec;
 	} 
 	
-
 
 	//gl_FragColor = texture2D(textureNormal,t);
 	//gl_FragColor = ambientF[2];

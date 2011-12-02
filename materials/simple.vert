@@ -1,5 +1,5 @@
 #version 130
-
+#define MAX_LIGHTS 2
 
 /////////////////////////////////////////////////
 // Musi zustat stejne
@@ -25,18 +25,17 @@ struct Material {
 
 out vec4 specularF;
 
-#define MAX_LIGHT 4
+
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
 uniform Material material;
 
 /////////////////////////////////////////////////
-out vec3 eyeLightPos[MAX_LIGHT];
+out vec3 eyeLightPos[MAX_LIGHTS];
 out vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 out vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
-
-
+out vec2 t;
 
 
 void main() {
@@ -44,6 +43,7 @@ void main() {
 	mat4 mv = view * model;
 	mat4 mvp = projection * view * model;
 	gl_Position = mvp * pos;
+	t = texpos;
 
 	//transformace normaly do eyespace
 	eyeNormal = normalize(mv_inverse_transpose * normal);
@@ -54,7 +54,7 @@ void main() {
 
 	// predpokladame enabledLights > 0
 	////////////////////////////SVETLO /////////////////////////////////////
-	for(int i =0; i < 4; i++) {
+	for(int i =0; i < MAX_LIGHTS; i++) {
 		vec4 lightPosition = lights[i * 3 + 0]; // 0 == prvni hodnota prvniho svetla == pozice
 
 		//transformace svetla do eyespace (TODO : zeptat se Davida kam ho umistil : pravdepodobne je ve worldspace?)
