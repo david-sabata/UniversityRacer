@@ -41,6 +41,9 @@ class Game : public BaseApp
         // pomocna promenna pro moznost kreslit wireframe (TAB)
         bool drawWireframe;
 
+        // pomocna promenna pro moznost zapnuti kamery ktera nasleduje auto (F)
+        bool followCamera;
+
 };
 
 #endif

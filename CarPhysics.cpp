@@ -12,18 +12,16 @@ CarPhysics::~CarPhysics(void)
 
 btCollisionShape* CarPhysics::CreateVehicleUpperShape()
 {
-    static btScalar vertices[] = {
-                     
-        -0.9f, -0.2f, -1.5f,
-        -0.9f, -0.2f,  1.5f,
-        -0.9f,  0.2f,  0.5f,
-        -0.9f,  0.2f, -1.0f,
+    static btScalar vertices[] = {                     
+        -0.85f,  0.264f, -1.827f,  // back bottom
+        -0.85f,  0.154f,  1.118f,  // front bottom
+        -0.57f,  0.596f,  0.178f,  // front top
+        -0.57f,  0.577f, -1.038f,  // back top
 
-        0.9f, -0.2f, -1.5f,
-        0.9f, -0.2f,  1.5f,
-        0.9f,  0.2f,  0.5f,
-        0.9f,  0.2f, -1.0f
-        
+         0.85f,  0.264f, -1.827f,  // back bottom
+         0.85f,  0.154f,  1.118f,  // front bottom
+         0.57f,  0.596f,  0.178f,  // front top
+         0.57f,  0.577f, -1.038f,  // back top        
     };
 
     return new btConvexHullShape(vertices, 8, 3*sizeof(btScalar));
@@ -31,32 +29,33 @@ btCollisionShape* CarPhysics::CreateVehicleUpperShape()
 
 btCollisionShape* CarPhysics::CreateVehicleShape()
 {
-    static btScalar vertices[] = {
-                     
-        -1.0f,  0.0f, -2.5f,
-        -1.0f, -0.3f, -2.4f,
-        -1.0f, -0.6f, -2.0f,
-        -1.0f, -0.6f,  2.0f,
-        -1.0f, -0.2f,  2.4f,
-        -1.0f,  0.1f,  2.5f,
-        -1.0f,  0.2f,  2.4f,
-        -1.0f,  0.6f,  1.0f,
-        -1.0f,  0.6f, -2.0f, 
-        -1.0f,  0.5f, -2.4f,     
+    static btScalar vertices[] = {                     
+        -0.45f, -0.204f, -2.276f,   // back center
+        -0.45f, -0.472f, -2.238f,   // back lower
+        -0.85f, -0.597f, -1.789f,   // back bottom
+        -0.85f, -0.615f,  1.728f,   // front new bottom
+        -0.35f, -0.620f,  2.198f,   // front bottom 
+        -0.35f, -0.276f,  2.273f,   // front center
+        -0.35f, -0.046f,  2.122f,   // front upper
+        -0.85f,  0.069f,  1.728f,   // front new top
+        -0.85f,  0.154f,  1.118f,   // front top
+        -0.85f,  0.264f, -1.827f,   // back top
+        -0.45f,  0.207f, -2.174f,   // back upper    
 
-         1.0f,  0.0f, -2.5f,
-         1.0f, -0.3f, -2.4f,
-         1.0f, -0.6f, -2.0f,
-         1.0f, -0.6f,  2.0f,
-         1.0f, -0.2f,  2.4f,
-         1.0f,  0.1f,  2.5f,
-         1.0f,  0.2f,  2.4f,
-         1.0f,  0.6f,  1.0f,
-         1.0f,  0.6f, -2.0f, 
-         1.0f,  0.5f, -2.4f,
+         0.45f, -0.204f, -2.276f,   // back center
+         0.45f, -0.472f, -2.238f,   // back lower
+         0.85f, -0.597f, -1.789f,   // back bottom
+         0.85f, -0.615f,  1.728f,   // front new bottom
+         0.35f, -0.620f,  2.198f,   // front bottom 
+         0.35f, -0.276f,  2.273f,   // front center
+         0.35f, -0.046f,  2.122f,   // front upper
+         0.85f,  0.069f,  1.728f,   // front new top
+         0.85f,  0.154f,  1.118f,   // front top
+         0.85f,  0.264f, -1.827f,   // back top
+         0.45f,  0.207f, -2.174f,   // back upper    
     };
 
-    return new btConvexHullShape(vertices, 20, 3*sizeof(btScalar)); 
+    return new btConvexHullShape(vertices, 24, 3*sizeof(btScalar)); 
 }
 
 void CarPhysics::Initialize(btDiscreteDynamicsWorld *refWorld)
@@ -69,15 +68,15 @@ void CarPhysics::Initialize(btDiscreteDynamicsWorld *refWorld)
     btCompoundShape* compound = new btCompoundShape();
     m_collisionShapes.push_back(compound);
     
+    
     btTransform localTrans;
     localTrans.setIdentity();
+    localTrans.setOrigin(btVector3(0, m_cfg.bodyConnectionToChasisHeight, 0));  // localTrans effectively shifts the center of mass with respect to the chassis
 
-    btCollisionShape* chassisShape2 = CreateVehicleUpperShape();//CreateVehicleShape(); //new btBoxShape(btVector3(0.7f, 0.2f, 1.7f));
-    localTrans.setOrigin(btVector3(0, 2.8f, -0.5f));  //1.7 localTrans effectively shifts the center of mass with respect to the chassis
-    compound->addChildShape(localTrans, chassisShape2);
-
-    localTrans.setOrigin(btVector3(0.f, 1.0f, 0.f));  //1.5localTrans effectively shifts the center of mass with respect to the chassis
+    
+    btCollisionShape* upperShape = CreateVehicleUpperShape();
     compound->addChildShape(localTrans, chassisShape);
+    compound->addChildShape(localTrans, upperShape);
 
     
     
@@ -114,30 +113,30 @@ void CarPhysics::Initialize(btDiscreteDynamicsWorld *refWorld)
 
     // front left
     connectionPointCS0 = btVector3( m_cfg.connectionWidth, m_cfg.connectionHeight,  m_cfg.connectionLength);
-    m_vehicle->addWheel(connectionPointCS0, m_cfg.wheelDirectionCS0, m_cfg.wheelAxleCS, m_cfg.suspensionRestLength, m_cfg.wheelRadius, m_tuning, true);
+    m_vehicle->addWheel(connectionPointCS0, m_cfg.wheelDirectionCS, m_cfg.wheelAxleCS, m_cfg.suspensionRestLength, m_cfg.wheelRadius, m_tuning, true);
 
     // front right
     connectionPointCS0 = btVector3(-m_cfg.connectionWidth, m_cfg.connectionHeight,  m_cfg.connectionLength);
-    m_vehicle->addWheel(connectionPointCS0, m_cfg.wheelDirectionCS0, m_cfg.wheelAxleCS, m_cfg.suspensionRestLength, m_cfg.wheelRadius, m_tuning, true);
+    m_vehicle->addWheel(connectionPointCS0, m_cfg.wheelDirectionCS, m_cfg.wheelAxleCS, m_cfg.suspensionRestLength, m_cfg.wheelRadius, m_tuning, true);
 
     // back left
     connectionPointCS0 = btVector3( m_cfg.connectionWidth, m_cfg.connectionHeight, -m_cfg.connectionLength);
-    m_vehicle->addWheel(connectionPointCS0, m_cfg.wheelDirectionCS0, m_cfg.wheelAxleCS, m_cfg.suspensionRestLength, m_cfg.wheelRadius, m_tuning, false);
+    m_vehicle->addWheel(connectionPointCS0, m_cfg.wheelDirectionCS, m_cfg.wheelAxleCS, m_cfg.suspensionRestLength, m_cfg.wheelRadius, m_tuning, false);
 
     // back right
     connectionPointCS0 = btVector3(-m_cfg.connectionWidth, m_cfg.connectionHeight, -m_cfg.connectionLength);
-    m_vehicle->addWheel(connectionPointCS0, m_cfg.wheelDirectionCS0, m_cfg.wheelAxleCS, m_cfg.suspensionRestLength, m_cfg.wheelRadius, m_tuning, false);
+    m_vehicle->addWheel(connectionPointCS0, m_cfg.wheelDirectionCS, m_cfg.wheelAxleCS, m_cfg.suspensionRestLength, m_cfg.wheelRadius, m_tuning, false);
     
     for (int i = 0; i < m_vehicle->getNumWheels(); i++)
     {
         btWheelInfo& wheel = m_vehicle->getWheelInfo(i);
 
         wheel.m_suspensionStiffness = m_cfg.suspensionStiffness;
-        wheel.m_wheelsDampingRelaxation = m_cfg.suspensionDamping;
-        wheel.m_wheelsDampingCompression = m_cfg.suspensionCompression;
-        wheel.m_frictionSlip = m_cfg.wheelFriction;
+        wheel.m_wheelsDampingRelaxation = m_cfg.suspensionDampingRelaxation;
+        wheel.m_wheelsDampingCompression = m_cfg.suspensionDampingCompression;
+        wheel.m_frictionSlip = m_cfg.wheelFrictionSlip;
         wheel.m_rollInfluence = m_cfg.rollInfluence;
-        //wheel.m_maxSuspensionTravelCm
+        wheel.m_maxSuspensionTravelCm = m_cfg.suspensionMaxTravelCm;
     }
 }
 

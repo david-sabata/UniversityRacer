@@ -4,13 +4,13 @@
 using namespace std;
 
 
-#define WALK_SPEED 0.1f
+#define WALK_SPEED 0.05f
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
 
-Game::Game(): mouseCaptured(false), drawingQueue(NULL), drawWireframe(false)
+Game::Game(): mouseCaptured(false), drawingQueue(NULL), drawWireframe(false), followCamera(false)
 {
 
 }
@@ -169,8 +169,13 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
     glDepthFunc(GL_LESS);
 
-    drawingQueue->at(carQueueItem).matrix = physics->GetCar()->GetWorldTransform();   
-    
+    drawingQueue->at(carQueueItem).matrix = physics->GetCar()->GetWorldTransform(); 
+
+    if (followCamera)
+    {
+        btVector3 vel = physics->GetCar()->GetVehicle()->getRigidBody()->getLinearVelocity();        
+        camera.Follow(drawingQueue->at(carQueueItem).matrix, glm::vec3(vel.x(), vel.y(), vel.z()), gameTime);
+    }    
  
     for (int i = 0; i < physics->GetCar()->GetVehicle()->getNumWheels(); i++)
     {
@@ -182,8 +187,6 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
         if (i == 1 || i == 3)
             drawingQueue->at(wheelQueueItem[i]).matrix = glm::rotate(drawingQueue->at(wheelQueueItem[i]).matrix, 180.f, 0.f, 1.f, 0.f);
-
-        //PhysicsDebugDraw::DrawCylinder(m, physics->GetCar()->GetVehicle()->getWheelInfo(i).m_wheelsRadius, physics->GetCar()->GetVehicle()->getWheelInfo(i).m_wheelsRadius/2);            
     }
 	
 	// vykreslit scenu
@@ -331,7 +334,11 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 
     if (key == SDLK_RETURN) {
         physics->GetCar()->Reset();
+        camera.ResetFollow();
     }
+
+    if (key == SDLK_f)
+        followCamera = !followCamera;
 }
 
 
