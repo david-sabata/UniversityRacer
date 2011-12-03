@@ -7,7 +7,7 @@
 using namespace std;
 
 
-Camera::Camera(void) {
+Camera::Camera(void): currentSettleTime(0.f) {
 	Reset();
 }
 
@@ -108,3 +108,91 @@ void Camera::toggleObserve() {
 		observeCenter = Vector3f(2.78f, 2.73f, 2.73f);
 }
 */
+
+void Camera::Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameTime & gameTime)
+{
+    const glm::vec3 lookAtPos(0, 1, 0);
+    const glm::vec3 lookFromPos(0, 4, 4);  //0, 3, -2
+    float viewDistance = 10.0f;
+    const float settleTime = 2.f;
+
+    glm::mat3 targetRot(targetMat);
+    glm::vec3 targetPos(targetMat[3]);
+    
+    // Using statics here because of lazy programming
+    static glm::vec3 lastBaseLookFromPos = targetPos - targetRot[2] * 20.f;
+    static float facing = 1.f;
+    //static float actSettleTime = 0.f;
+
+    // camera intro
+    if (currentSettleTime < settleTime)
+    {
+        glm::vec3 defaultPos = targetPos - targetRot[2] * 20.f;
+        if (currentSettleTime > settleTime - 1.f)
+            lastBaseLookFromPos += (settleTime - currentSettleTime) * (defaultPos - lastBaseLookFromPos);
+        else
+            lastBaseLookFromPos = defaultPos;
+        viewDistance += (settleTime - currentSettleTime) * (settleTime - currentSettleTime);
+        currentSettleTime += gameTime.Elapsed() * 0.001f;
+    }
+
+    // First we nudge the previous camera position to get it to behave exactly the way we want.
+    // If the object is moving towards the camera then nudge the camera
+    // side was a little so it goes around.
+    // This avoids camera going over the top of the car and flipping when 
+    // changing velocity when going into reverse while looking forwards.
+    float nudge = glm::length(lastBaseLookFromPos - targetPos);
+    if (nudge < viewDistance)
+    {
+        nudge = viewDistance - nudge;
+        lastBaseLookFromPos -= targetRot[0] * nudge * 1.1f;
+        lastBaseLookFromPos.y += nudge * 0.2f;
+    }
+
+    // Nudged the camera a bit so that it swings around a bit more to face
+    // the direction that the car is moving.
+    // This makes it a little easier to see around corners.
+    lastBaseLookFromPos -= targetVelocity * 0.1f;
+
+    // Nudge the camera so that is a bit more likely to look in the direction
+    // that the car is facing. This helps most when maneuvering at low speed.
+    glm::vec3 facingNudge = targetRot[2] * 0.2f * facing;
+    facingNudge.y = 0.f;
+    lastBaseLookFromPos -= facingNudge;
+
+    // Smoothly choose whether the car is facing forwards or backwards for the above code.
+    float dot = glm::dot(targetPos - lastBaseLookFromPos, targetRot[2]);
+    facing = dot * 0.1f;
+    // ClampPosNeg
+    if (facing > 1.f)
+        facing = 1.f;
+    else if (facing < -1.f)
+        facing = -1.f;
+
+    // Now we make the camera follow the new object position.
+    glm::vec3 lookDirection = targetPos - lastBaseLookFromPos;
+    float mag = glm::length(lookDirection);
+    if (mag > 0.f)
+        lookDirection /= mag;
+    else
+        lookDirection = glm::vec3(0,0,1);   // It would be much better to use the last valid value
+
+    glm::vec3 currentLookFromPos = targetPos - lookDirection * viewDistance;
+    
+    lastBaseLookFromPos = currentLookFromPos;
+
+    if (glm::abs(lookDirection.y) <= 0.99f)
+    {
+        glm::mat4 tmp = glm::lookAt(glm::vec3(0), lookDirection, glm::vec3(0, 1, 0));
+        glm::mat3 m(tmp);
+
+        currentLookFromPos += lookFromPos * m;
+       
+        // glm::vec3 actLookAtPos = targetPos + lookAtPos * m;  // nefunguje podle originalu, proc?
+        glm::vec3 currentLookAtPos = lookDirection;  // nahrada, problem pri velmi pomale zmene smeru (kamera jde moc pod sledovany objekt)
+
+        eye = currentLookFromPos;
+        target = currentLookAtPos;
+        up = glm::vec3(0, 1, 0);
+    }
+}
