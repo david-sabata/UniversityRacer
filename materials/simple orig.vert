@@ -57,7 +57,7 @@ void main() {
 	eyePosition = eyePosition4.xyz / eyePosition4.w;
 
 	// predpokladame enabledLights > 0
-	for(int i = 0; i < MAX_LIGHT ; i++) {
+	for(int i = 0; i < enabledLights ; i++) {
 
 		vec4 lightPosition = lights[i * 3 + 0]; // 0 == prvni hodnota prvniho svetla == pozice
 		vec4 lightDiffuse = lights[i * 3 + 1]; // 1 == druha hodnota prvniho svetla == difuzni slozka

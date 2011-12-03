@@ -69,9 +69,8 @@ void main() {
 		float specular = pow(dot(N,H), 64);
 	
 		//pricteme spekulární složku k výsledné barvì
-		vec4 spec;
 		if(specular >= 0.0)
-			spec = attenuation * specularF * specular;
+			vec4 spec = attenuation * specularF * specular;
 	    finalColor +=  diff + spec;
 	 
 		///////////////////////////////////////SVETLO 2/////////////////////////////////////////

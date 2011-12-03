@@ -55,7 +55,7 @@ btCollisionShape* CarPhysics::CreateVehicleShape()
          0.45f,  0.207f, -2.174f,   // back upper    
     };
 
-    return new btConvexHullShape(vertices, 24, 3*sizeof(btScalar)); 
+    return new btConvexHullShape(vertices, 22, 3*sizeof(btScalar)); 
 }
 
 void CarPhysics::Initialize(btDiscreteDynamicsWorld *refWorld)

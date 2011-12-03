@@ -32,12 +32,13 @@ class Game : public BaseApp
 
 	protected:
 		Scene* scene;
+        ModelContainer* container;
         Physics *physics;
 
 		bool mouseCaptured;
 
         // ukazatel na frontu kreslenych objektu
-        std::vector<ModelContainer::DRAWINGQUEUEITEM>* drawingQueue;
+        //std::vector<ModelContainer::DRAWINGQUEUEITEM>* drawingQueue;
 
         // indexy polozek v kreslici fronte
         unsigned int carQueueItem, e112QueueItem;

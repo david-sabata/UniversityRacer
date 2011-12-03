@@ -14,7 +14,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////
 
 
-Game::Game(): mouseCaptured(false), drawingQueue(NULL), drawWireframe(false), followCamera(false)
+Game::Game(): mouseCaptured(false), /*drawingQueue(NULL),*/ drawWireframe(false), followCamera(false)
 {
 
 }
@@ -40,7 +40,7 @@ void Game::onInit()
 	cout << "- loading models" << endl;
 
 	// nacist modely	
-	ModelContainer* container = new ModelContainer;	
+	container = new ModelContainer;	
 
 
 	BaseModel* chairs = container->load3DS("models/chairs.3ds");
@@ -110,7 +110,7 @@ void Game::onInit()
 
 
 	// pro kazde svetlo v kontejneru pridat kouli, ktera ho znazornuje
-	if (0) {
+	if (1) {
 		BaseModel* sphere = container->load3DS("models/sphere.3ds");
 		container->addModel("lightsphere", sphere);
 
@@ -139,7 +139,7 @@ void Game::onInit()
 	}
 
     // zapamatovat si frontu
-	drawingQueue = &container->getDrawingQueue();
+	//drawingQueue = &container->getDrawingQueue();
 
 	cout << "- constructing scene" << endl;
 
@@ -162,8 +162,8 @@ void Game::onInit()
     btTransform transform;
     transform.setIdentity();
     transform.setOrigin(btVector3(0, 3, 1));
-   // physics->AddRigidBody(5., transform, new btBoxShape(btVector3(0.75,0.75,0.75)))->setAngularVelocity(btVector3(1,1,1));
-    physics->AddStaticModel(drawingQueue->at(e112QueueItem).model, 0.2f, false);
+    // physics->AddRigidBody(5., transform, new btBoxShape(btVector3(0.75,0.75,0.75)))->setAngularVelocity(btVector3(1,1,1)); // TODO konstruktor se neprelozi kvuli Debug.h
+    physics->AddStaticModel(e112, 0.2f, false);
 }
  
 
@@ -184,12 +184,14 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
     glDepthFunc(GL_LESS);
 
-    drawingQueue->at(carQueueItem).matrix = physics->GetCar()->GetWorldTransform(); 
+    container->updateDrawingMatrix(carQueueItem, physics->GetCar()->GetWorldTransform());
+    //drawingQueue->at(carQueueItem).matrix = physics->GetCar()->GetWorldTransform(); 
 
     if (followCamera)
     {
         btVector3 vel = physics->GetCar()->GetVehicle()->getRigidBody()->getLinearVelocity();        
-        camera.Follow(drawingQueue->at(carQueueItem).matrix, glm::vec3(vel.x(), vel.y(), vel.z()), gameTime);
+        camera.Follow(physics->GetCar()->GetWorldTransform(), glm::vec3(vel.x(), vel.y(), vel.z()), gameTime);
+        //camera.Follow(drawingQueue->at(carQueueItem).matrix, glm::vec3(vel.x(), vel.y(), vel.z()), gameTime);
     }    
  
     for (int i = 0; i < physics->GetCar()->GetVehicle()->getNumWheels(); i++)
@@ -198,10 +200,13 @@ void Game::onWindowRedraw(const GameTime & gameTime)
         physics->GetCar()->GetVehicle()->updateWheelTransform(i, true); //synchronize the wheels with the (interpolated) chassis worldtransform        
         physics->GetCar()->GetVehicle()->getWheelInfo(i).m_worldTransform.getOpenGLMatrix(m); //draw wheels (cylinders)
         
-        drawingQueue->at(wheelQueueItem[i]).matrix = mat4_from_arr(m);
+     // container->updateDrawingMatrix(wheelQueueItem[i], mat4_from_arr(m));
+     // drawingQueue->at(wheelQueueItem[i]).matrix = glm::rotate(drawingQueue->at(wheelQueueItem[i]).matrix, 180.f, 0.f, 1.f, 0.f);
 
         if (i == 1 || i == 3)
-            drawingQueue->at(wheelQueueItem[i]).matrix = glm::rotate(drawingQueue->at(wheelQueueItem[i]).matrix, 180.f, 0.f, 1.f, 0.f);
+            container->updateDrawingMatrix(wheelQueueItem[i], glm::rotate(mat4_from_arr(m), 180.f, 0.f, 1.f, 0.f));
+        else
+            container->updateDrawingMatrix(wheelQueueItem[i], mat4_from_arr(m));
     }
 	
 	// vykreslit scenu
