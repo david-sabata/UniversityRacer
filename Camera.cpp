@@ -1,5 +1,9 @@
 #include "Camera.h"
 
+#ifdef _DEBUG
+	#define new MYDEBUG_NEW
+#endif
+
 using namespace std;
 
 
@@ -105,7 +109,7 @@ void Camera::toggleObserve() {
 }
 */
 
- void Camera::Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameTime & gameTime)
+void Camera::Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameTime & gameTime)
 {
     const glm::vec3 lookAtPos(0, 1, 0);
     const glm::vec3 lookFromPos(0, 4, 4);  //0, 3, -2

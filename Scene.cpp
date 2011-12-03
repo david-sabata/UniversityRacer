@@ -1,5 +1,9 @@
 #include "Scene.h"
 
+#ifdef _DEBUG
+	#define new MYDEBUG_NEW
+#endif
+
 using namespace std;
 
 
@@ -128,6 +132,7 @@ void Scene::buildBufferObjects()
 					{
 						glm::vec3 vert = mesh->getVertices()[i];
 						glm::vec3 norm = mesh->getNormals()[i];
+						glm::vec3 tan = mesh->getTangents()[i];
 
 						glm::vec2 tex(0, 0);
 						if (mesh->getTexCoords().size() > i)
@@ -136,15 +141,13 @@ void Scene::buildBufferObjects()
 						// zapsat data a posunout ukazatel na nasledujici volne misto
 						VBOENTRY e = {
 							vert.x, vert.y, vert.z, 
-							norm.x, norm.y, norm.z, 
+							norm.x, norm.y, norm.z,
+							tan.x, tan.y, tan.z,
 							tex.x, tex.y
 						};
 						
 						*mapping = e;
 						mapping++;
-
-						//cout << "v[" << i << "]\t" << vert.x << "\t" << vert.y << "\t" << vert.z << endl;
-						//cout << "n[" << i << "]\t" << norm.x << "\t" << norm.y << "\t" << norm.z << endl;
 					}
 				}
 			}
@@ -187,11 +190,6 @@ void Scene::buildBufferObjects()
 						mapping[writingIndex + 1] = (unsigned int)face.y + indexOffset;
 						mapping[writingIndex + 2] = (unsigned int)face.z + indexOffset;
 
-						if (0) {
-							cout << "writingIndex " << writingIndex << "\t" << mapping[writingIndex + 0] << "\t" << mapping[writingIndex + 1] << "\t" << mapping[writingIndex + 2] << endl;
-							cout << "original     " << writingIndex << "\t" << (unsigned int)face.x << "\t" << (unsigned int)face.y << "\t" << (unsigned int)face.z << endl;
-						}
-						
 						writingIndex += 3;					
 					}	
 					

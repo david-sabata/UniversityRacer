@@ -2,11 +2,13 @@
 #define GAME_H
 
 #include <algorithm>
+#include <ostream>
+#include <sstream>
 #include <vector>
 
 #include "BaseApp.h"
 #include "Scene.h"
-#include "CachedModel.h"
+#include "Debug.h"
 #include "Physics.h"
 
 class Game : public BaseApp
@@ -24,6 +26,9 @@ class Game : public BaseApp
 		void handleActiveKeys(const GameTime & gameTime);		
 		void onKeyDown(SDLKey key, Uint16 mod);
 		void onMouseMove(unsigned x, unsigned y, int xrel, int yrel, Uint8 buttons);
+
+        // vraci statistiku - pocet vrcholu, facu,...
+        std::string statsString();
 
 	protected:
 		Scene* scene;

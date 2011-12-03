@@ -11,6 +11,7 @@
 #endif
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Debug.h"
 #include "Exceptions.h"
 
 #ifndef M_PI

@@ -5,6 +5,12 @@
 #include <iomanip>
 #include <sstream>
 
+#ifdef _MSC_VER
+	#define _CRTDBG_MAP_ALLOC
+	#include <crtdbg.h>
+	#include "Debug.h"
+#endif
+
 // Libraries ///////////////////////////////////////////
 
 #include <SDL/SDL.h>
@@ -28,8 +34,6 @@
 #include <GL/glu.h>
 
 ////////////////////////////////////////////////////////
-
-
 
 #include "Exceptions.h"
 #include "Utils.h"

@@ -15,9 +15,10 @@
 
 #include <glm/gtx/transform2.hpp>
 
+#include "Debug.h"
 #include "Utils.h"
 
-#include <cmath>
+
 
 class Camera {
 
@@ -33,7 +34,7 @@ class Camera {
 
 		void DebugDump();       
 
-        void Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameTime & gameTime);
+		void Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameTime & gameTime);
         void ResetFollow() { currentSettleTime = 0.0f; }
 
 		//void toggleObserve();
@@ -54,8 +55,8 @@ class Camera {
 		glm::vec3 up;			// up vektor kamery
 		float angle_horiz;
 		float angle_vert;
-
-        float currentSettleTime; // pomocna promenna pro "intro" follow kamery
+		
+		float currentSettleTime; // pomocna promenna pro "intro" follow kamery
 
 		/*
 		bool isObserving;
