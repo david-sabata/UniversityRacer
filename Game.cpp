@@ -86,7 +86,7 @@ void Game::onInit()
 					offsetX += 100;
 
 				glm::mat4 col = glm::translate(rows[rowI], glm::vec3(offsetX, 0, 0));
-				container->queueDraw(chairs, col);
+				container->queueDraw(chairs, col); // jen testovaci; ulozi se index na posledni pridanou zidli
 			
 				offsetX += 105;
 			}		
@@ -94,7 +94,7 @@ void Game::onInit()
 	}
 */
 	// pro kazde svetlo v kontejneru pridat kouli, ktera ho znazornuje
-	if (0) {
+	{
 		BaseModel* sphere = container->load3DS("models/sphere.3ds");
 		container->addModel("lightsphere", sphere);
 
@@ -127,7 +127,7 @@ void Game::onInit()
 	drawingQueue = &container->getDrawingQueue();
 
 	cout << "- constructing scene" << endl;
-	
+
 	// vyrobit scenu
 	scene = new Scene(*this);
 	scene->addModelContainer(container);
@@ -360,25 +360,3 @@ void Game::onMouseMove(unsigned x, unsigned y, int xrel, int yrel, Uint8 buttons
 	}
 }
 
-
-string Game::statsString()
-{
-	static unsigned int vertCount = 0;
-	static unsigned int faceCount = 0;
-
-	if (vertCount > 0 && faceCount > 0) {
-		ostringstream out;
-		out << vertCount << " vertices, " << faceCount << " faces";
-		return string(out.str());
-	}
-
-	if (scene->getModelContainers().size() > 0) {
-		for (vector<ModelContainer*>::iterator it = scene->getModelContainers().begin(); it != scene->getModelContainers().end(); it++)
-		{
-			vertCount += (*it)->verticesCount();
-			faceCount += (*it)->facesCount();
-		}
-	}
-
-	return "---";
-}

@@ -3,8 +3,6 @@
 
 #include <algorithm>
 #include <vector>
-#include <ostream>
-#include <sstream>
 
 #include "BaseApp.h"
 #include "Scene.h"
@@ -26,9 +24,6 @@ class Game : public BaseApp
 		void handleActiveKeys(const GameTime & gameTime);		
 		void onKeyDown(SDLKey key, Uint16 mod);
 		void onMouseMove(unsigned x, unsigned y, int xrel, int yrel, Uint8 buttons);
-
-		// vraci statistiku - pocet vrcholu, facu,...
-		std::string statsString();
 
 	protected:
 		Scene* scene;
