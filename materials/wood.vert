@@ -1,5 +1,5 @@
 #version 130
-#define MAX_LIGHTS 2
+#define MAX_LIGHTS 4
 
 /////////////////////////////////////////////////
 // Musi zustat stejne
@@ -35,9 +35,9 @@ uniform Material material;
 out vec3 eyeLightPos[MAX_LIGHTS];
 out vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 out vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
-
 out vec2 t;
 
+varying vec3 oPosition;
 
 void main() {
 	vec4 pos = vec4(position, 1.0);
@@ -45,6 +45,7 @@ void main() {
 	mat4 mvp = projection * view * model;
 	gl_Position = mvp * pos;
 	t = texpos;
+	oPosition = position;
 
 	//transformace normaly do eyespace
 	eyeNormal = normalize(mv_inverse_transpose * normal);

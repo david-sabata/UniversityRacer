@@ -1,6 +1,11 @@
 #version 130
 
-#define MAX_LIGHTS 2
+#define MAX_LIGHTS 4
+
+// @LOAD materials/textures/chair2.bmp
+uniform sampler2D tex;
+
+
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
@@ -17,11 +22,11 @@ uniform Material material;
 
 in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
-
 in vec3 eyeLightPos[MAX_LIGHTS];
 
-in vec4 specularF;
+varying vec3 oPosition;
 
+in vec4 specularF;
 in vec4 color;
 in vec2 t;
 
@@ -70,7 +75,7 @@ void main() {
 		vec3 H = normalize(L + V);
 	
 		//spocitame spekularni odlesk
-		float specular = pow(dot(N,H), material.shininess);
+		float specular = pow(dot(N,H), material.shininess + 100);
 	
 		vec4 spec = vec4(0.0,0.0,0.0,1.0);
 		//pricteme spekulární složku k výsledné barvì
@@ -79,8 +84,12 @@ void main() {
 		finalColor +=  diff +  spec;
 	} 
 	
+
+	//Textura dreva
+	vec4 texel = texture(tex, t);
+
 	//gl_FragColor = texture2D(textureNormal,t);
 	//gl_FragColor = ambientF[2];
-	//gl_FragColor = vec4(diffuse,0.0,0.0,1.0);		
-	gl_FragColor = finalColor;
+	//gl_FragColor = vec4(diffuse,0.0,0.0,1.0);	
+	gl_FragColor = finalColor * texel;
 }
