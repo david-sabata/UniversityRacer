@@ -31,6 +31,7 @@ in vec3 oPosition;
 vec3 grad3D[] = {vec3(1,1,0), vec3(-1,1,0), vec3(1,-1,0), vec3(-1,-1,0), 
 				  vec3(1,0,1),vec3(-1,0,1), vec3(1,0,-1), vec3(-1,0,-1), 
 				  vec3(0,1,1), vec3(0,-1,1), vec3(0,1,-1), vec3(0,-1,-1)};
+
 //Nahodne cislo, dle ktereho se pak vybere gradient
 vec4 p[] = {vec4(151,160,137,91),	vec4(90,15,131,13),		vec4(201,95,96,53),
 			vec4(194,233,7,225),	vec4(140,36,103,30),	vec4(69,142,8,99),
