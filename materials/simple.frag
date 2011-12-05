@@ -49,7 +49,7 @@ void main() {
 		//slabnuti svetla
 		float attenuation, distance;
 		distance = length(lightDir / radius);	 
-		//pro Range 100 - zdroj : http://www.ogre3d.org/tikiwiki/-Point+Light+Attenuation
+
 		float constantAtt = 1.0;
 		float linearAtt = LINEAR_ATTENUATION;
 		float quadraticAtt = QUADR_ATTENUATION;
