@@ -1,5 +1,5 @@
 #version 130
-#define MAX_LIGHTS 2
+#define MAX_LIGHTS 4
 
 /////////////////////////////////////////////////
 // Musi zustat stejne
