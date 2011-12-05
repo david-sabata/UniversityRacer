@@ -1,5 +1,10 @@
 #include "ModelContainer.h"
 #include <stdexcept>
+
+#ifdef _DEBUG
+	#define new MYDEBUG_NEW
+#endif
+
 using namespace std;
 
 

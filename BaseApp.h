@@ -13,6 +13,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #endif
 
+#include "Debug.h"
 #include "Exceptions.h"
 #include "Utils.h"
 #include "ModelContainer.h"
@@ -26,6 +27,7 @@ class BaseApp {
 	
 	public:
 		BaseApp();
+		virtual ~BaseApp();
 
 		Camera* const getCamera();		
 

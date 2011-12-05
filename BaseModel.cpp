@@ -1,7 +1,10 @@
-
 #include "BaseModel.h"
 #include <iostream>
 #include <string>
+
+#ifdef _DEBUG
+	#define new MYDEBUG_NEW
+#endif
 
 using namespace std;
 

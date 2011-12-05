@@ -9,6 +9,7 @@
 # include <GL/glew.h>
 #endif
 
+#include "Debug.h"
 #include "ModelContainer.h"
 #include "ShaderManager.h"
 #include "Camera.h"

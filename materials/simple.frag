@@ -17,9 +17,11 @@ uniform Material material;
 
 in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
+
 in vec3 eyeLightPos[MAX_LIGHTS];
 
 in vec4 specularF;
+
 in vec4 color;
 in vec2 t;
 
@@ -77,7 +79,6 @@ void main() {
 		finalColor +=  diff +  spec;
 	} 
 	
-
 	//gl_FragColor = texture2D(textureNormal,t);
 	//gl_FragColor = ambientF[2];
 	//gl_FragColor = vec4(diffuse,0.0,0.0,1.0);		

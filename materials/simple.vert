@@ -35,6 +35,7 @@ uniform Material material;
 out vec3 eyeLightPos[MAX_LIGHTS];
 out vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 out vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
+
 out vec2 t;
 
 

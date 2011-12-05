@@ -1,8 +1,11 @@
 
 #include "main.h"
 
-using namespace std;
+#ifdef _DEBUG
+	#define new MYDEBUG_NEW
+#endif
 
+using namespace std;
 
 // Pointer to active application instance, which will recieve and handle SDL events
 BaseApp* application = NULL;
@@ -15,17 +18,21 @@ SDL_Surface * init(unsigned width, unsigned height, unsigned color, unsigned dep
     if(SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, stencil) < 0) throw SDL_Exception();
     if(SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1) < 0) throw SDL_Exception();
 
+	// Zapnout antialiasing
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
+
     // Create window
     SDL_Surface * screen = SDL_SetVideoMode(width, height, color, SDL_OPENGL | SDL_RESIZABLE);
     if(screen == NULL) throw SDL_Exception();
-
+	
 	SDL_WM_SetCaption("University Racer", "University Racer");
 
 #ifndef USE_GLEE
 	// Inicializace glew	
 	GLenum err = glewInit();
 	if (GLEW_OK != err) {
-		/* Problem: glewInit failed, something is seriously wrong. */
+		// Problem: glewInit failed, something is seriously wrong.
 		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 	}
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
@@ -37,7 +44,7 @@ SDL_Surface * init(unsigned width, unsigned height, unsigned color, unsigned dep
     application->onInit();
     application->onWindowResized(width, height);
 
-    return screen;
+    return screen;	
 }
 
 
@@ -120,16 +127,12 @@ void mainLoop()
 
 
 
-
 int main(int /*argc*/, char ** /*argv*/) 
 {
 	try {
         // Init SDL - only video subsystem will be used
         if(SDL_Init(SDL_INIT_VIDEO) < 0) throw SDL_Exception();
-
-        // Shutdown SDL when program ends
-        atexit(SDL_Quit);
-
+        
 		// initialize application
         init(800, 600, 24, 24, 8);
 
@@ -145,13 +148,16 @@ int main(int /*argc*/, char ** /*argv*/)
 		return EXIT_FAILURE;
     }
 
-	//system("pause");
+	SDL_Quit();
+
+#ifdef _MSC_VER
+	_CrtDumpMemoryLeaks();
+#endif
+
     return EXIT_SUCCESS;
 }
 
-/**
- * Pomocna funkce pro GLEE/GLEW kompatibilitu
- */
+
 const char * getGlErrorString(GLenum error)
 {
 #define ERROR(e) case e : return #e

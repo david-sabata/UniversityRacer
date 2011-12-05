@@ -1,6 +1,10 @@
 #include "Game.h"
 #include "Light.h"
 
+#ifdef _DEBUG
+	#define new MYDEBUG_NEW
+#endif
+
 using namespace std;
 
 
@@ -55,6 +59,7 @@ void Game::onInit()
 	BaseModel* chairs = container->load3DS("models/chairs.3ds");
 	BaseModel* e112 = container->load3DS("models/e112.3ds");
 	BaseModel* middesk = container->load3DS("models/desk-mid.3ds");
+	BaseModel* sidedesk = container->load3DS("models/desk-side.3ds");
 		
 	cout << "- setting up drawing queue" << endl;
 		
@@ -95,7 +100,7 @@ void Game::onInit()
 		}
 	}
 
-	// vykreslit lavice
+	// vykresli prostredni lavice
 	{
 		container->addModel("middesk", middesk);
 
@@ -115,6 +120,32 @@ void Game::onInit()
 		}
 	}
 
+	// vykresli postranni lavice
+	{
+		container->addModel("sidedesk", sidedesk);
+
+		glm::mat4 scale = glm::scale(glm::vec3(0.2));
+		glm::mat4 rows[] = {
+			glm::translate(scale, glm::vec3(-785,  20, -15)),
+			glm::translate(scale, glm::vec3(-785,  40, -115)),
+			glm::translate(scale, glm::vec3(-785,  60, -215)),
+			glm::translate(scale, glm::vec3(-785,  80, -315)),
+			glm::translate(scale, glm::vec3(-785, 100, -415))
+		};
+
+		glm::vec3 otherside(1250, 0, 0);
+
+		for (unsigned int rowI = 0; rowI < 5; rowI++)
+		{
+			// leva strana (z pohledu z katedry)
+			glm::mat4 col = glm::translate(rows[rowI], glm::vec3(0, 0, 0));			
+			container->queueDraw(sidedesk, col);
+
+			// prava strana
+			glm::mat4 mat = glm::translate(col, otherside);
+			container->queueDraw(sidedesk, mat);
+		}
+	}
 
 	// pro kazde svetlo v kontejneru pridat kouli, ktera ho znazornuje
 	if (0) {
