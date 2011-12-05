@@ -176,9 +176,9 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 	handleActiveKeys(gameTime);
 
     physics->StepSimulation(gameTime.Elapsed() * 0.001f);
-
+    
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    
     glEnable(GL_DEPTH_TEST);    
 	glEnable(GL_CULL_FACE);
 
@@ -197,7 +197,7 @@ void Game::onWindowRedraw(const GameTime & gameTime)
     for (int i = 0; i < physics->GetCar()->GetVehicle()->getNumWheels(); i++)
     {
         btScalar m[16];
-        physics->GetCar()->GetVehicle()->updateWheelTransform(i, true); //synchronize the wheels with the (interpolated) chassis worldtransform        
+        //physics->GetCar()->GetVehicle()->updateWheelTransform(i, true); //synchronize the wheels with the (interpolated) chassis worldtransform        
         physics->GetCar()->GetVehicle()->getWheelInfo(i).m_worldTransform.getOpenGLMatrix(m); //draw wheels (cylinders)
         
      // container->updateDrawingMatrix(wheelQueueItem[i], mat4_from_arr(m));
