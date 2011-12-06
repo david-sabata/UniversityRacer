@@ -73,7 +73,7 @@ void main() {
 		float specular = pow(dot(N,H), material.shininess);
 	
 		vec4 spec = vec4(0.0,0.0,0.0,1.0);
-		//pricteme spekulární složku k výsledné barvì
+		//pricteme spekulární složku k výsledné barvi
 		if(specular >= 0.0)
 			spec = attenuation *  specular * material.specular;
 		finalColor +=  diff +  spec;

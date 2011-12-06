@@ -30,10 +30,10 @@ class Camera {
 		void Move(float x, float y, float z);		
 		void Aim(float vertical_angle, float horizontal_angle);
 		
-		glm::mat4 GetMatrix();		
+		glm::mat4 GetMatrix();	
 
-		void DebugDump();
-		
+		void DebugDump();       
+
 		void Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameTime & gameTime);
         void ResetFollow() { currentSettleTime = 0.0f; }
 
