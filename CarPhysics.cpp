@@ -1,4 +1,7 @@
+
 #include "CarPhysics.h"
+#include <cmath>
+
 
 
 CarPhysics::CarPhysics(void): m_engineForce(0.f), m_breakingForce(0.f), m_vehicleSteering(0.f), turned(false),
@@ -10,26 +13,9 @@ CarPhysics::~CarPhysics(void)
 {
 }
 
-btCollisionShape* CarPhysics::CreateVehicleUpperShape()
-{
-    static btScalar vertices[] = {                     
-        -0.85f,  0.264f, -1.827f,  // back bottom
-        -0.85f,  0.154f,  1.118f,  // front bottom
-        -0.57f,  0.596f,  0.178f,  // front top
-        -0.57f,  0.577f, -1.038f,  // back top
-
-         0.85f,  0.264f, -1.827f,  // back bottom
-         0.85f,  0.154f,  1.118f,  // front bottom
-         0.57f,  0.596f,  0.178f,  // front top
-         0.57f,  0.577f, -1.038f,  // back top        
-    };
-
-    return new btConvexHullShape(vertices, 8, 3*sizeof(btScalar));
-}
-
 btCollisionShape* CarPhysics::CreateVehicleShape()
 {
-    static btScalar vertices[] = {                     
+    static btScalar baseVertices[] = {                     
         -0.45f, -0.204f, -2.276f,   // back center
         -0.45f, -0.472f, -2.238f,   // back lower
         -0.85f, -0.597f, -1.789f,   // back bottom
@@ -55,58 +41,54 @@ btCollisionShape* CarPhysics::CreateVehicleShape()
          0.45f,  0.207f, -2.174f,   // back upper    
     };
 
-    return new btConvexHullShape(vertices, 22, 3*sizeof(btScalar)); 
+    static btScalar topVertices[] = {                     
+        -0.85f,  0.264f, -1.827f,  // back bottom
+        -0.85f,  0.154f,  1.118f,  // front bottom
+        -0.57f,  0.596f,  0.178f,  // front top
+        -0.57f,  0.577f, -1.038f,  // back top
+
+         0.85f,  0.264f, -1.827f,  // back bottom
+         0.85f,  0.154f,  1.118f,  // front bottom
+         0.57f,  0.596f,  0.178f,  // front top
+         0.57f,  0.577f, -1.038f,  // back top        
+    };
+
+    btConvexHullShape *baseHull = new btConvexHullShape(baseVertices, 22, 3 * sizeof(btScalar)); 
+    btConvexHullShape *topHull  = new btConvexHullShape( topVertices,  8, 3 * sizeof(btScalar)); 
+
+    btCompoundShape* compound = new btCompoundShape();
+    //m_collisionShapes.push_back(compound);
+
+    // localTrans effectively shifts the center of mass with respect to the chassis
+    btTransform localTrans = PhysicsUtils::btTransFrom(btVector3(0, m_cfg.bodyConnectionToChasisHeight, 0));
+    
+    compound->addChildShape(localTrans, baseHull);
+    compound->addChildShape(localTrans, topHull);
+
+    return compound;
 }
 
 void CarPhysics::Initialize(btDiscreteDynamicsWorld *refWorld)
 {
     m_refDynamicsWorld = refWorld;
 
-    btCollisionShape* chassisShape = CreateVehicleShape();//new btBoxShape(btVector3(1.f, 0.5f, 2.f));
-    m_collisionShapes.push_back(chassisShape);
-
-    btCompoundShape* compound = new btCompoundShape();
-    m_collisionShapes.push_back(compound);
     
-    
-    btTransform localTrans;
-    localTrans.setIdentity();
-    localTrans.setOrigin(btVector3(0, m_cfg.bodyConnectionToChasisHeight, 0));  // localTrans effectively shifts the center of mass with respect to the chassis
+    btTransform tr = PhysicsUtils::btTransFrom(btVector3(0, 2, 5));
 
     
-    btCollisionShape* upperShape = CreateVehicleUpperShape();
-    compound->addChildShape(localTrans, chassisShape);
-    compound->addChildShape(localTrans, upperShape);
-
-    
-    
-    btTransform tr;
-    tr.setIdentity();
- // tr.setRotation(btQuaternion(btVector3(0.f, 1.f, 0.f), 3.14f));
-    tr.setOrigin(btVector3(0,2, 5));  
-
-    
-    btVector3 localInertia(0, 0, 0);
-    compound->calculateLocalInertia(m_cfg.mass, localInertia);
-    btDefaultMotionState* myMotionState = new btDefaultMotionState(tr);
-    btRigidBody::btRigidBodyConstructionInfo cInfo(m_cfg.mass, myMotionState, compound,localInertia);
-    m_carChassis = new btRigidBody(cInfo);
+    m_carChassis = PhysicsUtils::CreateRigidBody(m_cfg.mass, tr, CreateVehicleShape());
     m_refDynamicsWorld->addRigidBody(m_carChassis);
-    //m_carChassis->setDamping(0.2f,0.2f);
-    
+    m_carChassis->setDamping(m_cfg.linearDamping, m_cfg.angularDamping);    
 
-    /// create vehicle            
-    
+    /// create vehicle
     m_vehicleRayCaster = new btDefaultVehicleRaycaster(m_refDynamicsWorld);
     
     btRaycastVehicle::btVehicleTuning  m_tuning;
-    //m_tuning.
     m_vehicle = new btRaycastVehicle(m_tuning, m_carChassis, m_vehicleRayCaster);
     m_refDynamicsWorld->addVehicle(m_vehicle);        
     
     m_carChassis->setActivationState(DISABLE_DEACTIVATION);  ///never deactivate the vehicle
     m_vehicle->setCoordinateSystem(0, 1, 2);  //choose coordinate system
-
             
     // add wheels
     btVector3 connectionPointCS0;
@@ -248,4 +230,10 @@ void CarPhysics::HandBrake()
 {   
     m_breakingForce = m_cfg.maxBreakingForce; 
     m_engineForce = 0.f;    
+}
+
+btTransform CarPhysics::GetWorldTransform()
+{        
+    btCompoundShape* compoundShape = static_cast<btCompoundShape*>(m_vehicle->getRigidBody()->getCollisionShape());
+    return m_vehicle->getRigidBody()->getWorldTransform() * compoundShape->getChildTransform(0);
 }

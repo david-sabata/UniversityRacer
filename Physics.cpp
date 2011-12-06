@@ -17,27 +17,29 @@ void Physics::Initialize()
 {
     ///collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
     m_collisionConfiguration = new btDefaultCollisionConfiguration();
+    
     ///use the default collision dispatcher. For parallel processing you can use a diffent dispatcher (see Extras/BulletMultiThreaded)
     m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
+    
     ///btDbvtBroadphase is a good general purpose broadphase. You can also try out btAxis3Sweep.
     m_overlappingPairCache = new btAxisSweep3(btVector3(-1000,-1000,-1000), btVector3(1000,1000,1000));//new btDbvtBroadphase();
+    
     ///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
     m_constraintSolver = new btSequentialImpulseConstraintSolver;
     
     m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher, m_overlappingPairCache, m_constraintSolver, m_collisionConfiguration);
     m_ghostPairCallback = new btGhostPairCallback();
     m_dynamicsWorld->getPairCache()->setInternalGhostPairCallback(m_ghostPairCallback);
-   // m_dynamicsWorld->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback()); 
+   // m_dynamicsWorld->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(m_ghostPairCallback); 
     m_dynamicsWorld->setGravity(btVector3(0, -9.81f, 0));
 
     m_debugDraw = new PhysicsDebugDraw;    
     m_dynamicsWorld->setDebugDrawer(m_debugDraw);
-    // dynamicsWorld->getDebugDrawer()->setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-
+    
     m_car = new CarPhysics();
     m_car->Initialize(m_dynamicsWorld);
 
-
+    // checkpoint test
     btCollisionShape* checkpointShape = new btBoxShape(btVector3(2.f, 2.f, 0.1f));
     this->AddCollisionShape(checkpointShape);
     
@@ -45,30 +47,7 @@ void Physics::Initialize()
     m_ghostObject->setCollisionShape(checkpointShape);
     m_ghostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
     m_dynamicsWorld->addCollisionObject(m_ghostObject);//, btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::AllFilter & ~btBroadphaseProxy::SensorTrigger);
-    
-    btTransform transform;
-    transform.setIdentity();
-    transform.setOrigin(btVector3(0, -3, -5));  //-10
-    m_ghostObject->setWorldTransform(transform);
-}
-
-void Physics::DebugDrawWorld()
-{
-    m_dynamicsWorld->debugDrawWorld();
-    
- /*   btCompoundShape* compoundShape = static_cast<btCompoundShape*>(m_car->GetVehicle()->getRigidBody()->getCollisionShape());
-    
-    for (int i = 0; i < compoundShape->getNumChildShapes(); i++)
-    {
-        btTransform childTrans = compoundShape->getChildTransform(i);
-        btCollisionShape* colShape = compoundShape->getChildShape(i);
-                 
-        btTransform trans = m_car->GetVehicle()->getRigidBody()->getWorldTransform() * childTrans;
-        btScalar m[16];
-        trans.getOpenGLMatrix(m);
-    
-        m_debugDraw->DrawConvexShape(m, colShape);
-    }*/
+    m_ghostObject->setWorldTransform(PhysicsUtils::btTransFrom(btVector3(0, -3, -5)));
 }
 
 void Physics::Deinitialize()  //cleanup in the reverse order of creation/initialization
@@ -131,26 +110,15 @@ void Physics::StepSimulation(btScalar timeStep)
 
 btRigidBody * Physics::AddRigidBody(float mass, const btTransform & startTransform, btCollisionShape * shape)
 {
-    btVector3 localInertia(0, 0, 0);
-    if (mass != 0.f)  //rigidbody is dynamic if and only if mass is non zero, otherwise static
-        shape->calculateLocalInertia(mass, localInertia);
-
-    //using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-    btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-
-    btRigidBody::btRigidBodyConstructionInfo cInfo(mass, myMotionState, shape, localInertia);
-
-    btRigidBody* body = new btRigidBody(cInfo);
-    //body->setContactProcessingThreshold(BT_LARGE_FLOAT);
-
+    btRigidBody* body = PhysicsUtils::CreateRigidBody(mass, startTransform, shape);
+    
     m_dynamicsWorld->addRigidBody(body);
 
     return body;
 }
 
-void Physics::AddStaticModel(BaseModel * model, float scale, bool debugDraw)
-{
-        
+void Physics::AddStaticModel(BaseModel * model, const btTransform & trans, float scale, bool debugDraw)
+{        
     for (unsigned int i = 0; i < model->getMeshes().size(); i++)
     {
         Mesh *m = model->getMeshes()[i];
@@ -167,12 +135,8 @@ void Physics::AddStaticModel(BaseModel * model, float scale, bool debugDraw)
         
         shape->setLocalScaling(btVector3(scale, scale, scale));
         
-        btTransform tr;
-        tr.setIdentity();
-        tr.setOrigin(btVector3(0, 0, 0));
-        
-        btRigidBody *tmp = AddRigidBody(0, tr, shape); //->getCollisionFlags;
+        btRigidBody *body = AddRigidBody(0, trans, shape); //->getCollisionFlags;
         if (!debugDraw)
-            tmp->setCollisionFlags(tmp->getCollisionFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
+            body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
     }
 }

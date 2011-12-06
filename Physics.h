@@ -1,9 +1,11 @@
-
-#pragma once
+#ifndef PHYSICS_H
+#define PHYSICS_H
 
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <glm/gtc/type_ptr.hpp>
 
+#include "PhysicsUtils.h"
 #include "CarPhysics.h"
 #include "PhysicsDebugDraw.h"
 
@@ -22,15 +24,17 @@ public:
     void StepSimulation(btScalar timeStep);
     btRigidBody * AddRigidBody(float mass, const btTransform & startTransform, btCollisionShape * shape);
 
-    void DebugDrawWorld();
+    void DebugDrawWorld() { m_dynamicsWorld->debugDrawWorld(); } 
     void AddCollisionShape(btCollisionShape * shape) { m_collisionShapes.push_back(shape); }
+
+
+    void AddStaticModel(BaseModel * model, const btTransform & trans, float scale = 1.f, bool debugDraw = true);
+    
     CarPhysics * GetCar() { return m_car; }
-    btDiscreteDynamicsWorld * GetDynamicsWorld() { return m_dynamicsWorld; }
-
-    btCollisionShape* CreateTriMeshGround();
-
-    void AddStaticModel(BaseModel *model, float scale, bool debugDraw = true);
+    btDiscreteDynamicsWorld * GetDynamicsWorld() { return m_dynamicsWorld; }    
     PhysicsDebugDraw *GetDebugDrawer() { return m_debugDraw; }
+
+
 
 private:
 
@@ -51,3 +55,4 @@ private:
     CarPhysics *m_car;
 };
 
+#endif

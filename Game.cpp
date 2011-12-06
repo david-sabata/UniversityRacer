@@ -186,11 +186,8 @@ void Game::onInit()
     cout << "- initializing physics" << endl;
 
     physics = new Physics();
-    btTransform transform;
-    transform.setIdentity();
-    transform.setOrigin(btVector3(0, 3, 1));
-    // physics->AddRigidBody(5., transform, new btBoxShape(btVector3(0.75,0.75,0.75)))->setAngularVelocity(btVector3(1,1,1)); // TODO konstruktor se neprelozi kvuli Debug.h
-    physics->AddStaticModel(e112, 0.2f, false);
+    //physics->AddRigidBody(5., PhysicsUtils::btTransFrom(btVector3(0, 3, 1)), new btBoxShape(btVector3(0.75,0.75,0.75)))->setAngularVelocity(btVector3(1,1,1)); // TODO konstruktor se neprelozi kvuli Debug.h
+    physics->AddStaticModel(e112, PhysicsUtils::btTransFrom(btVector3(0, 0, 0)), 0.2f, false);
 }
  
 
@@ -211,29 +208,24 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
     glDepthFunc(GL_LESS);
 
-    container->updateDrawingMatrix(carQueueItem, physics->GetCar()->GetWorldTransform());
-    //drawingQueue->at(carQueueItem).matrix = physics->GetCar()->GetWorldTransform(); 
+    glm::mat4 carMatrix = PhysicsUtils::glmMat4From(physics->GetCar()->GetWorldTransform());
+    container->updateDrawingMatrix(carQueueItem, carMatrix);
 
     if (followCamera)
     {
         btVector3 vel = physics->GetCar()->GetVehicle()->getRigidBody()->getLinearVelocity();        
-        camera.Follow(physics->GetCar()->GetWorldTransform(), glm::vec3(vel.x(), vel.y(), vel.z()), gameTime);
-        //camera.Follow(drawingQueue->at(carQueueItem).matrix, glm::vec3(vel.x(), vel.y(), vel.z()), gameTime);
+        camera.Follow(carMatrix, glm::vec3(vel.x(), vel.y(), vel.z()), gameTime);
     }    
  
     for (int i = 0; i < physics->GetCar()->GetVehicle()->getNumWheels(); i++)
     {
-        btScalar m[16];
         //physics->GetCar()->GetVehicle()->updateWheelTransform(i, true); //synchronize the wheels with the (interpolated) chassis worldtransform        
-        physics->GetCar()->GetVehicle()->getWheelInfo(i).m_worldTransform.getOpenGLMatrix(m); //draw wheels (cylinders)
+        glm::mat4 wheelMatrix = PhysicsUtils::glmMat4From(physics->GetCar()->GetVehicle()->getWheelInfo(i).m_worldTransform);
         
-     // container->updateDrawingMatrix(wheelQueueItem[i], mat4_from_arr(m));
-     // drawingQueue->at(wheelQueueItem[i]).matrix = glm::rotate(drawingQueue->at(wheelQueueItem[i]).matrix, 180.f, 0.f, 1.f, 0.f);
-
         if (i == 1 || i == 3)
-            container->updateDrawingMatrix(wheelQueueItem[i], glm::rotate(mat4_from_arr(m), 180.f, 0.f, 1.f, 0.f));
-        else
-            container->updateDrawingMatrix(wheelQueueItem[i], mat4_from_arr(m));
+            wheelMatrix = glm::rotate(wheelMatrix, 180.f, 0.f, 1.f, 0.f);
+
+        container->updateDrawingMatrix(wheelQueueItem[i], wheelMatrix);
     }
 	
 	// vykreslit scenu

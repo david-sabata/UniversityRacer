@@ -1,19 +1,11 @@
-
-#pragma once
-
-#ifdef _WIN32
-    #define NOMINMAX    
-    #include <windows.h>
-#endif
+#ifndef PHYSICSDEBUGDRAW_H
+#define PHYSICSDEBUGDRAW_H
 
 #include <iostream>
 #include <vector>
-#include "Utils.h"
+#include <glm/gtc/type_ptr.hpp>
 
 #include <btBulletDynamicsCommon.h>
-#include <btBulletCollisionCommon.h>
-#include <BulletCollision/CollisionShapes/btShapeHull.h>
-#include <BulletCollision/CollisionShapes/btConvexPolyhedron.h>
 
 class PhysicsDebugDraw : public btIDebugDraw
 {
@@ -51,3 +43,4 @@ private:
     int m_debugMode;
 };
 
+#endif
