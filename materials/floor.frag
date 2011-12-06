@@ -7,9 +7,6 @@
 // @LOAD materials/textures/floor.bmp
 uniform sampler2D tex;
 
-// @LOAD materials/textures/floor_bump.bmp
-uniform sampler2D texNormal;
-
 uniform mat3 mv_inverse_transpose;
 uniform mat4 view;
 

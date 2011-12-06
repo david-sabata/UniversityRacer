@@ -16,11 +16,13 @@ using namespace std;
 
 Game::Game(): mouseCaptured(false), /*drawingQueue(NULL),*/ drawWireframe(false), followCamera(false)
 {
-
+	gui = new Gui(windowWidth, windowHeight);
+	scene = new Scene(*this);
 }
 
 Game::~Game()
 {
+	delete gui;
 	delete scene;
 }
 
@@ -186,13 +188,9 @@ void Game::onInit()
         }
 	}
 
-    // zapamatovat si frontu
-	//drawingQueue = &container->getDrawingQueue();
-
 	cout << "- constructing scene" << endl;
 
 	// vyrobit scenu
-	scene = new Scene(*this);
 	scene->addModelContainer(container);
 	scene->init();
 	
@@ -201,6 +199,9 @@ void Game::onInit()
 	// nacist vsechny materialy	
 	ShaderManager::loadPrograms();
 
+	// testovaci gui text	
+	Gui::POSITION pos = {Gui::TOP, Gui::LEFT};
+	guiTime = gui->addString(".", pos);
 
 	ShaderManager::loadProgram("line");
 }
@@ -220,6 +221,7 @@ void Game::onWindowRedraw(const GameTime & gameTime)
     
     glEnable(GL_DEPTH_TEST);    
 	glEnable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
 
     glDepthFunc(GL_LESS);
 
@@ -246,21 +248,28 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 	// vykreslit scenu
 	scene->draw();
 
-    // vykreslit fyziku
-    physics->DebugDrawWorld();
-
-    /*for (int i = 0; i < 100000; i++)
+    if (drawWireframe)
     {
-        physics->GetDebugDrawer()->drawLine(btVector3(0,0,0), btVector3(5,5,5), btVector3(1,0,0));
-        physics->GetDebugDrawer()->drawLine(btVector3(6,6,6), btVector3(11,11,11), btVector3(0,1,0));
-    }*/
+        // vykreslit fyziku
+        physics->DebugDrawWorld();
 
-    drawLines(physics->GetDebugDrawer()->GetLines());
+        /*for (int i = 0; i < 100000; i++)
+        {
+            physics->GetDebugDrawer()->drawLine(btVector3(0,0,0), btVector3(5,5,5), btVector3(1,0,0));
+            physics->GetDebugDrawer()->drawLine(btVector3(6,6,6), btVector3(11,11,11), btVector3(0,1,0));
+        }*/
+
+        drawLines(physics->GetDebugDrawer()->GetLines());
+    }
     
     // ---------------------------------------
 	// Vykresleni ingame gui
+	
+	ostringstream time;
+	time << gameTime.Total();
 
-
+	gui->updateString(guiTime, time.str());
+	gui->draw();
 
 
 	// ---------------------------------------
@@ -419,6 +428,14 @@ void Game::onMouseMove(unsigned x, unsigned y, int xrel, int yrel, Uint8 buttons
 		}
 	}
 }
+
+
+void Game::onWindowResized(int w, int h)
+{
+	BaseApp::onWindowResized(w, h);
+	gui->updateScreenDimensions(w, h);
+}
+
 
 string Game::statsString()
 {
