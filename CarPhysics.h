@@ -10,14 +10,20 @@
 
 class CarPhysics
 {
-public:    
+public: 
+    enum WHEELID {  // z pohledu ridice
+        WHEEL_FRONTLEFT = 0,
+        WHEEL_FRONTRIGHT,
+        WHEEL_REARLEFT,
+        WHEEL_REARRIGHT
+    };
 
     CarPhysics(void);
     ~CarPhysics(void);
 
     btCollisionShape* CreateVehicleShape();
 
-    void Initialize(btDiscreteDynamicsWorld *refWorld);
+    void Initialize(btDiscreteDynamicsWorld *refWorld, const btTransform & trans);
     void Deinitialize();
 
     void SetLastCheckpointPos(btVector3 & pos) { m_lastCheckpointPos = pos; }

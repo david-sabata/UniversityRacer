@@ -49,7 +49,13 @@ void Game::onInit()
   	BaseModel* sidedesk = container->load3DS("models/desk-side.3ds");
     BaseModel* car =  container->load3DS("models/car.3ds");
     BaseModel* wheel =  container->load3DS("models/wheel.3ds");
-		
+
+    cout << "- initializing physics" << endl;
+
+    physics = new Physics();
+    physics->AddCar(PhysicsUtils::btTransFrom(btVector3(81, 28, -102))); // 0,2,5    
+    //physics->AddRigidBody(5., PhysicsUtils::btTransFrom(btVector3(0, 3, 1)), new btBoxShape(btVector3(0.75,0.75,0.75)))->setAngularVelocity(btVector3(1,1,1)); // TODO konstruktor se neprelozi kvuli Debug.h    
+    		
 	cout << "- setting up drawing queue" << endl;
 		
 	// vykresli E112 zmensenou na 20%
@@ -57,12 +63,14 @@ void Game::onInit()
 		container->addModel("e112", e112);
 		glm::mat4 modelmat = glm::scale(glm::vec3(0.2));
 		e112QueueItem = container->queueDraw(e112, modelmat);
+
+        physics->AddStaticModel(Physics::CreateStaticCollisionShapes(e112, 0.2f), PhysicsUtils::btTransFrom(btVector3(0, 0, 0)), false);
 	}
 
-	// vykresli zidle
+    // vykresli zidle
 	{
 		container->addModel("chairs", chairs);
-
+                
 		glm::mat4 scale = glm::scale(glm::vec3(0.2));
 		glm::mat4 rows[] = {
 			glm::translate(scale, glm::vec3(-740, 19, -70)),
@@ -71,6 +79,8 @@ void Game::onInit()
 			glm::translate(scale, glm::vec3(-740, 79, -370)),
 			glm::translate(scale, glm::vec3(-740, 99, -470))
 		};
+
+        std::vector<btCollisionShape*> chairShapes = Physics::CreateStaticCollisionShapes(chairs, 0.2f);
 		
 		for (unsigned int rowI = 0; rowI < 5; rowI++)
 		{
@@ -83,8 +93,9 @@ void Game::onInit()
 
 				glm::mat4 col = glm::translate(rows[rowI], glm::vec3(offsetX, 0, 0));
 				container->queueDraw(chairs, col); // jen testovaci; ulozi se index na posledni pridanou zidli
-			
-				offsetX += 105;
+                offsetX += 105;
+
+                physics->AddStaticModel(chairShapes, PhysicsUtils::btTransFrom(glm::scale(col, glm::vec3(1/0.2f))), false);
 			}		
 		}
 	}
@@ -102,10 +113,14 @@ void Game::onInit()
 			glm::translate(scale, glm::vec3(-365, 93, -443))
 		};
 
+        std::vector<btCollisionShape*> middeskShapes = Physics::CreateStaticCollisionShapes(middesk, 0.2f);
+
 		for (unsigned int rowI = 0; rowI < 5; rowI++)
 		{
 			glm::mat4 col = glm::translate(rows[rowI], glm::vec3(0, 0, 0));
 			container->queueDraw(middesk, col);
+
+            physics->AddStaticModel(middeskShapes, PhysicsUtils::btTransFrom(glm::scale(col, glm::vec3(1/0.2f))), false);
 		}
 	}
 
@@ -122,6 +137,8 @@ void Game::onInit()
 			glm::translate(scale, glm::vec3(-785, 100, -415))
 		};
 
+        std::vector<btCollisionShape*> sidedeskShapes = Physics::CreateStaticCollisionShapes(sidedesk, 0.2f);
+
 		glm::vec3 otherside(1250, 0, 0);
 
 		for (unsigned int rowI = 0; rowI < 5; rowI++)
@@ -130,9 +147,13 @@ void Game::onInit()
 			glm::mat4 col = glm::translate(rows[rowI], glm::vec3(0, 0, 0));			
 			container->queueDraw(sidedesk, col);
 
+            physics->AddStaticModel(sidedeskShapes, PhysicsUtils::btTransFrom(glm::scale(col, glm::vec3(1/0.2f))), false);
+
 			// prava strana
 			glm::mat4 mat = glm::translate(col, otherside);
 			container->queueDraw(sidedesk, mat);
+
+            physics->AddStaticModel(sidedeskShapes, PhysicsUtils::btTransFrom(glm::scale(mat, glm::vec3(1/0.2f))), false);
 		}
 	}
 
@@ -182,12 +203,6 @@ void Game::onInit()
 
 
 	ShaderManager::loadProgram("line");
-
-    cout << "- initializing physics" << endl;
-
-    physics = new Physics();
-    //physics->AddRigidBody(5., PhysicsUtils::btTransFrom(btVector3(0, 3, 1)), new btBoxShape(btVector3(0.75,0.75,0.75)))->setAngularVelocity(btVector3(1,1,1)); // TODO konstruktor se neprelozi kvuli Debug.h
-    physics->AddStaticModel(e112, PhysicsUtils::btTransFrom(btVector3(0, 0, 0)), 0.2f, false);
 }
  
 
@@ -222,7 +237,7 @@ void Game::onWindowRedraw(const GameTime & gameTime)
         //physics->GetCar()->GetVehicle()->updateWheelTransform(i, true); //synchronize the wheels with the (interpolated) chassis worldtransform        
         glm::mat4 wheelMatrix = PhysicsUtils::glmMat4From(physics->GetCar()->GetVehicle()->getWheelInfo(i).m_worldTransform);
         
-        if (i == 1 || i == 3)
+        if (i == CarPhysics::WHEEL_FRONTRIGHT || i == CarPhysics::WHEEL_REARRIGHT)
             wheelMatrix = glm::rotate(wheelMatrix, 180.f, 0.f, 1.f, 0.f);
 
         container->updateDrawingMatrix(wheelQueueItem[i], wheelMatrix);

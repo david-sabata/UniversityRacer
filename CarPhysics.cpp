@@ -68,15 +68,11 @@ btCollisionShape* CarPhysics::CreateVehicleShape()
     return compound;
 }
 
-void CarPhysics::Initialize(btDiscreteDynamicsWorld *refWorld)
+void CarPhysics::Initialize(btDiscreteDynamicsWorld *refWorld, const btTransform & trans)
 {
     m_refDynamicsWorld = refWorld;
-
     
-    btTransform tr = PhysicsUtils::btTransFrom(btVector3(0, 2, 5));
-
-    
-    m_carChassis = PhysicsUtils::CreateRigidBody(m_cfg.mass, tr, CreateVehicleShape());
+    m_carChassis = PhysicsUtils::CreateRigidBody(m_cfg.mass, trans, CreateVehicleShape());
     m_refDynamicsWorld->addRigidBody(m_carChassis);
     m_carChassis->setDamping(m_cfg.linearDamping, m_cfg.angularDamping);    
 
@@ -168,14 +164,14 @@ void CarPhysics::Update(btScalar timeStep)
     }        
     
     
-    m_vehicle->applyEngineForce(m_engineForce, 2);
-    m_vehicle->setBrake(m_breakingForce, 2);
-    m_vehicle->applyEngineForce(m_engineForce, 3);
-    m_vehicle->setBrake(m_breakingForce, 3);
+    m_vehicle->applyEngineForce(m_engineForce, WHEEL_REARLEFT);
+    m_vehicle->setBrake(m_breakingForce, WHEEL_REARLEFT);
+    m_vehicle->applyEngineForce(m_engineForce, WHEEL_REARRIGHT);
+    m_vehicle->setBrake(m_breakingForce, WHEEL_REARLEFT);
 
     
-    m_vehicle->setSteeringValue(m_vehicleSteering, 0);
-    m_vehicle->setSteeringValue(m_vehicleSteering, 1);
+    m_vehicle->setSteeringValue(m_vehicleSteering, WHEEL_FRONTLEFT);
+    m_vehicle->setSteeringValue(m_vehicleSteering, WHEEL_FRONTRIGHT);
 
     m_engineForce = 0.f;
     m_breakingForce = 0.f;

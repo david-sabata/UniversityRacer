@@ -3,7 +3,7 @@
 #include "Physics.h"
 
 
-Physics::Physics(void):m_checkpointOffset(0)
+Physics::Physics(void): m_car(NULL), m_checkpointOffset(0)
 {
     Initialize();
 }
@@ -36,9 +36,6 @@ void Physics::Initialize()
     m_debugDraw = new PhysicsDebugDraw;    
     m_dynamicsWorld->setDebugDrawer(m_debugDraw);
     
-    m_car = new CarPhysics();
-    m_car->Initialize(m_dynamicsWorld);
-
     // checkpoint test
     btCollisionShape* checkpointShape = new btBoxShape(btVector3(2.f, 2.f, 0.1f));
     this->AddCollisionShape(checkpointShape);
@@ -73,7 +70,8 @@ void Physics::Deinitialize()  //cleanup in the reverse order of creation/initial
     //delete dynamics world
     delete m_dynamicsWorld;
             
-    delete m_car;
+    if (m_car)
+        delete m_car;
     //delete m_vehicleRayCaster;
     //delete m_vehicle;
     //delete m_wheelShape;
@@ -86,9 +84,13 @@ void Physics::Deinitialize()  //cleanup in the reverse order of creation/initial
 
 void Physics::StepSimulation(btScalar timeStep)
 {
-    m_car->Update(timeStep);
+    if (m_car)
+        m_car->Update(timeStep);
+    
     m_dynamicsWorld->stepSimulation(timeStep, 10);
 
+    
+    if (m_car)
     for(int i = 0; i < m_ghostObject->getNumOverlappingObjects(); i++)
     {
         btRigidBody *pRigidBody = static_cast<btRigidBody *>(m_ghostObject->getOverlappingObject(i));
@@ -117,8 +119,10 @@ btRigidBody * Physics::AddRigidBody(float mass, const btTransform & startTransfo
     return body;
 }
 
-void Physics::AddStaticModel(BaseModel * model, const btTransform & trans, float scale, bool debugDraw)
-{        
+std::vector<btCollisionShape *> Physics::CreateStaticCollisionShapes(BaseModel * model, float scale)
+{
+    std::vector<btCollisionShape *> ret;
+    
     for (unsigned int i = 0; i < model->getMeshes().size(); i++)
     {
         Mesh *m = model->getMeshes()[i];
@@ -131,11 +135,21 @@ void Physics::AddStaticModel(BaseModel * model, const btTransform & trans, float
 
         btTriangleIndexVertexArray* tiva = new btTriangleIndexVertexArray(numTriangles, (int*)(&m->getFaces()[0]), sizeof(glm::ivec3),
                                                                           numVertices, (btScalar*)(&m->getVertices()[0]), sizeof(glm::vec3));
-        btBvhTriangleMeshShape *shape = new btBvhTriangleMeshShape(tiva, true);
         
+        btBvhTriangleMeshShape *shape = new btBvhTriangleMeshShape(tiva, true);        
         shape->setLocalScaling(btVector3(scale, scale, scale));
-        
-        btRigidBody *body = AddRigidBody(0, trans, shape); //->getCollisionFlags;
+
+        ret.push_back(shape);
+    }
+
+    return ret;
+}
+
+void Physics::AddStaticModel(std::vector<btCollisionShape *> & collisionShapes, const btTransform & trans, bool debugDraw)
+{
+    for (unsigned int i = 0; i < collisionShapes.size(); i++)
+    {
+        btRigidBody *body = AddRigidBody(0, trans, collisionShapes[i]); //->getCollisionFlags;
         if (!debugDraw)
             body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
     }

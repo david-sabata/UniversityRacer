@@ -28,11 +28,20 @@ public:
     void AddCollisionShape(btCollisionShape * shape) { m_collisionShapes.push_back(shape); }
 
 
-    void AddStaticModel(BaseModel * model, const btTransform & trans, float scale = 1.f, bool debugDraw = true);
+    //void AddStaticModel(BaseModel * model, const btTransform & trans, float scale = 1.f, bool debugDraw = true);
+
+    static std::vector<btCollisionShape *> CreateStaticCollisionShapes(BaseModel * model, float scale = 1.f);
+    void AddStaticModel(std::vector<btCollisionShape *> & collisionShapes, const btTransform & trans, bool debugDraw = true);
     
     CarPhysics * GetCar() { return m_car; }
     btDiscreteDynamicsWorld * GetDynamicsWorld() { return m_dynamicsWorld; }    
     PhysicsDebugDraw *GetDebugDrawer() { return m_debugDraw; }
+
+    void AddCar(const btTransform & trans)
+    {
+        m_car = new CarPhysics();
+        m_car->Initialize(m_dynamicsWorld, trans);
+    }
 
 
 
