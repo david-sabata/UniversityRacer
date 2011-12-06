@@ -35,11 +35,11 @@ in vec3 oPosition;
 ////////////////////GENEROVANI SUMU////////////////////////
 //SMEROVE VEKTORY
 
-vec3 grad3D[] = {vec3(1,1,0), vec3(-1,1,0), vec3(1,-1,0), vec3(-1,-1,0), 
+const vec3 grad3D[] = vec3[](vec3(1,1,0), vec3(-1,1,0), vec3(1,-1,0), vec3(-1,-1,0), 
 				  vec3(1,0,1),vec3(-1,0,1), vec3(1,0,-1), vec3(-1,0,-1), 
-				  vec3(0,1,1), vec3(0,-1,1), vec3(0,1,-1), vec3(0,-1,-1)};
+				  vec3(0,1,1), vec3(0,-1,1), vec3(0,1,-1), vec3(0,-1,-1));
 //Nahodne cislo, dle ktereho se pak vybere gradient
-vec4 p[] = {vec4(151,160,137,91),	vec4(90,15,131,13),		vec4(201,95,96,53),
+const vec4 p[] = vec4[](vec4(151,160,137,91),	vec4(90,15,131,13),		vec4(201,95,96,53),
 			vec4(194,233,7,225),	vec4(140,36,103,30),	vec4(69,142,8,99),
 			vec4(37,240,21,10),		vec4(23,190, 6,148),	vec4(247,120,234,75),
 			vec4(0,26,197,62),		vec4(94,252,219,203),	vec4(117,35,11,32),
@@ -60,7 +60,7 @@ vec4 p[] = {vec4(151,160,137,91),	vec4(90,15,131,13),		vec4(201,95,96,53),
 			vec4(49,192,214, 31),	vec4(181,199,106,157),	vec4(184, 84,204,176),
 			vec4(115,121,50,45),	vec4(127, 4,150,254),	vec4(138,236,205,93),
 			vec4(222,114,67,29),	vec4(24,72,243,141),	vec4(128,195,78,66),
-			vec4(215,61,156,180)};
+			vec4(215,61,156,180));
 
 //Pomocna fce pro vyhledavani konkretnich prvku v poli vektoru velikosti 4
 int gIG(float index, float size, float gradSize) {
