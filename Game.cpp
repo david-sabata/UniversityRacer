@@ -29,11 +29,13 @@ GLuint linesEBO;
 
 Game::Game(): mouseCaptured(false), drawingQueue(NULL), drawWireframe(false)
 {
-
+	gui = new Gui(windowWidth, windowHeight);
+	scene = new Scene(*this);
 }
 
 Game::~Game()
 {
+	delete gui;
 	delete scene;
 }
 
@@ -166,8 +168,7 @@ void Game::onInit()
 
 	cout << "- constructing scene" << endl;
 	
-	// vyrobit scenu
-	scene = new Scene(*this);
+	// vyrobit scenu	
 	scene->addModelContainer(container);
 	scene->init();
 	
@@ -176,10 +177,13 @@ void Game::onInit()
 	// nacist vsechny materialy	
 	ShaderManager::loadPrograms();
 
+	// testovaci gui text	
+	Gui::POSITION pos = {Gui::TOP, Gui::LEFT};
+	guiTime = gui->addString(".", pos);
 
-	ShaderManager::loadProgram("line");
 
-	drawLine(glm::vec3(1, 1, 1), glm::vec3(10, 10, 10), glm::vec3(1, 1, 1));	
+	//ShaderManager::loadProgram("line");
+	//drawLine(glm::vec3(1, 1, 1), glm::vec3(10, 10, 10), glm::vec3(1, 1, 1));	
 }
  
 
@@ -195,6 +199,7 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
     glEnable(GL_DEPTH_TEST);    
 	glEnable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
 
     glDepthFunc(GL_LESS);
 	
@@ -269,7 +274,11 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 	// ---------------------------------------
 	// Vykresleni ingame gui
 	
+	ostringstream time;
+	time << gameTime.Total();
 
+	gui->updateString(guiTime, time.str());
+	gui->draw();
 
 
 	// ---------------------------------------
@@ -286,10 +295,6 @@ void Game::drawLine(glm::vec3 a, glm::vec3 b, glm::vec3 color)
 	LINE l(a, b, color);
 	lines.push_back(l);
 }
-
-
-
-
 
 
 void Game::handleActiveKeys(const GameTime & gameTime)
@@ -357,6 +362,13 @@ void Game::onMouseMove(unsigned x, unsigned y, int xrel, int yrel, Uint8 buttons
 			camera.DebugDump();
 		}
 	}
+}
+
+
+void Game::onWindowResized(int w, int h)
+{
+	BaseApp::onWindowResized(w, h);
+	gui->updateScreenDimensions(w, h);
 }
 
 

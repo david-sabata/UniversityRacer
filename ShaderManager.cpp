@@ -42,6 +42,11 @@ void ShaderManager::loadPrograms()
 
 bool ShaderManager::loadProgram(string material)
 {
+	// pokud jiz program existuje, neni treba jej nacitat znovu
+	if (programs.find(material) != programs.end())
+		return true;
+
+
 	PROGRAMBINDING mat;
 	
 	// VS

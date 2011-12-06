@@ -5,9 +5,10 @@
 #include <ostream>
 #include <sstream>
 
+#include "Debug.h"
 #include "BaseApp.h"
 #include "Scene.h"
-#include "Debug.h"
+#include "Gui.h"
 
 class Game : public BaseApp
 {
@@ -17,6 +18,7 @@ class Game : public BaseApp
 		~Game();
 		void onInit();
 		void onWindowRedraw(const GameTime & gameTime);
+		void onWindowResized(int w, int h);
 		
 		// vykresli usecku mezi dvema body (souradnice jsou v prostoru sceny)
 		void drawLine(glm::vec3 a, glm::vec3 b, glm::vec3 color);
@@ -30,6 +32,10 @@ class Game : public BaseApp
 
 	protected:
 		Scene* scene;
+		Gui* gui;
+
+		// handle retezce ukazujici cas
+		unsigned int guiTime;
 
 		bool mouseCaptured;
 
