@@ -1,11 +1,15 @@
 #version 130
 
 #define MAX_LIGHTS 4
-uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
-uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
-#define LINEAR_ATTENUATION 0.006
-#define QUADR_ATTENUATION 0.0007 
+// @LOAD materials/textures/ceiling.bmp
+uniform sampler2D tex;
+
+// @LOAD materials/textures/ceiling_bump.bmp
+uniform sampler2D texNormal;
+
+// @LOAD materials/textures/ceiling.bmp
+uniform sampler2D texHeight;
 
 struct Material {
 	vec4 ambient;
@@ -13,65 +17,61 @@ struct Material {
 	vec4 specular;
 	int shininess;
 };
+
 uniform Material material;
 
-in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
-in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
+uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
+uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
-in vec3 eyeLightPos[MAX_LIGHTS];
+//tangent space
+in vec3 tanCam;
+in vec3 tanLightDir[MAX_LIGHTS];
 
-in vec4 specularF;
-
-in vec4 color;
+//texture coordinates
 in vec2 t;
+
+//debug color
+in vec4 color;
 
 void main() {
 	
-	vec4 ambientF, diffuseF, specularF, shininessF;
-	vec3 lightDir;
-	float radius = 1.0;
+	//nove koordinaty po posunuti v parallax mappingu
+	vec2 newTexCoord;
 
-	//kdyz je vse zhasnute, bude tma
-	vec4 finalColor = vec4(0.0,0.0,0.0,1.0);
+	vec4 finalColor = vec4(0.5,0.5,0.5,1.0);
 
-	vec3 N = normalize(eyeNormal);
+	float scaleCoord = 5;
 
-	//vypocet half vectoru (HV)
-	//v eyespace muzeme povazovat za vektor pozorovatele eyePosition, jeho otocenim tak ziskame 
-	//vektor z plosky do pozorovaele
-	vec3 V = normalize(-eyePosition);
-
-	//////////////////////////////////////SVETLA/////////////////////////////////////
-	for(int i = 0; i < MAX_LIGHTS ; i++) {
-		
-		finalColor += material.ambient * lights[i * 3 + 2];
-
-		lightDir = eyeLightPos[i] - eyePosition;
-
-		//slabnuti svetla
-		float attenuation, distance;
-		distance = length(lightDir / radius);	 
-
-		float constantAtt = 1.0;
-		float linearAtt = LINEAR_ATTENUATION;
-		float quadraticAtt = QUADR_ATTENUATION;
+	//////////////////////////////OSVETLENI////////////////////////////////
+	//Nastaveni fyzikalnich konstant pro slabnuti svetla se vzdalenosti
+	float attenuation, distance, radius; 
+	radius = 0.6;
+	//pro Range 100 - zdroj : http://www.ogre3d.org/tikiwiki/-Point+Light+Attenuation
+	float constantAtt = 1.0;
+	float linearAtt = 0.0014;
+	float quadraticAtt = 0.00007;
+	vec4 diffuseF;
+	for(int i = 0; i < MAX_LIGHTS; i++) { 
+		distance = length(tanLightDir[i] / radius);	
 		attenuation = 1.0 / (constantAtt + linearAtt * distance +
 										   quadraticAtt * distance * distance);
-									  
-		vec3 L = normalize(lightDir);
+									   
+		//spocitame odraz (difuzni slozku)	
+		vec3 nMap = normalize(texture(texNormal, t * scaleCoord).rgb * 2.0 - 1.0);
+					   	
+		vec3 N = normalize(nMap); //normala plosky dle textury
+		vec3 L = normalize(tanLightDir[i]); //paprsek svetla v tangentovem prostoru
 
-	
+
 		//difuzni slozka
 		float diffuse = max(dot(N,L),0.0);
-		diffuseF = 	material.diffuse * lights[i * 3 + 1];
-		vec4 diff = attenuation * diffuse * diffuseF;
-		finalColor +=  diff;
-
-		//spekularni nepocitame - matny material
-	} 
+		
+		diffuseF =  material.diffuse * lights[i * 3 + 1]; // * material.diffuse;
+		finalColor += attenuation * diffuse * diffuseF;
+	}
 	
-	//gl_FragColor = texture2D(textureNormal,t);
-	//gl_FragColor = ambientF[2];
-	//gl_FragColor = vec4(diffuse,0.0,0.0,1.0);		
-	gl_FragColor = finalColor;
+
+	//gl_FragColor = color;
+	//gl_FragColor = vec4(t,0.0,1.0);		
+	gl_FragColor = texture(tex, t * scaleCoord) * finalColor;
 }

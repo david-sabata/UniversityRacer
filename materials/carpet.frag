@@ -43,10 +43,10 @@ void main() {
 	//plasticnost parallax mappingu
 	float scale = 0.03f;
 	float bias =  0.00;
-	float scaleCoord = 3;
+	float scaleCoord = 5;
 	////////////////////////PARALLAX MAPPING///////////////////////////////
 	//spocitame offset posunuti
-	float height = texture(texHeight, t).r;
+	float height = texture(texHeight, t  * scaleCoord).r;
 	height = height * scale + bias;
 	newTexCoord = (t +  ( normalize(tanCam).xy * height)) * scaleCoord;
 
@@ -55,11 +55,11 @@ void main() {
 	//////////////////////////////OSVETLENI////////////////////////////////
 	//Nastaveni fyzikalnich konstant pro slabnuti svetla se vzdalenosti
 	float attenuation, distance, radius; 
-	radius = 0.4;
+	radius = 0.6;
 	//pro Range 100 - zdroj : http://www.ogre3d.org/tikiwiki/-Point+Light+Attenuation
 	float constantAtt = 1.0;
 	float linearAtt = 0.0014;
-	float quadraticAtt = 0.000007;
+	float quadraticAtt = 0.00007;
 	vec4 diffuseF;
 	for(int i = 0; i < MAX_LIGHTS; i++) { 
 		distance = length(tanLightDir[i] / radius);	
@@ -83,5 +83,5 @@ void main() {
 
 	//gl_FragColor = color;
 	//gl_FragColor = vec4(t,0.0,1.0);		
-	gl_FragColor = texture(tex, t * scaleCoord) * finalColor;
+	gl_FragColor = texture(tex, newTexCoord) * finalColor;
 }

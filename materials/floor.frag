@@ -1,15 +1,20 @@
 #version 130
 
+#define MAX_LIGHTS 4
+#define LINEAR_ATTENUATION 0.006
+#define QUADR_ATTENUATION 0.0001 
+
 // @LOAD materials/textures/floor.bmp
 uniform sampler2D tex;
 
+// @LOAD materials/textures/floor_bump.bmp
+uniform sampler2D texNormal;
 
-#define MAX_LIGHTS 4
+uniform mat3 mv_inverse_transpose;
+uniform mat4 view;
+
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
-
-#define LINEAR_ATTENUATION 0.006
-#define QUADR_ATTENUATION 0.0001 
 
 struct Material {
 	vec4 ambient;
@@ -33,11 +38,13 @@ void main() {
 	
 	vec4 ambientF, diffuseF, specularF, shininessF;
 	vec3 lightDir;
-	float radius = 0.6;
-
+	float radius = 1.0;
+	float scaleCoord = 2.0;
 	//kdyz je vse zhasnute, bude tma
 	vec4 finalColor = vec4(0.0,0.0,0.0,1.0);
 
+	//////////////////////////////////JEDNODUCHY BUMP MAPPING////////////////////////////
+	//prevedeme normaly do eyespace	 
 	vec3 N = normalize(eyeNormal);
 
 	//vypocet half vectoru (HV)
@@ -82,9 +89,6 @@ void main() {
 			spec = attenuation *  specular * material.specular;
 		finalColor +=  diff +  spec;
 	} 
-	
-	//gl_FragColor = texture2D(textureNormal,t);
-	//gl_FragColor = ambientF[2];
-	//gl_FragColor = vec4(diffuse,0.0,0.0,1.0);		
-	gl_FragColor = finalColor * texture(tex,t) ;
+			
+	gl_FragColor = finalColor * texture(tex,t * scaleCoord) ;
 }
