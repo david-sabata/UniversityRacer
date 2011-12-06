@@ -6,10 +6,13 @@
 #include <sstream>
 #include <vector>
 
+#include "Debug.h"
 #include "BaseApp.h"
 #include "Scene.h"
+#include "Gui.h"
 #include "Debug.h"
 #include "Physics.h"
+
 
 class Game : public BaseApp
 {
@@ -19,6 +22,7 @@ class Game : public BaseApp
 		~Game();
 		void onInit();
 		void onWindowRedraw(const GameTime & gameTime);
+		void onWindowResized(int w, int h);
 		
 		// vykresli usecky
         void drawLines(std::vector<PhysicsDebugDraw::LINE> & lines);
@@ -32,8 +36,12 @@ class Game : public BaseApp
 
 	protected:
 		Scene* scene;
+		Gui* gui;
         ModelContainer* container;
         Physics *physics;
+
+		// handle retezce ukazujici cas
+		unsigned int guiTime;
 
 		bool mouseCaptured;
 
