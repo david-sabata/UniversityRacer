@@ -29,7 +29,7 @@ void main() {
 	
 	vec4 ambientF, diffuseF, specularF, shininessF;
 	vec3 lightDir;
-	float radius = 0.8;
+	float radius = 1.0;
 
 	//kdyz je vse zhasnute, bude tma
 	vec4 finalColor = vec4(0.0,0.0,0.0,1.0);
@@ -70,13 +70,13 @@ void main() {
 		vec3 H = normalize(L + V);
 	
 		//spocitame spekularni odlesk
-		float specular = pow(dot(N,H), material.shininess);
+		float specular = pow(dot(N,H), material.shininess * 20);
 	
 		vec4 spec = vec4(0.0,0.0,0.0,1.0);
 		//pricteme spekulární složku k výsledné barvi
 		if(specular >= 0.0)
 			spec = attenuation *  specular * material.specular;
-		finalColor +=  diff +  spec;
+		finalColor +=  diff + spec;
 	} 
 	
 	//gl_FragColor = texture2D(textureNormal,t);

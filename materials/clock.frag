@@ -1,6 +1,10 @@
 #version 130
 
 #define MAX_LIGHTS 4
+
+// @LOAD materials/textures/clock.bmp
+uniform sampler2D tex;
+
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
@@ -29,7 +33,7 @@ void main() {
 	
 	vec4 ambientF, diffuseF, specularF, shininessF;
 	vec3 lightDir;
-	float radius = 0.8;
+	float radius = 1.2;
 
 	//kdyz je vse zhasnute, bude tma
 	vec4 finalColor = vec4(0.0,0.0,0.0,1.0);
@@ -79,8 +83,9 @@ void main() {
 		finalColor +=  diff +  spec;
 	} 
 	
+	vec4 texColor = texture(tex, t);
 	//gl_FragColor = texture2D(textureNormal,t);
 	//gl_FragColor = ambientF[2];
 	//gl_FragColor = vec4(diffuse,0.0,0.0,1.0);		
-	gl_FragColor = finalColor;
+	gl_FragColor = finalColor * texColor;
 }
