@@ -5,6 +5,7 @@
 // @LOAD materials/textures/povrch_auta.bmp
 uniform sampler2D tex;
 
+
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
@@ -37,6 +38,7 @@ void main() {
 
 	//kdyz je vse zhasnute, bude tma
 	vec4 finalColor = vec4(0.0,0.0,0.0,1.0);
+
 
 	vec3 N = normalize(eyeNormal);
 

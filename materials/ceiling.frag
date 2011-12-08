@@ -11,8 +11,6 @@ uniform sampler2D tex;
 // @LOAD materials/textures/ceiling_bump.bmp
 uniform sampler2D texNormal;
 
-// @LOAD materials/textures/ceiling.bmp
-uniform sampler2D texHeight;
 
 struct Material {
 	vec4 ambient;
@@ -38,7 +36,7 @@ in vec4 color;
 
 void main() {
 	
-	//nove koordinaty po posunuti v parallax mappingu
+	
 	vec2 newTexCoord;
 
 	vec4 finalColor = vec4(0.5,0.5,0.5,1.0);
@@ -73,9 +71,6 @@ void main() {
 		diffuseF =  material.diffuse * lights[i * 3 + 1]; // * material.diffuse;
 		finalColor += attenuation * diffuse * diffuseF;
 	}
-	
-
-	//gl_FragColor = color;
-	//gl_FragColor = vec4(t,0.0,1.0);		
+		
 	gl_FragColor = texture(tex, t * scaleCoord) * finalColor;
 }

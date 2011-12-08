@@ -1,8 +1,6 @@
 #version 130
 
 #define MAX_LIGHTS 4
-
-
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
@@ -26,7 +24,6 @@ in vec4 specularF;
 
 in vec4 color;
 in vec2 t;
-
 
 void main() {
 	
@@ -71,16 +68,19 @@ void main() {
 	
 		//halfvector = L + V - mezi light a pozorovatelem
 		vec3 H = normalize(L + V);
-	 
+	
 		//spocitame spekularni odlesk
 		float specular = pow(dot(N,H), material.shininess);
 	
 		vec4 spec = vec4(0.0,0.0,0.0,1.0);
-		//pricteme spekualrni slozku vysledne barvy
+		//pricteme spekulární složku k výsledné barvi
 		if(specular >= 0.0)
 			spec = attenuation *  specular * material.specular;
 		finalColor +=  diff +  spec;
 	} 
-			
-	gl_FragColor = vec4(0.30392,0.43333,0.643137,1.0) *  finalColor;
+	
+	//gl_FragColor = texture2D(textureNormal,t);
+	//gl_FragColor = ambientF[2];
+	//gl_FragColor = vec4(diffuse,0.0,0.0,1.0);		
+	gl_FragColor = finalColor;
 }
