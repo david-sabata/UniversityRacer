@@ -18,12 +18,14 @@ Game::Game(): mouseCaptured(false), /*drawingQueue(NULL),*/ drawWireframe(false)
 {
 	gui = new Gui(windowWidth, windowHeight);
 	scene = new Scene(*this);
+	shadowVolumes = new ShadowVolumes();
 }
 
 Game::~Game()
 {
 	delete gui;
 	delete scene;
+	delete shadowVolumes;
 }
 
 
@@ -44,13 +46,16 @@ void Game::onInit()
 	// nacist modely	
 	container = new ModelContainer;	
 
-
+	// modely pro kresleni
 	BaseModel* chairs = container->load3DS("models/chairs.3ds");
 	BaseModel* e112 = container->load3DS("models/e112.3ds");
-	BaseModel* middesk = container->load3DS("models/desk-mid.3ds");
+	BaseModel* middesk = container->load3DS("models/desk-mid.3ds");	
   	BaseModel* sidedesk = container->load3DS("models/desk-side.3ds");
     BaseModel* car =  container->load3DS("models/car.3ds");
     BaseModel* wheel =  container->load3DS("models/wheel.3ds");
+
+	// modely pro vypocet stinu - low poly; optimalizovano az na 10% puvodnich vrcholu
+	BaseModel* low_middesk = container->load3DS("models/low-desk-mid.3ds");
 
     cout << "- initializing physics" << endl;
 
@@ -60,17 +65,19 @@ void Game::onInit()
     		
 	cout << "- setting up drawing queue" << endl;
 		
-	// vykresli E112 zmensenou na 20%
-	if (1) {
+	// vykresli E112
+	if (0) {
 		container->addModel("e112", e112);
 		glm::mat4 modelmat = glm::scale(glm::vec3(0.2));
 		e112QueueItem = container->queueDraw(e112, modelmat);
+
+		//shadowVolumes->addModel(e112, modelmat);
 
         physics->AddStaticModel(Physics::CreateStaticCollisionShapes(e112, 0.2f), PhysicsUtils::btTransFrom(btVector3(0, 0, 0)), false);
 	}
 
     // vykresli zidle
-	{
+	if (0) {
 		container->addModel("chairs", chairs);
                 
 		glm::mat4 scale = glm::scale(glm::vec3(0.2));
@@ -120,14 +127,15 @@ void Game::onInit()
 		for (unsigned int rowI = 0; rowI < 5; rowI++)
 		{
 			glm::mat4 col = glm::translate(rows[rowI], glm::vec3(0, 0, 0));
-			container->queueDraw(middesk, col);
 
+			container->queueDraw(middesk, col);
+			shadowVolumes->addModel(low_middesk, col); // stiny se pocitaji nad low-poly modelem
             physics->AddStaticModel(middeskShapes, PhysicsUtils::btTransFrom(glm::scale(col, glm::vec3(1/0.2f))), false);
 		}
 	}
 
 	// vykresli postranni lavice
-	{
+	if (0) {
 		container->addModel("sidedesk", sidedesk);
 
 		glm::mat4 scale = glm::scale(glm::vec3(0.2));
@@ -170,16 +178,19 @@ void Game::onInit()
 			glm::vec4 pos = (*it).Position();
 			glm::mat4 mat = glm::scale(glm::translate(pos.x, pos.y, pos.z), glm::vec3(0.01));
 			//glm::mat4 mat = glm::translate(glm::scale(glm::vec3(0.01)), pos.x, pos.y, pos.z);
-		
+
 			container->queueDraw(sphere, mat);
+			shadowVolumes->addLight(glm::vec3(pos));
 		}
 	}
 
+	// pridat auto
     {
 		container->addModel("car", car);
 		carQueueItem = container->queueDraw(car);
 	}
 
+	// pridat kola auta
     {
 		container->addModel("wheel", wheel);
 		for (unsigned int i = 0; i < 4; i++)
@@ -193,6 +204,13 @@ void Game::onInit()
 	// vyrobit scenu
 	scene->addModelContainer(container);
 	scene->init();
+
+	cout << "- constructing shadow volumes" << endl;
+
+	// vygenerovat stinova telesa
+	shadowVolumes->generate();
+	// a uvolnit pomocne modely - jiz nebudou treba
+	delete low_middesk;
 	
 	cout << "- done!" << endl;
 	
@@ -219,12 +237,8 @@ void Game::onWindowRedraw(const GameTime & gameTime)
     
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    glEnable(GL_DEPTH_TEST);    
-	glEnable(GL_CULL_FACE);
-	glDisable(GL_BLEND);
-
-    glDepthFunc(GL_LESS);
-
+    
+#if 1
     glm::mat4 carMatrix = PhysicsUtils::glmMat4From(physics->GetCar()->GetWorldTransform());
     container->updateDrawingMatrix(carQueueItem, carMatrix);
 
@@ -244,9 +258,20 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
         container->updateDrawingMatrix(wheelQueueItem[i], wheelMatrix);
     }
+#endif
 	
-	// vykreslit scenu
+	// vykreslit stinova telesa
+	shadowVolumes->draw( getCamera()->GetMatrix(), glm::perspective(45.0f, (float)getWindowAspectRatio(), 1.0f, 1000.0f) );
+
+	// vykreslit scenu -----------------------
+	glEnable(GL_DEPTH_TEST);    
+	glEnable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
+
 	scene->draw();
+	// ---------------------------------------
+
+
 
     if (drawWireframe)
     {
@@ -264,18 +289,19 @@ void Game::onWindowRedraw(const GameTime & gameTime)
     
     // ---------------------------------------
 	// Vykresleni ingame gui
-	
+#if 0
 	ostringstream time;
 	time << gameTime.Total();
 
 	gui->updateString(guiTime, time.str());
 	gui->draw();
-
-
+#endif
 	// ---------------------------------------
 
     SDL_GL_SwapBuffers(); 
 }
+
+
 
 void Game::drawLines(vector<PhysicsDebugDraw::LINE> & lines)
 {
@@ -343,6 +369,7 @@ void Game::drawLines(vector<PhysicsDebugDraw::LINE> & lines)
 
     lines.clear();
 }
+
 
 void Game::handleActiveKeys(const GameTime & gameTime)
 {

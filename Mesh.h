@@ -25,6 +25,8 @@ class Mesh
 		Mesh(std::string name, std::string materialName, std::vector<glm::vec3> vertices, 
 			std::vector<glm::ivec3> faces, std::vector<glm::vec2> texcoords);
 		
+		Mesh(const Mesh& mesh, const glm::mat4& matrix);
+
 		/////////////////////////////////////////////////////////////////////////
 
 		/**
@@ -36,40 +38,50 @@ class Mesh
 		/**
 		 * Vraci nazev meshe
 		 */
-		std::string const &getName();
+		std::string const &getName() const;
 
 		/**
 		 * Vraci referenci na pole trojuhelniku. Kazdy bod
 		 * pole slouzi jako index do pole vrcholu
 		 */
-		std::vector<glm::ivec3> const &getFaces();
+		std::vector<glm::ivec3> const &getFaces() const;
 
 		/**
 		 * Vraci referenci na pole vrcholu modelu
 		 */
-		std::vector<glm::vec3> const& getVertices();
+		std::vector<glm::vec3> const& getVertices() const;
 
 		/**
 		 * Vraci referenci na pole normal odpovidajicich vrcholum
 		 */
-		std::vector<glm::vec3> const& getNormals();
+		std::vector<glm::vec3> const& getNormals() const;
 
 		/**
 		 * Vraci referenci na pole tangent odpovidajici vrcholum
 		 */
-		std::vector<glm::vec3> const& getTangents();
+		std::vector<glm::vec3> const& getTangents() const;
 
 		/**
 		 * Vraci referenci na pole souradnic textur. Indexy
 		 * odpovidaji indexum do pole vrcholu
 		 */
-		std::vector<glm::vec2> const& getTexCoords();
+		std::vector<glm::vec2> const& getTexCoords() const;
 
 		/**
 		 * Vraci referenci na nazev materialu
 		 */
-		std::string const& getMaterialName();
+		std::string const &getMaterialName() const;
+
+		/**
+		 * Ma tato mesh vypoctene normaly?
+		 */
+		bool areNormalsComputed() const;
 		
+		/**
+		 * Nasobeni matici vynasobi vsechny vertexy meshe
+		 */
+		Mesh operator* (glm::mat4 const& matrix) const;
+
 
 	protected:
 		std::vector<glm::ivec3> faces;

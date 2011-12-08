@@ -59,7 +59,7 @@ class ShaderManager
 			GLint MAG_FILTER;
 			GLint WRAP_S;
 			GLint WRAP_T;
-
+			
 			// binding je platny, tj. jeho textura je nactena v GL
 			bool isValid;
 		} TEXTUREBINDING;

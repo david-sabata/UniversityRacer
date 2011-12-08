@@ -26,6 +26,47 @@ Mesh::Mesh(string name, string materialName, vector<glm::vec3> vertices,
 }
 
 
+/**
+ * Konstruktor pro mesh jejiz vsechny vrcholy se ihned po vytvoreni 
+ * vynasobi danou matici
+ */
+Mesh::Mesh(const Mesh& mesh, const glm::mat4& matrix)
+{
+	name = mesh.getName();
+	materialName = mesh.getMaterialName();
+	faces = mesh.getFaces();
+	texcoords = mesh.getTexCoords();
+	
+	vector<glm::vec3> meshVerts = mesh.getVertices();
+	vertices = vector<glm::vec3>(meshVerts.size());
+
+	for (unsigned int i = 0; i < meshVerts.size(); i++)
+	{
+		glm::vec4 vert = glm::vec4(meshVerts[i], 1.0f);
+		vertices[i] = glm::vec3(vert * matrix);
+	}
+
+	normals = vector<glm::vec3>(vertices.size(), glm::vec3(0.0f));
+	tangents = vector<glm::vec3>(vertices.size(), glm::vec3(0.0f));
+
+	if (mesh.areNormalsComputed()) {
+		normalsComputed = true;
+
+		vector<glm::vec3> meshNormals = mesh.getNormals();
+		for (unsigned int i = 0; i < meshNormals.size(); i++)
+		{
+			normals[i] = glm::vec3(glm::vec4(meshNormals[i], 0.0f) * matrix);
+		}
+
+		vector<glm::vec3> meshTangents = mesh.getTangents();
+		for (unsigned int i = 0; i < meshTangents.size(); i++)
+		{
+			tangents[i] = glm::vec3(glm::vec4(meshTangents[i], 0.0f) * matrix);
+		}
+	}
+}
+
+
 
 /**
  * http://www.lighthouse3d.com/opengl/terrain/index.php3?normals
@@ -44,9 +85,9 @@ void Mesh::computeTangentsAndNormals()
 		glm::vec3 v3 = vertices[ (unsigned int)faces[i].z ];
 
 		// texturovaci souradnice nemusi existovat
-		glm::vec2 tc1 = texcoords.size() > faces[i].x ? texcoords[ faces[i].x ] : glm::vec2(0, 0);
-		glm::vec2 tc2 = texcoords.size() > faces[i].y ? texcoords[ faces[i].y ] : glm::vec2(0, 0);
-		glm::vec2 tc3 = texcoords.size() > faces[i].z ? texcoords[ faces[i].z ] : glm::vec2(0, 0);
+		glm::vec2 tc1 = texcoords.size() > (unsigned int)faces[i].x ? texcoords[ faces[i].x ] : glm::vec2(0, 0);
+		glm::vec2 tc2 = texcoords.size() > (unsigned int)faces[i].y ? texcoords[ faces[i].y ] : glm::vec2(0, 0);
+		glm::vec2 tc3 = texcoords.size() > (unsigned int)faces[i].z ? texcoords[ faces[i].z ] : glm::vec2(0, 0);
 
 		// spocitat per-face normaly
 		glm::vec3 normal = glm::cross(
@@ -144,37 +185,50 @@ void Mesh::computeTangentsAndNormals()
 }
 
 
-std::string const &Mesh::getName() 
+
+
+std::string const &Mesh::getName() const
 {
 	return name;
 }
 
-std::vector<glm::ivec3> const &Mesh::getFaces()
+std::vector<glm::ivec3> const &Mesh::getFaces() const
 {
 	return faces;
 }
 
-std::vector<glm::vec3> const &Mesh::getVertices() 
+std::vector<glm::vec3> const &Mesh::getVertices() const
 {
 	return vertices;
 }
 
-std::vector<glm::vec3> const &Mesh::getNormals() 
+std::vector<glm::vec3> const &Mesh::getNormals() const
 {
 	return normals;
 }
 
-std::vector<glm::vec3> const &Mesh::getTangents()
+std::vector<glm::vec3> const &Mesh::getTangents() const
 {
 	return tangents;
 }
 
-std::vector<glm::vec2> const &Mesh::getTexCoords()
+std::vector<glm::vec2> const &Mesh::getTexCoords() const
 {
 	return texcoords;
 }
 
-std::string const &Mesh::getMaterialName()
+std::string const &Mesh::getMaterialName() const
 {
 	return materialName;
+}
+
+bool Mesh::areNormalsComputed() const
+{
+	return normalsComputed;
+}
+
+Mesh Mesh::operator* (glm::mat4 const& matrix) const
+{
+	const Mesh& self = *this;
+	return Mesh(self, matrix);
 }

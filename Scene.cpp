@@ -154,6 +154,7 @@ void Scene::buildBufferObjects()
 
 			// presun dat do graficke pameti
 			glUnmapBuffer(GL_ARRAY_BUFFER);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 
 		// EBO ////////////////////////////////////////////////////////////
@@ -199,7 +200,8 @@ void Scene::buildBufferObjects()
 			}
 
 			// presun dat do graficke pameti
-			glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+			glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);			
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
 		
 	}	

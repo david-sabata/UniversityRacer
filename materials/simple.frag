@@ -82,5 +82,6 @@ void main() {
 	//gl_FragColor = texture2D(textureNormal,t);
 	//gl_FragColor = ambientF[2];
 	//gl_FragColor = vec4(diffuse,0.0,0.0,1.0);		
-	gl_FragColor = finalColor;
+	//gl_FragColor = finalColor;
+	gl_FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 }
