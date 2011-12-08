@@ -65,9 +65,9 @@ class ShadowVolumes {
 		void generate();
 
 		/**
-		 * Vykresli stinova telesa
+		 * Vykresli stinova telesa tvorena svetlem lightI z dane pozice kamery
 		 */
-		void draw(glm::mat4 mView, glm::mat4 mProjection);
+		void draw(unsigned int lightI, glm::mat4 mView, glm::mat4 mProjection);
 
 	protected:
 		/**

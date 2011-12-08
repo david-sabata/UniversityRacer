@@ -43,7 +43,8 @@ Mesh::Mesh(const Mesh& mesh, const glm::mat4& matrix)
 	for (unsigned int i = 0; i < meshVerts.size(); i++)
 	{
 		glm::vec4 vert = glm::vec4(meshVerts[i], 1.0f);
-		vertices[i] = glm::vec3(vert * matrix);
+		glm::vec4 multed = matrix * vert;
+		vertices[i] = glm::vec3(multed);
 	}
 
 	normals = vector<glm::vec3>(vertices.size(), glm::vec3(0.0f));

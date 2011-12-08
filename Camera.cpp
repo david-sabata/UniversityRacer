@@ -14,9 +14,9 @@ Camera::Camera(void): currentSettleTime(0.f) {
 
 void Camera::Reset() {
 	//eye = glm::vec3(2.78f, 2.73f, -2.5f);	
-	eye = glm::vec3(0.0f, 0.0f, -10.0f);
+	eye = glm::vec3(0.0f, 20.0f, 40.0f);
 	up = glm::vec3(0.0f, 1.0f, 0.0f);		
-	target = glm::vec3(0.0f, 0.0f, 1.0f);
+	target = glm::vec3(0.0f, 0.0f, -1.0f);
 	angle_horiz = 0.0f;
 	angle_vert = 0.0f;
 

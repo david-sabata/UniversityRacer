@@ -66,7 +66,7 @@ void Game::onInit()
 	cout << "- setting up drawing queue" << endl;
 		
 	// vykresli E112
-	if (0) {
+	if (1) {
 		container->addModel("e112", e112);
 		glm::mat4 modelmat = glm::scale(glm::vec3(0.2));
 		e112QueueItem = container->queueDraw(e112, modelmat);
@@ -124,7 +124,7 @@ void Game::onInit()
 
         std::vector<btCollisionShape*> middeskShapes = Physics::CreateStaticCollisionShapes(middesk, 0.2f);
 
-		for (unsigned int rowI = 0; rowI < 5; rowI++)
+		for (unsigned int rowI = 0; rowI < 1; rowI++) // 5 !!!
 		{
 			glm::mat4 col = glm::translate(rows[rowI], glm::vec3(0, 0, 0));
 
@@ -235,10 +235,10 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
     physics->StepSimulation(gameTime.Elapsed() * 0.001f);
     
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     
     
-#if 1
+#if 0
     glm::mat4 carMatrix = PhysicsUtils::glmMat4From(physics->GetCar()->GetWorldTransform());
     container->updateDrawingMatrix(carQueueItem, carMatrix);
 
@@ -260,16 +260,85 @@ void Game::onWindowRedraw(const GameTime & gameTime)
     }
 #endif
 	
-	// vykreslit stinova telesa
-	shadowVolumes->draw( getCamera()->GetMatrix(), glm::perspective(45.0f, (float)getWindowAspectRatio(), 1.0f, 1000.0f) );
+	
+	// vykreslit scenu do z-bufferu ------------------------------	
+#if 1
+	glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+	
+	/*
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);	
+    glDepthMask(GL_TRUE);
+    */
 
-	// vykreslit scenu -----------------------
-	glEnable(GL_DEPTH_TEST);    
-	glEnable(GL_CULL_FACE);
-	glDisable(GL_BLEND);
+	//glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);	
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	
+	glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
 
 	scene->draw();
-	// ---------------------------------------
+
+	glDepthMask(GL_FALSE);
+
+	/*
+	glBlendFunc(GL_ONE, GL_ONE); // The blending function scr+dst, to add all the lighting
+    glDepthMask(GL_FALSE);  // We stop writing to z-buffer now. We made this in the first pass, now we have it
+    glEnable(GL_STENCIL_TEST); // We enable the stencil testing	
+	*/
+#endif
+	// -----------------------------------------------------------
+
+	// vykreslit stiny; predpoklada se naplneny z-buffer ---------
+#if 1
+	glm::mat4 mView = getCamera()->GetMatrix();
+	glm::mat4 mPerspective = glm::perspective(45.0f, (float)getWindowAspectRatio(), 1.0f, 1000.0f);
+	
+	unsigned int lightI = 0;
+	
+	//glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    //glEnable(GL_STENCIL_TEST);
+
+	glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+	glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+
+    //glStencilFunc(GL_ALWAYS, 0, 0);
+    //glStencilOpSeparate(GL_FRONT, GL_INCR, GL_KEEP, GL_KEEP);
+    //glStencilOpSeparate(GL_BACK, GL_INCR, GL_KEEP, GL_KEEP);
+
+	shadowVolumes->draw( lightI, mView, mPerspective );
+#endif
+	// -----------------------------------------------------------
+
+	// vykreslit scenu normalne ----------------------------------
+#if 0
+	/*
+	glDepthFunc(GL_LEQUAL); // we put it again to LESS or EQUAL (or else you will get some z-fighting)
+    glCullFace(GL_BACK); // we draw the front face
+    glEnable(GL_BLEND); // We enable blending
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // We enable color buffer
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Drawing will not affect the stencil buffer
+    glStencilFunc(GL_EQUAL, 0x0, 0xff); // And the most important thing, the stencil function. Drawing if equal to 0
+	*/
+
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+    glStencilFunc(GL_EQUAL, 0, 1);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); 
+
+	scene->draw();
+#endif
+	// -----------------------------------------------------------
+
+	glDepthMask(GL_TRUE);
+	glDisable(GL_STENCIL_TEST);
 
 
 

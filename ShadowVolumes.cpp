@@ -9,7 +9,7 @@
 
 
 #define PROGRAM_NAME "test"
-#define INFINITY 100
+#define INFINITY 10
 
 using namespace std;
 
@@ -40,7 +40,11 @@ void ShadowVolumes::generate()
 		for (vector<Mesh*>::iterator meshIt = (*modelIt).first->getMeshes().begin(); meshIt != (*modelIt).first->getMeshes().end(); meshIt++)
 		{
 			Mesh* mesh = (*meshIt);
-			Mesh* newMesh = new Mesh((*mesh) * (*modelIt).second);			
+
+			if (mesh->getName() != "deska_stol")
+				continue;
+
+			Mesh* newMesh = new Mesh((*mesh) * (*modelIt).second);
 			meshes.push_back(newMesh);
 		}
 	}
@@ -94,26 +98,30 @@ void ShadowVolumes::generate()
 
 							glm::vec3 v3, v4;
 
-							v3.x = ( v1.x - light.x ) * INFINITY;
-							v3.y = ( v1.y - light.y ) * INFINITY;
-							v3.z = ( v1.z - light.z ) * INFINITY;
- 
-							v4.x = ( v2.x - light.x ) * INFINITY;
-							v4.y = ( v2.y - light.y ) * INFINITY;
-							v4.z = ( v2.z - light.z ) * INFINITY;
+							v3 = ( v1 - light ) * glm::vec3(INFINITY, INFINITY, INFINITY);
+							v4 = ( v2 - light ) * glm::vec3(INFINITY, INFINITY, INFINITY);
 
 							unsigned int index = glVertices.size();
 
 							// kreslit se budou 4 vrcholy jako quad
 							glVertices.push_back( v1 );
-							glVertices.push_back( v1 + v3 );
+							//glVertices.push_back( v1 + v3 );
 							glVertices.push_back( v2 );
-							glVertices.push_back( v2 + v4 );
+							glVertices.push_back( v3 );
+							//glVertices.push_back( v2 + v4 );
+							glVertices.push_back( v4 );
 							
+							glIndices.push_back(index + 3);
+							glIndices.push_back(index + 2);
+							glIndices.push_back(index + 1);
+							glIndices.push_back(index + 0);
+
+							/*
 							glIndices.push_back(index);
 							glIndices.push_back(index + 1);
 							glIndices.push_back(index + 2);
 							glIndices.push_back(index + 3);
+							*/
 						}
 					}
 				}
@@ -268,15 +276,8 @@ void ShadowVolumes::computeNeighboursAndVisibilities()
 
 
 
-void ShadowVolumes::draw(glm::mat4 mView, glm::mat4 mProjection)
+void ShadowVolumes::draw(unsigned int lightI, glm::mat4 mView, glm::mat4 mProjection)
 {
-	// nastaveni kresleni
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
-
 	ShaderManager::PROGRAMBINDING activeBinding = ShaderManager::useProgram(PROGRAM_NAME);
 	
 	// transformacni matice
@@ -285,71 +286,39 @@ void ShadowVolumes::draw(glm::mat4 mView, glm::mat4 mProjection)
 	glUniformMatrix4fv(activeBinding.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
 	glUniformMatrix4fv(activeBinding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));	
 
-
-	for (unsigned int lightI = 0; lightI < lights.size(); lightI++)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, VBOs[lightI]);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[lightI]);
+	// zdroje dat
+	glBindBuffer(GL_ARRAY_BUFFER, VBOs[lightI]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[lightI]);
 		
-		glEnableVertexAttribArray(activeBinding.positionAttrib);
-		glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(activeBinding.positionAttrib);
+	glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 		
-		glDrawElements(GL_QUADS, shadowVolumeIndices, GL_UNSIGNED_INT, NULL);
-
-		break;
-	}
-
+/*
+	glDisable(GL_BLEND); // We don't want lighting. We are only writing in stencil buffer for now
+    glClear(GL_STENCIL_BUFFER_BIT); // We clear the stencil buffer
+    glDepthFunc(GL_LESS); // We change the z-testing function to LESS, to avoid little bugs in shadow
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); // We dont draw it to the screen
+    glStencilFunc(GL_ALWAYS, 0, 0); // We always draw whatever we have in the stencil buffer
 		
+	glCullFace(GL_FRONT); // We are drawing the back faces first 
+    glStencilOp(GL_KEEP, GL_INCR, GL_KEEP); // We increment if the depth test fails
+
+	glDrawElements(GL_QUADS, shadowVolumeIndices, GL_UNSIGNED_INT, NULL);
+
+    glCullFace(GL_BACK); // We are now drawing the front faces
+    glStencilOp(GL_KEEP, GL_DECR, GL_KEEP); // We decrement if the depth test fails
+*/
+    glDrawElements(GL_QUADS, shadowVolumeIndices, GL_UNSIGNED_INT, NULL);
+	
 
 	/*
-	for (vector<pair<BaseModel*, glm::mat4>>::iterator it = models.begin(); it != models.end(); it++)
-	{
-		// modelova matice
-		glUniformMatrix4fv(activeBinding.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).second));
-
-		vector<float> vertices;
-		vector<float> normals;
-		vector<unsigned int> indices;
-		unsigned int indexI = 0;
-
-		for (vector<Mesh*>::iterator mit = (*it).first->getMeshes().begin(); mit != (*it).first->getMeshes().end(); mit++)
-		{
-			Mesh* mesh = (*mit);
-			vector<glm::ivec3> faces = mesh->getFaces();
-
-			for (vector<glm::ivec3>::iterator fit = faces.begin(); fit != faces.end(); fit++)
-			{
-				glm::ivec3 face = (*fit);
-
-				glm::vec3 v1 = mesh->getVertices()[ face.x ];
-				vertices.push_back(v1.x);
-				vertices.push_back(v1.y);
-				vertices.push_back(v1.z);
-
-				indices.push_back(vertices.size() / 3 - 1);
-				
-				glm::vec3 v2 = mesh->getVertices()[ face.y ];
-				vertices.push_back(v2.x);
-				vertices.push_back(v2.y);
-				vertices.push_back(v2.z);
-
-				indices.push_back(vertices.size() / 3 - 1);
-
-				
-				glm::vec3 v3 = mesh->getVertices()[ face.z ];
-				vertices.push_back(v3.x);
-				vertices.push_back(v3.y);
-				vertices.push_back(v3.z);
-
-				indices.push_back(vertices.size() / 3 - 1);
-			}
-		}
-				
-		glEnableVertexAttribArray(activeBinding.positionAttrib);
-		glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)&(vertices.at(0)));
-		
-		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)&(indices.at(0)));
-	}
+	// We draw our lighting now that we created the shadows area in the stencil buffer
+    glDepthFunc(GL_LEQUAL); // we put it again to LESS or EQUAL (or else you will get some z-fighting)
+    glCullFace(GL_BACK); // we draw the front face
+    glEnable(GL_BLEND); // We enable blending
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // We enable color buffer
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Drawing will not affect the stencil buffer
+    glStencilFunc(GL_EQUAL, 0x0, 0xff); // And the most important thing, the stencil function. Drawing if equal to 0
 	*/
 	
 }
