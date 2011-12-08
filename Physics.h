@@ -15,6 +15,8 @@
 class Physics  // TODO Singleton
 {
 public:
+    static const int MAX_SIMULATION_SUBSTEPS = 100;
+
     Physics(void); 
     ~Physics(void);
 
@@ -27,9 +29,7 @@ public:
     void DebugDrawWorld() { m_dynamicsWorld->debugDrawWorld(); } 
     void AddCollisionShape(btCollisionShape * shape) { m_collisionShapes.push_back(shape); }
 
-
-    //void AddStaticModel(BaseModel * model, const btTransform & trans, float scale = 1.f, bool debugDraw = true);
-
+    static btCollisionShape * CreateStaticCollisionShape(Mesh * mesh, float scale = 1.f);
     static std::vector<btCollisionShape *> CreateStaticCollisionShapes(BaseModel * model, float scale = 1.f);
     void AddStaticModel(std::vector<btCollisionShape *> & collisionShapes, const btTransform & trans, bool debugDraw = true);
     

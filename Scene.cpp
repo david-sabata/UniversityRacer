@@ -290,7 +290,7 @@ void Scene::draw()
 			glUniformMatrix4fv(activeBinding.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
 
 			// projekcni matice
-			glm::mat4 mProjection = glm::perspective(45.0f, (float)application.getWindowAspectRatio(), 1.0f, 1000.0f);
+			glm::mat4 mProjection = glm::perspective(45.0f, (float)application.getWindowAspectRatio(), 0.1f, 1000.0f);
 			glUniformMatrix4fv(activeBinding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
 	
 			// nastaveni kamery

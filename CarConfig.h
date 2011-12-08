@@ -3,21 +3,24 @@
 
 #include <btBulletDynamicsCommon.h>
 
+#define CAR_SCALE 0.25f
+
 struct CarConfig
 {
-    CarConfig(): mass(900.f),
+    CarConfig(): mass(5.0f),
                  
                  /// Amount of torque applied to the wheel. This provides the vehicle's acceleration
-                 maxEngineForce(10000.f),  //this should be engine/velocity dependent
+                 maxEngineForce(15.f),  //this should be engine/velocity dependent
                 
                  /// Amount of braking torque applied to the wheel.
-                 maxBreakingForce(150.f),
+                 maxBreakingForce(0.5f),
                  
-                 steeringIncrement(0.04f),
-                 steeringClamp(0.75f),
+                 steeringIncrement(0.04f),  // 0.04
+                 steeringClamp(0.75f),      // 0.75
                  
-                 linearDamping(0.3f),
-                 angularDamping(0.1f),
+                 // chasis damping
+                 linearDamping(0.1f),  // 0.3
+                 angularDamping(0.1f), // 0.1
 
                  /// The direction of ray cast (chassis space). The wheel moves relative to the chassis in this direction, and the suspension force acts along this direction.
                  wheelDirectionCS(0.f, -1.f, 0.f),
@@ -42,7 +45,7 @@ struct CarConfig
                  suspensionMaxTravelCm(12.0f),
 
                  /// The stiffness constant for the suspension. 10.0 - Offroad buggy, 50.0 - Sports car, 200.0 - F1 Car
-                 suspensionStiffness(80.f),  //20
+                 suspensionStiffness(100.f),  //80
 
                  /// The damping coefficient for when the suspension is compressed. Set to k * 2.0 * btSqrt(m_suspensionStiffness) so k is proportional to critical damping.
                  /// k = 0.0 undamped & bouncy, k = 1.0 critical damping; k = 0.1 to 0.3 are good values
@@ -62,7 +65,21 @@ struct CarConfig
                  /// If m_frictionSlip is too high, you'll need to reduce this to stop the vehicle rolling over.
                  /// You should also try lowering the vehicle's centre of mass
                  rollInfluence(0.2f)   //1.0f;
-                 {}
+                 {
+                     wheelRadius*=CAR_SCALE;
+                     wheelWidth*=CAR_SCALE;
+                     connectionHeight*=CAR_SCALE;
+                     connectionWidth*=CAR_SCALE;
+                     connectionLength*=CAR_SCALE;
+                     bodyConnectionToChasisHeight*=CAR_SCALE;
+
+                    // suspensionRestLength = 0.5f;
+                    // suspensionMaxTravelCm= 20.f;
+                     
+                     //suspensionStiffness*=CAR_SCALE;
+                     //suspensionDampingCompression = 0.59 * 2.0 * btSqrt(suspensionStiffness);
+                     //suspensionDampingRelaxation = 0.65 * 2.0 * btSqrt(suspensionStiffness);    
+                }
 
     btScalar mass, linearDamping, angularDamping;
     btScalar maxEngineForce, maxBreakingForce, steeringIncrement, steeringClamp;
