@@ -4,8 +4,9 @@
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
-#define LINEAR_ATTENUATION 0.006
-#define QUADR_ATTENUATION 0.0001 
+#define LINEAR_ATTENUATION 0.027
+#define QUADR_ATTENUATION 0.0028 
+
 
 struct Material {
 	vec4 ambient;

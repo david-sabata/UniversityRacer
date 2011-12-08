@@ -2,15 +2,15 @@
 
 #define MAX_LIGHTS 4
 
+#define LINEAR_ATTENUATION 0.027
+#define QUADR_ATTENUATION 0.0028 
+
 // @LOAD materials/textures/tyre_gum.bmp
 uniform sampler2D tex;
 
 
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
-
-#define LINEAR_ATTENUATION 0.006
-#define QUADR_ATTENUATION 0.0001 
 
 struct Material {
 	vec4 ambient;
@@ -34,7 +34,7 @@ void main() {
 	
 	vec4 ambientF, diffuseF, specularF, shininessF;
 	vec3 lightDir;
-	float radius = 0.8;
+	float radius = 1.0;
 
 	//kdyz je vse zhasnute, bude tma
 	vec4 finalColor = vec4(0.0,0.0,0.0,1.0);
