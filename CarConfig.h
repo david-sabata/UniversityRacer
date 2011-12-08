@@ -45,7 +45,7 @@ struct CarConfig
                  suspensionMaxTravelCm(12.0f),
 
                  /// The stiffness constant for the suspension. 10.0 - Offroad buggy, 50.0 - Sports car, 200.0 - F1 Car
-                 suspensionStiffness(100.f),  //80
+                 suspensionStiffness(160.f),  //80
 
                  /// The damping coefficient for when the suspension is compressed. Set to k * 2.0 * btSqrt(m_suspensionStiffness) so k is proportional to critical damping.
                  /// k = 0.0 undamped & bouncy, k = 1.0 critical damping; k = 0.1 to 0.3 are good values
@@ -68,10 +68,10 @@ struct CarConfig
                  {
                      wheelRadius*=CAR_SCALE;
                      wheelWidth*=CAR_SCALE;
-                     connectionHeight*=CAR_SCALE;
+                     connectionHeight*=0.05f;
                      connectionWidth*=CAR_SCALE;
                      connectionLength*=CAR_SCALE;
-                     bodyConnectionToChasisHeight*=CAR_SCALE;
+                     bodyConnectionToChasisHeight = 0.085f;
 
                     // suspensionRestLength = 0.5f;
                     // suspensionMaxTravelCm= 20.f;
