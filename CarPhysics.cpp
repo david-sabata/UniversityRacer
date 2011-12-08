@@ -131,7 +131,7 @@ void CarPhysics::Reset()
 {
     m_vehicleSteering = 0.f;
     
-    btTransform tr = PhysicsUtils::btTransFrom(btVector3(37.19f, 10.71f, -21.7f), btQuaternion(btVector3(0, 1, 0), -3.14159f/2.f));
+    btTransform tr = PhysicsUtils::btTransFrom(btVector3(37.19f, 9.5f, -21.7f), btQuaternion(btVector3(0, 1, 0), -3.14159f/2.f));
     //tr.setIdentity();
    // tr.setRotation(btQuaternion(btVector3(0.f, 1.f, 0.f), 3.14f));
     //tr.setOrigin(m_lastCheckpointPos);
@@ -151,18 +151,18 @@ void CarPhysics::Reset()
 
 void CarPhysics::Update(btScalar timeStep)
 {
-/*    btScalar speed = std::abs(m_vehicle->getCurrentSpeedKmHour());
+    btScalar speed = std::abs(m_vehicle->getCurrentSpeedKmHour()*10.f);
        
-    if (speed > 100.f)
+/*    if (speed > 100.f)
     {
         m_cfg.steeringClamp = 0.1f;
         m_cfg.steeringIncrement = 0.004f;
     }
-    else
-    {
+    else */
+ /*   {
         m_cfg.steeringClamp = 0.1f + 0.65f - ((0.65f * speed) / 100.f);
         m_cfg.steeringIncrement = 0.04f - ((0.004f * speed) / 100.f);
-    }     */   
+    }    */   
     
     
     m_vehicle->applyEngineForce(m_engineForce, WHEEL_REARLEFT);

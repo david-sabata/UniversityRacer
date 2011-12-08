@@ -55,7 +55,7 @@ void Game::onInit()
     cout << "- initializing physics" << endl;
 
     physics = new Physics();
-    physics->AddCar(PhysicsUtils::btTransFrom(btVector3(37.19f, 10.71f, -21.7f), btQuaternion(btVector3(0, 1, 0), -3.14159f/2.f))); // 0,2,5
+    physics->AddCar(PhysicsUtils::btTransFrom(btVector3(37.19f, 9.5f, -21.7f), btQuaternion(btVector3(0, 1, 0), -3.14159f/2.f))); // 0,2,5
     //physics->AddCar(PhysicsUtils::btTransFrom(btVector3(8.69, 2.63, -5.4), btQuaternion(btVector3(0, 1, 0), -M_PI/2.f))); // 0,2,5    
     //physics->AddRigidBody(5., PhysicsUtils::btTransFrom(btVector3(0, 3, 1)), new btBoxShape(btVector3(0.75,0.75,0.75)))->setAngularVelocity(btVector3(1,1,1)); // TODO konstruktor se neprelozi kvuli Debug.h    
     		
