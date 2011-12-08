@@ -7,6 +7,7 @@ uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 #define LINEAR_ATTENUATION 0.027
 #define QUADR_ATTENUATION 0.0028 
 
+
 struct Material {
 	vec4 ambient;
 	vec4 diffuse;

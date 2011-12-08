@@ -4,9 +4,8 @@
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
-#define LINEAR_ATTENUATION 0.006
-#define QUADR_ATTENUATION 0.0001 
-
+#define LINEAR_ATTENUATION 0.027
+#define QUADR_ATTENUATION 0.0028 
 struct Material {
 	vec4 ambient;
 	vec4 diffuse;
@@ -59,15 +58,15 @@ vec4 p[] = vec4[](vec4(151,160,137,91),	vec4(90,15,131,13),		vec4(201,95,96,53),
 //Pomocna fce pro vyhledavani konkretnich prvku v poli vektoru velikosti 4
 int gIG(float index, float size, float gradSize) {
 	index = mod(index,size);
-	int mainIndex = int(floor(index / 4.0));
-	int smallIndex = int(floor(mod(index, 4.0)));
+	int mainIndex = int(index * 0.25);
+	int smallIndex = int(mod(index, 4.0));
 
 	return int(mod(((p[mainIndex])[smallIndex]),gradSize));
 }
 
 //funkce f(t) = 6t^5 - 15t^4 + 10t^3
 float f(float t) {
-	return (t * t * t * t * t * 6 - t * t * t * t * 15 + t * t * t * 10);
+	return (t * t * t * ( t * t * 6 - t * 15 + 10));
 }
 
 
@@ -138,14 +137,14 @@ void main() {
 	
 	vec4 ambientF, diffuseF, specularF, shininessF;
 	vec3 lightDir;
-	float radius = 1.2;
+	float radius = 1.0; //pak se nasobi dale - optimalizace, proto je opacny
 
 	//kdyz je vse zhasnute, bude tma
 	vec4 finalColor = vec4(0.0,0.0,0.0,1.0);
 	
 	float scale = 19.0;
 	//generovani nahodnych uprav normal
-	float intensity = (noise3D(oPosition.x * scale,oPosition.y * scale,oPosition.z * scale) / scale);
+	float intensity = (noise3D(oPosition.x * scale,oPosition.y * scale,oPosition.z * scale) * 0.0526315789473);
 	vec3 modEyeNormal = eyeNormal + intensity;
 
 	vec3 N = normalize(modEyeNormal);
@@ -165,7 +164,7 @@ void main() {
 
 		//slabnuti svetla
 		float attenuation, distance;
-		distance = length(lightDir / radius);	 
+		distance = length(lightDir * radius);	 
 		//pro Range 100 - zdroj : http://www.ogre3d.org/tikiwiki/-Point+Light+Attenuation
 		float constantAtt = 1.0;
 		float linearAtt = LINEAR_ATTENUATION;

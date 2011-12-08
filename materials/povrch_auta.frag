@@ -1,6 +1,10 @@
 #version 130
 
 #define MAX_LIGHTS 4
+
+// @LOAD materials/textures/povrch_auta.bmp
+uniform sampler2D tex;
+
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
@@ -76,11 +80,8 @@ void main() {
 		//pricteme spekulární složku k výsledné barvi
 		if(specular >= 0.0)
 			spec = attenuation *  specular * material.specular;
-		finalColor +=  diff +  spec;
+		finalColor += diff +  spec;
 	} 
 	
-	//gl_FragColor = texture2D(textureNormal,t);
-	//gl_FragColor = ambientF[2];
-	//gl_FragColor = vec4(diffuse,0.0,0.0,1.0);		
-	gl_FragColor = finalColor;
+	gl_FragColor = texture(tex,t) + finalColor;
 }

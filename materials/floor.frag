@@ -1,8 +1,8 @@
 #version 130
 
 #define MAX_LIGHTS 4
-#define LINEAR_ATTENUATION 0.006
-#define QUADR_ATTENUATION 0.0001 
+#define LINEAR_ATTENUATION 0.027
+#define QUADR_ATTENUATION 0.0028 
 
 // @LOAD materials/textures/floor.bmp
 uniform sampler2D tex;

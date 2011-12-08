@@ -52,6 +52,7 @@ void main() {
 	//transformace zkoumaneho bodu do eyespace
 	vec4 eyePosition4 = mv * pos;
 	eyePosition = eyePosition4.xyz / eyePosition4.w;
+	
 
 	// predpokladame enabledLights > 0
 	////////////////////////////SVETLO /////////////////////////////////////
@@ -61,7 +62,7 @@ void main() {
 		//transformace svetla do eyespace (TODO : zeptat se Davida kam ho umistil : pravdepodobne je ve worldspace?)
 		vec4 lightPos4 = view * lightPosition;
 		eyeLightPos[i] = lightPos4.xyz / lightPos4.w ;
-	} 
+	}
 
 	specularF = material.specular;
 }

@@ -7,6 +7,7 @@ uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 #define LINEAR_ATTENUATION 0.027
 #define QUADR_ATTENUATION 0.0028 
 
+
 struct Material {
 	vec4 ambient;
 	vec4 diffuse;
@@ -70,13 +71,13 @@ void main() {
 		vec3 H = normalize(L + V);
 	
 		//spocitame spekularni odlesk
-		float specular = pow(dot(N,H), material.shininess);
+		float specular = pow(dot(N,H), material.shininess * 20);
 	
 		vec4 spec = vec4(0.0,0.0,0.0,1.0);
 		//pricteme spekulární složku k výsledné barvi
 		if(specular >= 0.0)
 			spec = attenuation *  specular * material.specular;
-		finalColor +=  diff +  spec;
+		finalColor +=  diff + spec;
 	} 
 	
 	//gl_FragColor = texture2D(textureNormal,t);

@@ -66,17 +66,7 @@ void main() {
 		diffuseF = 	material.diffuse * lights[i * 3 + 1];
 		vec4 diff = attenuation * diffuse * diffuseF;
 	
-		//halfvector = L + V - mezi light a pozorovatelem
-		vec3 H = normalize(L + V);
-	
-		//spocitame spekularni odlesk
-		float specular = pow(dot(N,H), material.shininess);
-	
-		vec4 spec = vec4(0.0,0.0,0.0,1.0);
-		//pricteme spekulární složku k výsledné barvi
-		if(specular >= 0.0)
-			spec = attenuation *  specular * material.specular;
-		finalColor +=  diff +  spec;
+		finalColor +=  diff;
 	} 
 	
 	//gl_FragColor = texture2D(textureNormal,t);
