@@ -10,17 +10,17 @@ struct CarConfig
     CarConfig(): mass(5.0f),
                  
                  /// Amount of torque applied to the wheel. This provides the vehicle's acceleration
-                 maxEngineForce(15.f),  //this should be engine/velocity dependent
+                 maxEngineForce(20.f),  //this should be engine/velocity dependent
                 
                  /// Amount of braking torque applied to the wheel.
                  maxBreakingForce(0.5f),
                  
-                 steeringIncrement(0.04f),  // 0.04
+                 steeringIncrement(0.03f),  // 0.04
                  steeringClamp(0.75f),      // 0.75
                  
                  // chasis damping
                  linearDamping(0.1f),  // 0.3
-                 angularDamping(0.1f), // 0.1
+                 angularDamping(0.0f), // 0.1
 
                  /// The direction of ray cast (chassis space). The wheel moves relative to the chassis in this direction, and the suspension force acts along this direction.
                  wheelDirectionCS(0.f, -1.f, 0.f),
@@ -58,7 +58,7 @@ struct CarConfig
                  /// The coefficient of friction between the tyre and the ground.
                  /// Should be about 0.8 for realistic cars, but can increased for better handling.
                  /// Set large (10000.0) for kart racers
-                 wheelFrictionSlip(1000.f),  //BT_LARGE_FLOAT;
+                 wheelFrictionSlip(2.5f),  //BT_LARGE_FLOAT;
                  
                  /// Reduces the rolling torque applied from the wheels that cause the vehicle to roll over.
                  /// This is a bit of a hack, but it's quite effective. 0.0 = no roll, 1.0 = physical behaviour.
@@ -77,8 +77,8 @@ struct CarConfig
                     // suspensionMaxTravelCm= 20.f;
                      
                      //suspensionStiffness*=CAR_SCALE;
-                     //suspensionDampingCompression = 0.59 * 2.0 * btSqrt(suspensionStiffness);
-                     //suspensionDampingRelaxation = 0.65 * 2.0 * btSqrt(suspensionStiffness);    
+                    // suspensionDampingCompression = /*0.59*/ 0.2 * 2.0 * btSqrt(suspensionStiffness);
+                    // suspensionDampingRelaxation = /*0.65*/ 0.35 * 2.0 * btSqrt(suspensionStiffness);    
                 }
 
     btScalar mass, linearDamping, angularDamping;
