@@ -112,8 +112,8 @@ void Camera::toggleObserve() {
 void Camera::Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameTime & gameTime)
 {
     const glm::vec3 lookAtPos(0, 1, 0);
-    const glm::vec3 lookFromPos(0, 4, 4);  //0, 3, -2
-    float viewDistance = 10.0f;
+    const glm::vec3 lookFromPos(0, 4*0.25, 4*0.25);  //0, 3, -2
+    float viewDistance = 10.0f*0.25;
     const float settleTime = 2.f;
 
     glm::mat3 targetRot(targetMat);

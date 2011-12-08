@@ -22,7 +22,7 @@ void Physics::Initialize()
     m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
     
     ///btDbvtBroadphase is a good general purpose broadphase. You can also try out btAxis3Sweep.
-    m_overlappingPairCache = new btAxisSweep3(btVector3(-1000,-1000,-1000), btVector3(1000,1000,1000));//new btDbvtBroadphase();
+    m_overlappingPairCache = new btAxisSweep3(btVector3(-1000, -1000, -1000), btVector3(1000, 1000, 1000));//new btDbvtBroadphase();
     
     ///the default constraint solver. For parallel processing you can use a different solver (see Extras/BulletMultiThreaded)
     m_constraintSolver = new btSequentialImpulseConstraintSolver;
@@ -86,11 +86,26 @@ void Physics::StepSimulation(btScalar timeStep)
 {
     if (m_car)
         m_car->Update(timeStep);
-    
-    m_dynamicsWorld->stepSimulation(timeStep, 10);
+
+    int numSimSteps = m_dynamicsWorld->stepSimulation(timeStep, MAX_SIMULATION_SUBSTEPS, 1/240.f);
+
+   /* if (!numSimSteps)
+			std::cout << "Interpolated transforms" << std::endl;
+	else
+    {
+		if (numSimSteps > MAX_SIMULATION_SUBSTEPS)
+		{
+			//detect dropping frames
+			std::cout << "Dropped " << numSimSteps - MAX_SIMULATION_SUBSTEPS << " simulation steps out of " << numSimSteps << std::endl;
+		}
+        else
+		{
+			std::cout << "Simulated " << numSimSteps << " steps" << std::endl;
+		}
+	}*/
 
     
-    if (m_car)
+  /*  if (m_car)
     for(int i = 0; i < m_ghostObject->getNumOverlappingObjects(); i++)
     {
         btRigidBody *pRigidBody = static_cast<btRigidBody *>(m_ghostObject->getOverlappingObject(i));
@@ -107,7 +122,7 @@ void Physics::StepSimulation(btScalar timeStep)
 
         }
         // do whatever you want to do with these pairs of colliding objects
-    }
+    }*/
 }
 
 btRigidBody * Physics::AddRigidBody(float mass, const btTransform & startTransform, btCollisionShape * shape)
@@ -119,27 +134,33 @@ btRigidBody * Physics::AddRigidBody(float mass, const btTransform & startTransfo
     return body;
 }
 
+btCollisionShape * Physics::CreateStaticCollisionShape(Mesh * mesh, float scale)
+{
+    int numTriangles = mesh->getFaces().size();
+    int numVertices = mesh->getVertices().size();
+
+    if (numTriangles < 1 || numVertices < 3)
+        return NULL;
+
+    btTriangleIndexVertexArray* tiva = new btTriangleIndexVertexArray(numTriangles, (int*)(&mesh->getFaces()[0]), sizeof(glm::ivec3),
+                                                                      numVertices, (btScalar*)(&mesh->getVertices()[0]), sizeof(glm::vec3));
+        
+    btBvhTriangleMeshShape *shape = new btBvhTriangleMeshShape(tiva, true);        
+    shape->setLocalScaling(btVector3(scale, scale, scale));
+
+    return shape;
+}
+
 std::vector<btCollisionShape *> Physics::CreateStaticCollisionShapes(BaseModel * model, float scale)
 {
     std::vector<btCollisionShape *> ret;
     
     for (unsigned int i = 0; i < model->getMeshes().size(); i++)
     {
-        Mesh *m = model->getMeshes()[i];
-
-        int numTriangles = m->getFaces().size();
-        int numVertices = m->getVertices().size();
-
-        if (numTriangles == 0 || numVertices == 0)
-            continue;
-
-        btTriangleIndexVertexArray* tiva = new btTriangleIndexVertexArray(numTriangles, (int*)(&m->getFaces()[0]), sizeof(glm::ivec3),
-                                                                          numVertices, (btScalar*)(&m->getVertices()[0]), sizeof(glm::vec3));
+        btCollisionShape *shape = CreateStaticCollisionShape(model->getMeshes()[i], scale);
         
-        btBvhTriangleMeshShape *shape = new btBvhTriangleMeshShape(tiva, true);        
-        shape->setLocalScaling(btVector3(scale, scale, scale));
-
-        ret.push_back(shape);
+        if (shape)
+            ret.push_back(shape);
     }
 
     return ret;

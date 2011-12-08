@@ -23,7 +23,7 @@ btRigidBody * PhysicsUtils::CreateRigidBody(btScalar mass, const btTransform & s
     btRigidBody::btRigidBodyConstructionInfo cInfo(mass, myMotionState, shape, localInertia);
 
     btRigidBody* body = new btRigidBody(cInfo);
-    //body->setContactProcessingThreshold(BT_LARGE_FLOAT);
+    body->setContactProcessingThreshold(0);
 
     return body;
 }
