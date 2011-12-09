@@ -17,41 +17,41 @@ CarPhysics::~CarPhysics(void)
 btCollisionShape* CarPhysics::CreateVehicleShape()
 {
     static btScalar baseVertices[] = {                     
-        -0.45f*CAR_SCALE, -0.204f*CAR_SCALE, -2.276f*CAR_SCALE,   // back center
-        -0.45f*CAR_SCALE, -0.472f*CAR_SCALE, -2.238f*CAR_SCALE,   // back lower
-        -0.85f*CAR_SCALE, -0.597f*CAR_SCALE, -1.789f*CAR_SCALE,   // back bottom
-        -0.85f*CAR_SCALE, -0.615f*CAR_SCALE,  1.728f*CAR_SCALE,   // front new bottom
-        -0.35f*CAR_SCALE, -0.620f*CAR_SCALE,  2.198f*CAR_SCALE,   // front bottom 
-        -0.35f*CAR_SCALE, -0.276f*CAR_SCALE,  2.273f*CAR_SCALE,   // front center
-        -0.35f*CAR_SCALE, -0.046f*CAR_SCALE,  2.122f*CAR_SCALE,   // front upper
-        -0.85f*CAR_SCALE,  0.069f*CAR_SCALE,  1.728f*CAR_SCALE,   // front new top
-        -0.85f*CAR_SCALE,  0.154f*CAR_SCALE,  1.118f*CAR_SCALE,   // front top
-        -0.85f*CAR_SCALE,  0.264f*CAR_SCALE, -1.827f*CAR_SCALE,   // back top
-        -0.45f*CAR_SCALE,  0.207f*CAR_SCALE, -2.174f*CAR_SCALE,   // back upper    
+        -0.45f * CAR_SCALE, -0.204f * CAR_SCALE, -2.276f * CAR_SCALE,   // back center
+        -0.45f * CAR_SCALE, -0.472f * CAR_SCALE, -2.238f * CAR_SCALE,   // back lower
+        -0.85f * CAR_SCALE, -0.597f * CAR_SCALE, -1.789f * CAR_SCALE,   // back bottom
+        -0.85f * CAR_SCALE, -0.615f * CAR_SCALE,  1.728f * CAR_SCALE,   // front new bottom
+        -0.35f * CAR_SCALE, -0.620f * CAR_SCALE,  2.198f * CAR_SCALE,   // front bottom 
+        -0.35f * CAR_SCALE, -0.276f * CAR_SCALE,  2.273f * CAR_SCALE,   // front center
+        -0.35f * CAR_SCALE, -0.046f * CAR_SCALE,  2.122f * CAR_SCALE,   // front upper
+        -0.85f * CAR_SCALE,  0.069f * CAR_SCALE,  1.728f * CAR_SCALE,   // front new top
+        -0.85f * CAR_SCALE,  0.154f * CAR_SCALE,  1.118f * CAR_SCALE,   // front top
+        -0.85f * CAR_SCALE,  0.264f * CAR_SCALE, -1.827f * CAR_SCALE,   // back top
+        -0.45f * CAR_SCALE,  0.207f * CAR_SCALE, -2.174f * CAR_SCALE,   // back upper    
 
-         0.45f*CAR_SCALE, -0.204f*CAR_SCALE, -2.276f*CAR_SCALE,   // back center
-         0.45f*CAR_SCALE, -0.472f*CAR_SCALE, -2.238f*CAR_SCALE,   // back lower
-         0.85f*CAR_SCALE, -0.597f*CAR_SCALE, -1.789f*CAR_SCALE,   // back bottom
-         0.85f*CAR_SCALE, -0.615f*CAR_SCALE,  1.728f*CAR_SCALE,   // front new bottom
-         0.35f*CAR_SCALE, -0.620f*CAR_SCALE,  2.198f*CAR_SCALE,   // front bottom 
-         0.35f*CAR_SCALE, -0.276f*CAR_SCALE,  2.273f*CAR_SCALE,   // front center
-         0.35f*CAR_SCALE, -0.046f*CAR_SCALE,  2.122f*CAR_SCALE,   // front upper
-         0.85f*CAR_SCALE,  0.069f*CAR_SCALE,  1.728f*CAR_SCALE,   // front new top
-         0.85f*CAR_SCALE,  0.154f*CAR_SCALE,  1.118f*CAR_SCALE,   // front top
-         0.85f*CAR_SCALE,  0.264f*CAR_SCALE, -1.827f*CAR_SCALE,   // back top
-         0.45f*CAR_SCALE,  0.207f*CAR_SCALE, -2.174f*CAR_SCALE,   // back upper    
+         0.45f * CAR_SCALE, -0.204f * CAR_SCALE, -2.276f * CAR_SCALE,   // back center
+         0.45f * CAR_SCALE, -0.472f * CAR_SCALE, -2.238f * CAR_SCALE,   // back lower
+         0.85f * CAR_SCALE, -0.597f * CAR_SCALE, -1.789f * CAR_SCALE,   // back bottom
+         0.85f * CAR_SCALE, -0.615f * CAR_SCALE,  1.728f * CAR_SCALE,   // front new bottom
+         0.35f * CAR_SCALE, -0.620f * CAR_SCALE,  2.198f * CAR_SCALE,   // front bottom 
+         0.35f * CAR_SCALE, -0.276f * CAR_SCALE,  2.273f * CAR_SCALE,   // front center
+         0.35f * CAR_SCALE, -0.046f * CAR_SCALE,  2.122f * CAR_SCALE,   // front upper
+         0.85f * CAR_SCALE,  0.069f * CAR_SCALE,  1.728f * CAR_SCALE,   // front new top
+         0.85f * CAR_SCALE,  0.154f * CAR_SCALE,  1.118f * CAR_SCALE,   // front top
+         0.85f * CAR_SCALE,  0.264f * CAR_SCALE, -1.827f * CAR_SCALE,   // back top
+         0.45f * CAR_SCALE,  0.207f * CAR_SCALE, -2.174f * CAR_SCALE,   // back upper    
     };
 
     static btScalar topVertices[] = {                     
-        -0.85f*CAR_SCALE,  0.264f*CAR_SCALE, -1.827f*CAR_SCALE,  // back bottom
-        -0.85f*CAR_SCALE,  0.154f*CAR_SCALE,  1.118f*CAR_SCALE,  // front bottom
-        -0.57f*CAR_SCALE,  0.596f*CAR_SCALE,  0.178f*CAR_SCALE,  // front top
-        -0.57f*CAR_SCALE,  0.577f*CAR_SCALE, -1.038f*CAR_SCALE,  // back top
+        -0.85f * CAR_SCALE,  0.264f * CAR_SCALE, -1.827f * CAR_SCALE,  // back bottom
+        -0.85f * CAR_SCALE,  0.154f * CAR_SCALE,  1.118f * CAR_SCALE,  // front bottom
+        -0.57f * CAR_SCALE,  0.596f * CAR_SCALE,  0.178f * CAR_SCALE,  // front top
+        -0.57f * CAR_SCALE,  0.577f * CAR_SCALE, -1.038f * CAR_SCALE,  // back top
 
-         0.85f*CAR_SCALE,  0.264f*CAR_SCALE, -1.827f*CAR_SCALE,  // back bottom
-         0.85f*CAR_SCALE,  0.154f*CAR_SCALE,  1.118f*CAR_SCALE,  // front bottom
-         0.57f*CAR_SCALE,  0.596f*CAR_SCALE,  0.178f*CAR_SCALE,  // front top
-         0.57f*CAR_SCALE,  0.577f*CAR_SCALE, -1.038f*CAR_SCALE,  // back top        
+         0.85f * CAR_SCALE,  0.264f * CAR_SCALE, -1.827f * CAR_SCALE,  // back bottom
+         0.85f * CAR_SCALE,  0.154f * CAR_SCALE,  1.118f * CAR_SCALE,  // front bottom
+         0.57f * CAR_SCALE,  0.596f * CAR_SCALE,  0.178f * CAR_SCALE,  // front top
+         0.57f * CAR_SCALE,  0.577f * CAR_SCALE, -1.038f * CAR_SCALE,  // back top        
     };
 
     btConvexHullShape *baseHull = new btConvexHullShape(baseVertices, 22, 3 * sizeof(btScalar)); 
@@ -151,19 +151,18 @@ void CarPhysics::Reset()
 
 void CarPhysics::Update(btScalar timeStep)
 {
-    btScalar speed = std::abs(m_vehicle->getCurrentSpeedKmHour()*10.f);
+/*  btScalar speed = std::abs(m_vehicle->getCurrentSpeedKmHour()*10.f);
        
-/*    if (speed > 100.f)
+    if (speed > 100.f)
     {
         m_cfg.steeringClamp = 0.1f;
         m_cfg.steeringIncrement = 0.004f;
     }
-    else */
- /*   {
+    else 
+    {
         m_cfg.steeringClamp = 0.1f + 0.65f - ((0.65f * speed) / 100.f);
         m_cfg.steeringIncrement = 0.04f - ((0.004f * speed) / 100.f);
-    }    */   
-    
+    }    */       
     
     m_vehicle->applyEngineForce(m_engineForce, WHEEL_REARLEFT);
     m_vehicle->setBrake(m_breakingForce, WHEEL_REARLEFT);
@@ -213,14 +212,15 @@ void CarPhysics::TurnRight()
 
 void CarPhysics::Forward()
 {
-    if (std::abs(m_vehicle->getCurrentSpeedKmHour()) < 60)
+    if (std::abs(m_vehicle->getCurrentSpeedKmHour()) < m_cfg.maxSpeedClamp)
         m_engineForce = m_cfg.maxEngineForce;
     m_breakingForce = 0.f;    
 }
 
 void CarPhysics::Backward()
 {
-    m_engineForce = -m_cfg.maxEngineForce;
+    if (std::abs(m_vehicle->getCurrentSpeedKmHour()) < m_cfg.maxSpeedClamp)
+        m_engineForce = -m_cfg.maxEngineForce;
     m_breakingForce = 0.f;    
 }
 
