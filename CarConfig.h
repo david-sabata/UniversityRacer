@@ -14,6 +14,9 @@ struct CarConfig
                 
                  /// Amount of braking torque applied to the wheel.
                  maxBreakingForce(0.5f),
+
+                 /// Maximum speed clamp (km/h)
+                 maxSpeedClamp(60.f),
                  
                  steeringIncrement(0.03f),  // 0.04
                  steeringClamp(0.75f),      // 0.75
@@ -33,8 +36,8 @@ struct CarConfig
                  wheelWidth(0.215f),
 
                  /// The starting point of the ray, where the suspension connects to the chassis (chassis space)
-                 connectionHeight(0.200f),  // y
                  connectionWidth (0.725f),  // x
+                 connectionHeight(0.200f),  // y
                  connectionLength(1.325f),  // z 
                  bodyConnectionToChasisHeight(0.6f),
 
@@ -66,23 +69,23 @@ struct CarConfig
                  /// You should also try lowering the vehicle's centre of mass
                  rollInfluence(0.2f)   //1.0f;
                  {
-                     wheelRadius*=CAR_SCALE;
-                     wheelWidth*=CAR_SCALE;
-                     connectionHeight*=0.05f;
-                     connectionWidth*=CAR_SCALE;
-                     connectionLength*=CAR_SCALE;
-                     bodyConnectionToChasisHeight = 0.085f;
+                     wheelRadius                  *= CAR_SCALE;
+                     wheelWidth                   *= CAR_SCALE;
+                     connectionHeight             *= CAR_SCALE - 0.2f;  //*=0.05
+                     connectionWidth              *= CAR_SCALE;
+                     connectionLength             *= CAR_SCALE;
+                     bodyConnectionToChasisHeight *= CAR_SCALE - 0.10833f; //=0.085f;
 
-                    // suspensionRestLength = 0.5f;
-                    // suspensionMaxTravelCm= 20.f;
+                  // suspensionRestLength = 0.5f;
+                  // suspensionMaxTravelCm= 20.f;
                      
-                     //suspensionStiffness*=CAR_SCALE;
-                    // suspensionDampingCompression = /*0.59*/ 0.2 * 2.0 * btSqrt(suspensionStiffness);
-                    // suspensionDampingRelaxation = /*0.65*/ 0.35 * 2.0 * btSqrt(suspensionStiffness);    
+                  // suspensionStiffness *= CAR_SCALE;
+                  // suspensionDampingCompression = /*0.59*/ 0.2 * 2.0 * btSqrt(suspensionStiffness);
+                  // suspensionDampingRelaxation = /*0.65*/ 0.35 * 2.0 * btSqrt(suspensionStiffness);    
                 }
 
     btScalar mass, linearDamping, angularDamping;
-    btScalar maxEngineForce, maxBreakingForce, steeringIncrement, steeringClamp;
+    btScalar maxEngineForce, maxBreakingForce, maxSpeedClamp, steeringIncrement, steeringClamp;
     btScalar wheelFrictionSlip, wheelRadius, wheelWidth, connectionHeight, connectionWidth, connectionLength, bodyConnectionToChasisHeight;
     btVector3 wheelDirectionCS, wheelAxleCS;
     btScalar suspensionStiffness, suspensionDampingRelaxation, suspensionDampingCompression, suspensionRestLength, suspensionMaxTravelCm, rollInfluence;
