@@ -53,6 +53,7 @@ void Game::onInit()
   	BaseModel* sidedesk = container->load3DS("models/desk-side.3ds");
     BaseModel* car =  container->load3DS("models/car.3ds");
     BaseModel* wheel =  container->load3DS("models/wheel.3ds");
+	BaseModel* plank =  container->load3DS("models/plank.3ds");
 
     cout << "- initializing physics" << endl;
 
@@ -189,6 +190,65 @@ void Game::onInit()
             wheelQueueItem[i] = container->queueDraw(wheel);
         }
 	}
+
+	// pridat desticky
+	{
+		//deska spojujici stoly nahore v pravo
+		container->addModel("plank", plank);
+		glm::mat4 pos = glm::translate(glm::vec3(20.8f, 8.62f, -21.8f));
+	    glm::mat4 scale = glm::scale(glm::vec3(0.006,0.0006,0.009));
+		glm::mat4 rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+		
+		//deska v levo jede se na zem z horniho stolu
+		container->addModel("plank", plank);
+		pos = glm::translate(glm::vec3(-21.36f, 6.82f, -21.8f));
+	    scale = glm::scale(glm::vec3(0.006,0.0006,0.0115));
+		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
+		rot = glm::rotate(rot, -30.f, glm::vec3(1.f,0.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+		
+		//deska v v evo jede se smere dolu
+		container->addModel("plank", plank);
+		pos = glm::translate(glm::vec3(-25.36f, 4.20f, -18.9f));
+	    scale = glm::scale(glm::vec3(0.006,0.0006,0.006));
+		rot = glm::rotate(25.f, glm::vec3(1.f,0.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+
+
+		//po sjeti o patro nize prejizdime pres MOST (v levo)
+		container->addModel("plank", plank);
+		pos = glm::translate(glm::vec3(-20.8f, 4.0f, -17.0f));
+	    scale = glm::scale(glm::vec3(0.006,0.0006,0.009));
+		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+
+		//deska uprosred  jede se smerem dolu ve smeru jizdy
+		container->addModel("plank", plank);
+		pos = glm::translate(glm::vec3(-3.36f, 3.19f, -13.95f));
+	    scale = glm::scale(glm::vec3(0.006,0.0006,0.006));
+		rot = glm::rotate(25.f, glm::vec3(1.f,0.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+
+
+		//deska uprosred  jede se smerem dolu ve smeru jizdy - ploska 2
+		container->addModel("plank", plank);
+		pos = glm::translate(glm::vec3(-3.36f, 2.19f, -9.0f));
+	    scale = glm::scale(glm::vec3(0.006,0.0006,0.006));
+		rot = glm::rotate(25.f, glm::vec3(1.f,0.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+
+		//deska v levo jede ze zeme nahoru na levy stul
+		container->addModel("plank", plank);
+		pos = glm::translate(glm::vec3(-21.36f, 3.50f, -7.0f));
+	    scale = glm::scale(glm::vec3(0.006,0.0006,0.0115));
+		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
+		rot = glm::rotate(rot, 30.f, glm::vec3(1.f,0.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+
+
+	}
+
 
 	cout << "- constructing scene" << endl;
 

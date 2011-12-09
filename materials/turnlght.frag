@@ -1,16 +1,11 @@
 #version 130
 
 #define MAX_LIGHTS 4
-
-// @LOAD materials/textures/povrch_auta.bmp
-uniform sampler2D tex;
-
-
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
 #define LINEAR_ATTENUATION 0.022
-#define QUADR_ATTENUATION 0.0019  
+#define QUADR_ATTENUATION 0.0019 
 
 struct Material {
 	vec4 ambient;
@@ -38,7 +33,6 @@ void main() {
 
 	//kdyz je vse zhasnute, bude tma
 	vec4 finalColor = vec4(0.0,0.0,0.0,1.0);
-
 
 	vec3 N = normalize(eyeNormal);
 
@@ -82,8 +76,9 @@ void main() {
 		//pricteme spekulární složku k výsledné barvi
 		if(specular >= 0.0)
 			spec = attenuation *  specular * material.specular;
-		finalColor += diff +  spec;
+		finalColor +=  diff +  spec;
 	} 
 	
-	gl_FragColor = texture(tex,t) + finalColor;
+	
+	gl_FragColor = vec4(1.0,0.74509803,0.05098,1.0) * finalColor;
 }

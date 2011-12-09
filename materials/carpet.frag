@@ -1,8 +1,8 @@
 #version 130
 
 #define MAX_LIGHTS 4
-#define LINEAR_ATTENUATION 0.027
-#define QUADR_ATTENUATION 0.0028 
+#define LINEAR_ATTENUATION 0.022
+#define QUADR_ATTENUATION 0.0019 
 
 
 // @LOAD materials/textures/carpet2.bmp

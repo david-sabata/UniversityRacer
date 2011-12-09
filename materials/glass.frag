@@ -6,8 +6,8 @@
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
-#define LINEAR_ATTENUATION 0.027
-#define QUADR_ATTENUATION 0.0028 
+#define LINEAR_ATTENUATION 0.022
+#define QUADR_ATTENUATION 0.0019 
 
 struct Material {
 	vec4 ambient;
@@ -82,5 +82,5 @@ void main() {
 		finalColor +=  diff +  spec;
 	} 
 			
-	gl_FragColor = vec4(0.10392,0.23333,0.743137,1.0) * finalColor;
+	gl_FragColor = vec4(0.30392,0.43333,0.643137,1.0) *  finalColor;
 }
