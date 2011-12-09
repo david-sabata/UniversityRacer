@@ -10,7 +10,7 @@ struct CarConfig
     CarConfig(): mass(5.0f),
                  
                  /// Amount of torque applied to the wheel. This provides the vehicle's acceleration
-                 maxEngineForce(20.f),  //this should be engine/velocity dependent
+                 maxEngineForce(22.5f),  //this should be engine/velocity dependent
                 
                  /// Amount of braking torque applied to the wheel.
                  maxBreakingForce(0.5f),
@@ -18,11 +18,11 @@ struct CarConfig
                  /// Maximum speed clamp (km/h)
                  maxSpeedClamp(60.f),
                  
-                 steeringIncrement(0.03f),  // 0.04
-                 steeringClamp(0.75f),      // 0.75
+                 steeringIncrement(0.025f),  // 0.03
+                 steeringClamp(0.50f),      // 0.75
                  
                  // chasis damping
-                 linearDamping(0.1f),  // 0.3
+                 linearDamping(0.25f),  // 0.3
                  angularDamping(0.0f), // 0.1
 
                  /// The direction of ray cast (chassis space). The wheel moves relative to the chassis in this direction, and the suspension force acts along this direction.
