@@ -192,59 +192,64 @@ void Game::onInit()
 	}
 
 	// pridat desticky
-	{
-		//deska spojujici stoly nahore v pravo
+	{        
 		container->addModel("plank", plank);
+        std::vector<btCollisionShape*> plankShapes1 = Physics::CreateStaticCollisionShapes(plank, btVector3(0.006f,0.0006f,0.009f));
+        std::vector<btCollisionShape*> plankShapes2 = Physics::CreateStaticCollisionShapes(plank, btVector3(0.006f,0.0006f,0.0115f));
+        std::vector<btCollisionShape*> plankShapes3 = Physics::CreateStaticCollisionShapes(plank, btVector3(0.006f,0.0006f,0.006f));
+
+        //deska spojujici stoly nahore v pravo
 		glm::mat4 pos = glm::translate(glm::vec3(20.8f, 8.62f, -21.8f));
 	    glm::mat4 scale = glm::scale(glm::vec3(0.006,0.0006,0.009));
 		glm::mat4 rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes1, PhysicsUtils::btTransFrom(pos * rot));
 		
 		//deska v levo jede se na zem z horniho stolu
-		container->addModel("plank", plank);
 		pos = glm::translate(glm::vec3(-21.36f, 6.82f, -21.8f));
 	    scale = glm::scale(glm::vec3(0.006,0.0006,0.0115));
 		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
 		rot = glm::rotate(rot, -30.f, glm::vec3(1.f,0.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes2, PhysicsUtils::btTransFrom(pos * rot));
 		
 		//deska v v evo jede se smere dolu
-		container->addModel("plank", plank);
 		pos = glm::translate(glm::vec3(-25.36f, 4.20f, -18.9f));
 	    scale = glm::scale(glm::vec3(0.006,0.0006,0.006));
 		rot = glm::rotate(25.f, glm::vec3(1.f,0.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
 
 
 		//po sjeti o patro nize prejizdime pres MOST (v levo)
-		container->addModel("plank", plank);
 		pos = glm::translate(glm::vec3(-20.8f, 4.0f, -17.0f));
 	    scale = glm::scale(glm::vec3(0.006,0.0006,0.009));
 		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes1, PhysicsUtils::btTransFrom(pos * rot));
 
 		//deska uprosred  jede se smerem dolu ve smeru jizdy
-		container->addModel("plank", plank);
 		pos = glm::translate(glm::vec3(-3.36f, 3.19f, -13.95f));
 	    scale = glm::scale(glm::vec3(0.006,0.0006,0.006));
 		rot = glm::rotate(25.f, glm::vec3(1.f,0.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
 
 
 		//deska uprosred  jede se smerem dolu ve smeru jizdy - ploska 2
-		container->addModel("plank", plank);
 		pos = glm::translate(glm::vec3(-3.36f, 2.19f, -9.0f));
 	    scale = glm::scale(glm::vec3(0.006,0.0006,0.006));
 		rot = glm::rotate(25.f, glm::vec3(1.f,0.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
 
 		//deska v levo jede ze zeme nahoru na levy stul
-		container->addModel("plank", plank);
 		pos = glm::translate(glm::vec3(-21.36f, 3.50f, -7.0f));
 	    scale = glm::scale(glm::vec3(0.006,0.0006,0.0115));
 		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
 		rot = glm::rotate(rot, 30.f, glm::vec3(1.f,0.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes2, PhysicsUtils::btTransFrom(pos * rot));
 
 
 	}
