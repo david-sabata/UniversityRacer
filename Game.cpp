@@ -214,7 +214,7 @@ void Game::onInit()
         physics->AddStaticModel(plankShapes2, PhysicsUtils::btTransFrom(pos * rot));
 		
 		//deska v v evo jede se smere dolu
-		pos = glm::translate(glm::vec3(-25.36f, 4.20f, -18.9f));
+		pos = glm::translate(glm::vec3(-30.36f, 4.20f, -18.9f));
 	    scale = glm::scale(glm::vec3(0.006,0.0006,0.006));
 		rot = glm::rotate(25.f, glm::vec3(1.f,0.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
@@ -244,14 +244,38 @@ void Game::onInit()
         physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
 
 		//deska v levo jede ze zeme nahoru na levy stul
-		pos = glm::translate(glm::vec3(-21.36f, 3.50f, -7.0f));
-	    scale = glm::scale(glm::vec3(0.006,0.0006,0.0115));
+		pos = glm::translate(glm::vec3(-19.5f, 3.50f, -7.0f));
+	    scale = glm::scale(glm::vec3(0.006,0.0006,0.015));
 		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
-		rot = glm::rotate(rot, 30.f, glm::vec3(1.f,0.f,0.f));
+		rot = glm::rotate(rot, 27.f, glm::vec3(1.f,0.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
         physics->AddStaticModel(plankShapes2, PhysicsUtils::btTransFrom(pos * rot));
 
+		//ROURA DOLU MEZI ZIDLEMA
+		//deska LEVO, SJEZD z LAVICE na LAVICI
+		pos = glm::translate(glm::vec3(-36.85f, 5.10f, -4.00f));
+	    scale = glm::scale(glm::vec3(0.0045,0.0006,0.006));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
 
+		//deska LEVO, SJEZD z LAVICE na LAVICI
+		pos = glm::translate(glm::vec3(-37.29f, 5.10f, -4.00f));
+	    scale = glm::scale(glm::vec3(0.0009,0.0006,0.006));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		rot = glm::rotate(rot, 90.f, glm::vec3(0.f,0.f,1.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
+
+				//deska LEVO, SJEZD z LAVICE na LAVICI
+		pos = glm::translate(glm::vec3(-36.40f, 5.10f, -4.00f));
+	    scale = glm::scale(glm::vec3(0.0009,0.0006,0.006));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		rot = glm::rotate(rot, 90.f, glm::vec3(0.f,0.f,1.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
+
+		//KONEC ROURA 1 MEZI ZIDLEMA
 	}
 
 
