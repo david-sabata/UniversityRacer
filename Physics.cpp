@@ -134,7 +134,7 @@ btRigidBody * Physics::AddRigidBody(float mass, const btTransform & startTransfo
     return body;
 }
 
-btCollisionShape * Physics::CreateStaticCollisionShape(Mesh * mesh, float scale)
+btCollisionShape * Physics::CreateStaticCollisionShape(Mesh * mesh, const btVector3 & scale)
 {
     int numTriangles = mesh->getFaces().size();
     int numVertices = mesh->getVertices().size();
@@ -146,12 +146,12 @@ btCollisionShape * Physics::CreateStaticCollisionShape(Mesh * mesh, float scale)
                                                                       numVertices, (btScalar*)(&mesh->getVertices()[0]), sizeof(glm::vec3));
         
     btBvhTriangleMeshShape *shape = new btBvhTriangleMeshShape(tiva, true);        
-    shape->setLocalScaling(btVector3(scale, scale, scale));
+    shape->setLocalScaling(scale);
 
     return shape;
 }
 
-std::vector<btCollisionShape *> Physics::CreateStaticCollisionShapes(BaseModel * model, float scale)
+std::vector<btCollisionShape *> Physics::CreateStaticCollisionShapes(BaseModel * model, const btVector3 & scale)
 {
     std::vector<btCollisionShape *> ret;
     
@@ -164,6 +164,11 @@ std::vector<btCollisionShape *> Physics::CreateStaticCollisionShapes(BaseModel *
     }
 
     return ret;
+}
+
+std::vector<btCollisionShape *> Physics::CreateStaticCollisionShapes(BaseModel * model, float scale)
+{
+    return CreateStaticCollisionShapes(model, btVector3(scale, scale, scale));
 }
 
 void Physics::AddStaticModel(std::vector<btCollisionShape *> & collisionShapes, const btTransform & trans, bool debugDraw)

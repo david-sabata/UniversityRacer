@@ -29,8 +29,10 @@ public:
     void DebugDrawWorld() { m_dynamicsWorld->debugDrawWorld(); } 
     void AddCollisionShape(btCollisionShape * shape) { m_collisionShapes.push_back(shape); }
 
-    static btCollisionShape * CreateStaticCollisionShape(Mesh * mesh, float scale = 1.f);
+    static btCollisionShape * CreateStaticCollisionShape(Mesh * mesh, const btVector3 & scale = btVector3(1,1,1));
+    static std::vector<btCollisionShape *> CreateStaticCollisionShapes(BaseModel * model, const btVector3 & scale);
     static std::vector<btCollisionShape *> CreateStaticCollisionShapes(BaseModel * model, float scale = 1.f);
+
     void AddStaticModel(std::vector<btCollisionShape *> & collisionShapes, const btTransform & trans, bool debugDraw = true);
     
     CarPhysics * GetCar() { return m_car; }
