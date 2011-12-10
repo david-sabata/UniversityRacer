@@ -12,6 +12,7 @@
 #include "Gui.h"
 #include "Debug.h"
 #include "Physics.h"
+#include "ShadowVolumes.h"
 
 
 class Game : public BaseApp
@@ -39,6 +40,7 @@ class Game : public BaseApp
 		Gui* gui;
         ModelContainer* container;
         Physics *physics;
+		ShadowVolumes* shadowVolumes;
 
 		// handle retezce ukazujici cas
 		unsigned int guiTime;

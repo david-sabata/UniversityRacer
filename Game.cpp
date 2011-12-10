@@ -19,12 +19,14 @@ Game::Game(): mouseCaptured(false), /*drawingQueue(NULL),*/ drawWireframe(false)
 {
 	gui = new Gui(windowWidth, windowHeight);
 	scene = new Scene(*this);
+	shadowVolumes = new ShadowVolumes();
 }
 
 Game::~Game()
 {
 	delete gui;
 	delete scene;
+	delete shadowVolumes;
 }
 
 
@@ -46,10 +48,10 @@ void Game::onInit()
 	// nacist modely	
 	container = new ModelContainer;	
 
-
+	// modely pro kresleni
 	BaseModel* chairs = container->load3DS("models/chairs.3ds");
 	BaseModel* e112 = container->load3DS("models/e112.3ds");
-	BaseModel* middesk = container->load3DS("models/desk-mid.3ds");
+	BaseModel* middesk = container->load3DS("models/desk-mid.3ds");	
   	BaseModel* sidedesk = container->load3DS("models/desk-side.3ds");
     BaseModel* car =  container->load3DS("models/car.3ds");
     BaseModel* wheel =  container->load3DS("models/wheel.3ds");
@@ -58,12 +60,12 @@ void Game::onInit()
     cout << "- initializing physics" << endl;
 
     physics = new Physics();
-    physics->AddCar(PhysicsUtils::btTransFrom(btVector3(37.19f, 9.5f, -21.7f), btQuaternion(btVector3(0, 1, 0), -M_PI/2.f))); // 0,2,5
+	physics->AddCar(PhysicsUtils::btTransFrom(btVector3(37.19f, 9.5f, -21.7f), btQuaternion(btVector3(0, 1, 0), btScalar(-M_PI/2.f)))); // 0,2,5
    //physics->AddRigidBody(5., PhysicsUtils::btTransFrom(btVector3(0, 3, 1)), new btBoxShape(btVector3(0.75,0.75,0.75)))->setAngularVelocity(btVector3(1,1,1)); // TODO konstruktor se neprelozi kvuli Debug.h    
     		
 	cout << "- setting up drawing queue" << endl;
 		
-	// vykresli E112 zmensenou na 20%
+	// vykresli E112
 	if (1) {
 		container->addModel("e112", e112);
 		glm::mat4 modelmat = glm::scale(glm::vec3(STATICS_SCALE));
@@ -73,7 +75,7 @@ void Game::onInit()
 	}
 
     // vykresli zidle
-	{
+	if (0) {
 		container->addModel("chairs", chairs);
                 
 		glm::mat4 scale = glm::scale(glm::vec3(STATICS_SCALE));
@@ -106,7 +108,7 @@ void Game::onInit()
 	}
 
 	// vykresli prostredni lavice
-	{
+	if (1) {
 		container->addModel("middesk", middesk);
 
 		glm::mat4 scale = glm::scale(glm::vec3(STATICS_SCALE));
@@ -123,14 +125,16 @@ void Game::onInit()
 		for (unsigned int rowI = 0; rowI < 5; rowI++)
 		{
 			glm::mat4 col = glm::translate(rows[rowI], glm::vec3(0, 0, 0));
-			container->queueDraw(middesk, col);
 
             physics->AddStaticModel(middeskShapes, PhysicsUtils::btTransFrom(glm::scale(col, glm::vec3(1/STATICS_SCALE))), false);
+
+			container->queueDraw(middesk, col);
+			shadowVolumes->addModel(middesk, col);
 		}
 	}
 
 	// vykresli postranni lavice
-	{
+	if (1) {
 		container->addModel("sidedesk", sidedesk);
 
 		glm::mat4 scale = glm::scale(glm::vec3(STATICS_SCALE));
@@ -157,6 +161,7 @@ void Game::onInit()
 			// prava strana
 			glm::mat4 mat = glm::translate(col, otherside);
 			container->queueDraw(sidedesk, mat);
+			//shadowVolumes->addModel(sidedesk, mat);
 
             physics->AddStaticModel(sidedeskShapes, PhysicsUtils::btTransFrom(glm::scale(mat, glm::vec3(1/STATICS_SCALE))), false);
 		}
@@ -173,16 +178,19 @@ void Game::onInit()
 			glm::vec4 pos = (*it).Position();
 			glm::mat4 mat = glm::scale(glm::translate(pos.x, pos.y, pos.z), glm::vec3(0.001));
 			//glm::mat4 mat = glm::translate(glm::scale(glm::vec3(0.01)), pos.x, pos.y, pos.z);
-		
+
 			container->queueDraw(sphere, mat);
+			shadowVolumes->addLight(glm::vec3(pos));
 		}
 	}
 
+	// pridat auto
     {
 		container->addModel("car", car);
 		carQueueItem = container->queueDraw(car);
 	}
 
+	// pridat kola auta
     {
 		container->addModel("wheel", wheel);
 		for (unsigned int i = 0; i < 4; i++)
@@ -284,6 +292,11 @@ void Game::onInit()
 	// vyrobit scenu
 	scene->addModelContainer(container);
 	scene->init();
+
+	cout << "- constructing shadow volumes" << endl;
+
+	// vygenerovat stinova telesa
+	shadowVolumes->generate();
 	
 	cout << "- done!" << endl;
 	
@@ -308,15 +321,18 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
     physics->StepSimulation(gameTime.Elapsed() * 0.001f);
     
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+	/*
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	
     glEnable(GL_DEPTH_TEST);    
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_BLEND);
 
     glDepthFunc(GL_LESS);
+	*/
 
     glm::mat4 carMatrix = glm::scale(PhysicsUtils::glmMat4From(physics->GetCar()->GetWorldTransform()), glm::vec3(CAR_SCALE));
+
     container->updateDrawingMatrix(carQueueItem, carMatrix);
 
     if (followCamera)
@@ -335,9 +351,91 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
         container->updateDrawingMatrix(wheelQueueItem[i], wheelMatrix);
     }
+
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	
-	// vykreslit scenu
+	glEnable(GL_DEPTH_TEST); // Activate the depth test
+    glEnable(GL_CULL_FACE); // Activate the culling
+    glCullFace(GL_BACK);   // We are drawing front face
+    glDisable(GL_TEXTURE_2D); // no texture here
+    glDisable(GL_BLEND);   // no blending
+    glDepthMask(GL_TRUE);  // Writing on z-buffer
+    //glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);  // No writing on color buffer
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
 	scene->draw();
+
+	glBlendFunc(GL_ONE, GL_ONE); // The blending function scr+dst, to add all the lighting
+    glDepthMask(GL_FALSE);  // We stop writing to z-buffer now. We made this in the first pass, now we have it
+    glEnable(GL_STENCIL_TEST); // We enable the stencil testing
+
+	shadowVolumes->draw(0, getCamera()->GetMatrix(), glm::perspective(45.0f, (float)getWindowAspectRatio(), 1.0f, 1000.0f));
+
+
+#if 0
+	// vicepruchodove kresleni se stiny podle:
+	// http://www.angelfire.com/games5/duktroa/RealTimeShadowTutorial.htm
+	// vykreslit scenu do z-bufferu ------------------------------	
+#if 1
+	glEnable(GL_DEPTH_TEST); // Activate the depth test
+    glEnable(GL_CULL_FACE); // Activate the culling
+    glCullFace(GL_BACK);   // We are drawing front face
+    glDisable(GL_TEXTURE_2D); // no texture here
+    glDisable(GL_BLEND);   // no blending
+    glDepthMask(GL_TRUE);  // Writing on z-buffer
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);  // No writing on color buffer
+
+	scene->draw();
+
+	glBlendFunc(GL_ONE, GL_ONE); // The blending function scr+dst, to add all the lighting
+    glDepthMask(GL_FALSE);  // We stop writing to z-buffer now. We made this in the first pass, now we have it
+    glEnable(GL_STENCIL_TEST); // We enable the stencil testing
+#endif
+	// -----------------------------------------------------------
+
+	// vykreslit stiny; predpoklada se naplneny z-buffer ---------
+#if 1
+	glm::mat4 mView = getCamera()->GetMatrix();
+	glm::mat4 mPerspective = glm::perspective(45.0f, (float)getWindowAspectRatio(), 1.0f, 1000.0f);
+	
+	unsigned int lightI = 0;
+	
+	glDisable(GL_BLEND); // We don't want lighting. We are only writing in stencil buffer for now
+    glClear(GL_STENCIL_BUFFER_BIT); // We clear the stencil buffer
+    glDepthFunc(GL_LESS); // We change the z-testing function to LESS, to avoid little bugs in shadow
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); // We dont draw it to the screen
+    glStencilFunc(GL_ALWAYS, 0, 0); // We always draw whatever we have in the stencil buffer
+
+	glCullFace(GL_FRONT); // We are drawing the back faces first 
+    glStencilOp(GL_KEEP, GL_INCR, GL_KEEP); // We increment if the depth test fails
+	
+	shadowVolumes->draw( lightI, mView, mPerspective );
+
+	glCullFace(GL_BACK); // We are now drawing the front faces
+    glStencilOp(GL_KEEP, GL_DECR, GL_KEEP); // We decrement if the depth test fails
+
+	shadowVolumes->draw( lightI, mView, mPerspective );
+#endif
+	// -----------------------------------------------------------
+
+	// vykreslit scenu normalne ----------------------------------
+#if 1
+	// We draw our lighting now that we created the shadows area in the stencil buffer
+    glDepthFunc(GL_LEQUAL); // we put it again to LESS or EQUAL (or else you will get some z-fighting)
+    glCullFace(GL_BACK); // we draw the front face
+    glEnable(GL_BLEND); // We enable blending
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // We enable color buffer
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Drawing will not affect the stencil buffer
+    glStencilFunc(GL_EQUAL, 0x0, 0xff); // And the most important thing, the stencil function. Drawing if equal to 0
+
+	scene->draw();
+#endif
+	// -----------------------------------------------------------
+#endif
+	glDepthMask(GL_TRUE);
+	glDisable(GL_STENCIL_TEST);
+
 
     if (drawWireframe)
     {
@@ -349,18 +447,19 @@ void Game::onWindowRedraw(const GameTime & gameTime)
     
     // ---------------------------------------
 	// Vykresleni ingame gui
-	
+#if 0
 	ostringstream time;
     time << physics->GetCar()->GetVehicle()->getCurrentSpeedKmHour(); //gameTime.Total();
 
 	gui->updateString(guiTime, time.str());
 	gui->draw();
-
-
+#endif
 	// ---------------------------------------
 
     SDL_GL_SwapBuffers(); 
 }
+
+
 
 void Game::drawLines(vector<PhysicsDebugDraw::LINE> & lines)
 {
@@ -429,6 +528,7 @@ void Game::drawLines(vector<PhysicsDebugDraw::LINE> & lines)
     lines.clear();
 }
 
+
 void Game::handleActiveKeys(const GameTime & gameTime)
 {
 	bool wDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_w) != activeKeys.end() );
@@ -457,7 +557,7 @@ void Game::handleActiveKeys(const GameTime & gameTime)
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_LEFT) != activeKeys.end() )
         physics->GetCar()->TurnLeft();
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_RIGHT) != activeKeys.end() )
-        physics->GetCar()->TurnRight();			
+        physics->GetCar()->TurnRight();
 }
 
 
