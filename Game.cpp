@@ -319,18 +319,9 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
 	handleActiveKeys(gameTime);
 
+	// fyzika -------------------------------------------------
     physics->StepSimulation(gameTime.Elapsed() * 0.001f);
     
-	/*
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	
-    glEnable(GL_DEPTH_TEST);    
-	glEnable(GL_CULL_FACE);
-	glDisable(GL_BLEND);
-
-    glDepthFunc(GL_LESS);
-	*/
-
     glm::mat4 carMatrix = glm::scale(PhysicsUtils::glmMat4From(physics->GetCar()->GetWorldTransform()), glm::vec3(CAR_SCALE));
 
     container->updateDrawingMatrix(carQueueItem, carMatrix);
@@ -351,6 +342,7 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
         container->updateDrawingMatrix(wheelQueueItem[i], wheelMatrix);
     }
+	// ---------------------------------------------------------
 
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -358,19 +350,10 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 	glEnable(GL_DEPTH_TEST); // Activate the depth test
     glEnable(GL_CULL_FACE); // Activate the culling
     glCullFace(GL_BACK);   // We are drawing front face
-    glDisable(GL_TEXTURE_2D); // no texture here
-    glDisable(GL_BLEND);   // no blending
-    glDepthMask(GL_TRUE);  // Writing on z-buffer
-    //glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);  // No writing on color buffer
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-
+   
 	scene->draw();
 
-	glBlendFunc(GL_ONE, GL_ONE); // The blending function scr+dst, to add all the lighting
-    glDepthMask(GL_FALSE);  // We stop writing to z-buffer now. We made this in the first pass, now we have it
-    glEnable(GL_STENCIL_TEST); // We enable the stencil testing
-
-	shadowVolumes->draw(0, getCamera()->GetMatrix(), glm::perspective(45.0f, (float)getWindowAspectRatio(), 1.0f, 1000.0f));
+	shadowVolumes->draw(0, getCamera()->GetMatrix(), glm::perspective(45.0f, (float)getWindowAspectRatio(), 0.1f, 1000.0f));
 
 
 #if 0
@@ -433,9 +416,7 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 #endif
 	// -----------------------------------------------------------
 #endif
-	glDepthMask(GL_TRUE);
-	glDisable(GL_STENCIL_TEST);
-
+	
 
     if (drawWireframe)
     {
@@ -447,7 +428,7 @@ void Game::onWindowRedraw(const GameTime & gameTime)
     
     // ---------------------------------------
 	// Vykresleni ingame gui
-#if 0
+#if 1
 	ostringstream time;
     time << physics->GetCar()->GetVehicle()->getCurrentSpeedKmHour(); //gameTime.Total();
 
