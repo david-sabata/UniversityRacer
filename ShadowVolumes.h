@@ -121,12 +121,17 @@ class ShadowVolumes {
 		/** Pole pozic svetel */
 		std::vector<glm::vec3> lights;
 
-		/** pole GL bufferu stinovych teles pro kazde svetlo */
+		/** pole GL bufferu sten stinovych teles pro kazde svetlo */
 		std::vector<GLuint> VBOs;
 		std::vector<GLuint> EBOs;
 
-		/** pocet indexu (ctyruhelnikovych) facu stinovych teles - at vime kolik kreslit */
+		/** pole GL bufferu vik stinovych teles pro kazde svetlo */
+		std::vector<GLuint> capVBOs;
+		std::vector<GLuint> capEBOs;
+
+		/** pocet indexu facu sten a vik stinovych teles - at vime kolik kreslit */
 		unsigned int shadowVolumeIndices;
+		unsigned int shadowVolumeCapsIndices;
 };
 
 

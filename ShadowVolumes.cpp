@@ -7,9 +7,12 @@
 // vypnout otravne warningy Visual Studia; nasim iteratorum verime :)
 #define _SCL_SECURE_NO_WARNINGS
 
+// glm neumi porovnat dva vektory
+#define VEC3_EQ(A,B) ((A.x == B.x && A.y == B.y && A.z == B.z))
 
 #define PROGRAM_NAME "test"
-#define INFINITY 10
+#define INFINITY 1
+#define EPSILON 0.0000f
 
 using namespace std;
 
@@ -40,10 +43,6 @@ void ShadowVolumes::generate()
 		for (vector<Mesh*>::iterator meshIt = (*modelIt).first->getMeshes().begin(); meshIt != (*modelIt).first->getMeshes().end(); meshIt++)
 		{
 			Mesh* mesh = (*meshIt);
-
-			if (mesh->getName() != "deska_stol")
-				continue;
-
 			Mesh* newMesh = new Mesh((*mesh) * (*modelIt).second);
 			meshes.push_back(newMesh);
 		}
@@ -52,17 +51,24 @@ void ShadowVolumes::generate()
 	// vypocitat sousednosti jiz nad novymi meshi
 	computeNeighboursAndVisibilities();
 
-
 	VBOs = vector<GLuint>(lights.size());
 	EBOs = vector<GLuint>(lights.size());
+	capVBOs = vector<GLuint>(lights.size());
+	capEBOs = vector<GLuint>(lights.size());
 
 	// vyrobit GL buffery
 	for (unsigned int lightI = 0; lightI < lights.size(); lightI++)
 	{
 		glm::vec3 light = lights[lightI];
 		
+		// steny teles - triangle strip
 		vector<glm::vec3> glVertices;
 		vector<unsigned int> glIndices;
+
+		// vika teles - triangle
+		vector<glm::vec3> glCapVertices;
+		vector<unsigned int> glCapIndices;
+
 
 		for (unsigned int meshI = 0; meshI < meshes.size(); meshI++)
 		{
@@ -85,7 +91,8 @@ void ShadowVolumes::generate()
 						pair<glm::ivec2, int>(glm::ivec2(face.y, face.z), neighbours.b),
 						pair<glm::ivec2, int>(glm::ivec2(face.z, face.x), neighbours.c)
 					};
-
+					
+					// steny telesa
 					for (unsigned int edgeI = 0; edgeI < 3; edgeI++)
 					{		
 						int neighbourIndex = edges[edgeI].second;
@@ -98,37 +105,59 @@ void ShadowVolumes::generate()
 
 							glm::vec3 v3, v4;
 
-							v3 = ( v1 - light ) * glm::vec3(INFINITY, INFINITY, INFINITY);
-							v4 = ( v2 - light ) * glm::vec3(INFINITY, INFINITY, INFINITY);
+							v3 = v1 + (( v1 - light ) * glm::vec3(INFINITY, INFINITY, INFINITY));
+							v4 = v2 + (( v2 - light ) * glm::vec3(INFINITY, INFINITY, INFINITY));
 
 							unsigned int index = glVertices.size();
 
-							// kreslit se budou 4 vrcholy jako quad
-							glVertices.push_back( v1 );
-							//glVertices.push_back( v1 + v3 );
-							glVertices.push_back( v2 );
-							glVertices.push_back( v3 );
-							//glVertices.push_back( v2 + v4 );
-							glVertices.push_back( v4 );
-							
-							glIndices.push_back(index + 3);
-							glIndices.push_back(index + 2);
-							glIndices.push_back(index + 1);
-							glIndices.push_back(index + 0);
+							// kreslit se budou 4 vrcholy jako triangle strip							
+							glVertices.push_back(v1);
+							glVertices.push_back(v3);
+							glVertices.push_back(v2);
+							glVertices.push_back(v4);
 
-							/*
+							// indexy sten telesa
+							if (glIndices.size() > 0)
+								glIndices.push_back(index);
+
 							glIndices.push_back(index);
 							glIndices.push_back(index + 1);
 							glIndices.push_back(index + 2);
 							glIndices.push_back(index + 3);
-							*/
+							
+							glIndices.push_back(index + 3);
 						}
 					}
+
+				} // jestlize je face viditelny od svetla
+				
+				// z facu odvracenych od svetla vyrobime horni a dolni viko
+				else {
+					// horni viko
+					unsigned int capIndex = glCapVertices.size();
+					glCapVertices.push_back( vertices[face.z] + ( glm::normalize(vertices[face.z] - light) * glm::vec3(EPSILON, EPSILON, EPSILON) ));
+					glCapVertices.push_back( vertices[face.y] + ( glm::normalize(vertices[face.y] - light) * glm::vec3(EPSILON, EPSILON, EPSILON) ));
+					glCapVertices.push_back( vertices[face.x] + ( glm::normalize(vertices[face.x] - light) * glm::vec3(EPSILON, EPSILON, EPSILON) ));					
+					
+					glCapIndices.push_back(capIndex);
+					glCapIndices.push_back(capIndex + 1);
+					glCapIndices.push_back(capIndex + 2);
+					
+					// dolni viko - face protazeny od svetla do nekonecna
+					capIndex = glCapVertices.size();
+					glCapVertices.push_back( vertices[face.x] + ( (vertices[face.x] - light) * glm::vec3(INFINITY, INFINITY, INFINITY) ) );
+					glCapVertices.push_back( vertices[face.y] + ( (vertices[face.y] - light) * glm::vec3(INFINITY, INFINITY, INFINITY) ) );
+					glCapVertices.push_back( vertices[face.z] + ( (vertices[face.z] - light) * glm::vec3(INFINITY, INFINITY, INFINITY) ) );
+
+					glCapIndices.push_back(capIndex);
+					glCapIndices.push_back(capIndex + 1);
+					glCapIndices.push_back(capIndex + 2);
 				}
+
 			}
 		}
 
-		// zkopirovat data do VBO
+		// zkopirovat data sten do VBO
 		glGenBuffers(1, &VBOs[lightI]);
 		glBindBuffer(GL_ARRAY_BUFFER, VBOs[lightI]);
 		glBufferData(GL_ARRAY_BUFFER, glVertices.size() * 3 * sizeof(float), NULL, GL_STATIC_DRAW);
@@ -147,19 +176,62 @@ void ShadowVolumes::generate()
 		glUnmapBuffer(GL_ARRAY_BUFFER);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		// zkopirovat data do EBO
+
+
+		// zkopirovat data vik do VBO
+		glGenBuffers(1, &capVBOs[lightI]);
+		glBindBuffer(GL_ARRAY_BUFFER, capVBOs[lightI]);
+		glBufferData(GL_ARRAY_BUFFER, glCapVertices.size() * 3 * sizeof(float), NULL, GL_STATIC_DRAW);
+		
+		float* mappingCapVBO = (float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+		
+		for (vector<glm::vec3>::iterator it = glCapVertices.begin(); it != glCapVertices.end(); it++)
+		{
+			*(mappingCapVBO + 0) = (*it).x;
+			*(mappingCapVBO + 1) = (*it).y;
+			*(mappingCapVBO + 2) = (*it).z;
+			
+			mappingCapVBO += 3;
+		}
+
+		glUnmapBuffer(GL_ARRAY_BUFFER);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+
+		// zkopirovat data sten do EBO
 		glGenBuffers(1, &EBOs[lightI]);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[lightI]);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, glIndices.size() * sizeof(unsigned int), NULL, GL_STATIC_DRAW);
 		
 		unsigned int* mappingEBO = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
 		
-		copy(glIndices.begin(), glIndices.end(), mappingEBO);
+		if (glIndices.size() > 0)
+			copy(glIndices.begin(), glIndices.end(), mappingEBO);
 
 		glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+
+
+		// zkopirovat data vik do EBO
+		glGenBuffers(1, &capEBOs[lightI]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, capEBOs[lightI]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, glCapIndices.size() * sizeof(unsigned int), NULL, GL_STATIC_DRAW);
+		
+		unsigned int* mappingCapEBO = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+		
+		if (glCapIndices.size() > 0)
+			copy(glCapIndices.begin(), glCapIndices.end(), mappingCapEBO);
+
+		glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+
+		// zapamatovat si kolik se toho bude kreslit
 		shadowVolumeIndices = glIndices.size();
+		shadowVolumeCapsIndices = glCapIndices.size();
 	}
 
 }
@@ -191,16 +263,15 @@ void ShadowVolumes::computeNeighboursAndVisibilities()
 			glm::ivec3 face = faces[faceIA];
 
 			// ---------- Vypocet viditelnosti ze svetel ---------------------
-
-			glm::vec3 v1 = vertices[ face.x ];
-			glm::vec3 v2 = vertices[ face.y ];
-			glm::vec3 v3 = vertices[ face.z ];
+			glm::vec3 vA1 = vertices[ face.x ];
+			glm::vec3 vA2 = vertices[ face.y ];
+			glm::vec3 vA3 = vertices[ face.z ];
 
 			// vypocitat koeficienty rovnice plochy 
-			float a = v1.y*(v2.z-v3.z) + v2.y*(v3.z-v1.z) + v3.y*(v1.z-v2.z);
-			float b = v1.z*(v2.x-v3.x) + v2.z*(v3.x-v1.x) + v3.z*(v1.x-v2.x);
-			float c = v1.x*(v2.y-v3.y) + v2.x*(v3.y-v1.y) + v3.x*(v1.y-v2.y);
-			float d = -( v1.x*( v2.y*v3.z - v3.y*v2.z ) + v2.x*(v3.y*v1.z - v1.y*v3.z) + v3.x*(v1.y*v2.z - v2.y*v1.z) );
+			float a = vA1.y*(vA2.z-vA3.z) + vA2.y*(vA3.z-vA1.z) + vA3.y*(vA1.z-vA2.z);
+			float b = vA1.z*(vA2.x-vA3.x) + vA2.z*(vA3.x-vA1.x) + vA3.z*(vA1.x-vA2.x);
+			float c = vA1.x*(vA2.y-vA3.y) + vA2.x*(vA3.y-vA1.y) + vA3.x*(vA1.y-vA2.y);
+			float d = -( vA1.x*( vA2.y*vA3.z - vA3.y*vA2.z ) + vA2.x*(vA3.y*vA1.z - vA1.y*vA3.z) + vA3.x*(vA1.y*vA2.z - vA2.y*vA1.z) );
 
 			vector<bool> visibilities(lights.size());
 
@@ -216,26 +287,26 @@ void ShadowVolumes::computeNeighboursAndVisibilities()
 
 			// --------- Vypocet sousednosti ---------------------------------
 
-			// hrany face definovane vzdy dvema indexy vrcholu
-			glm::ivec2 edges[3] = {
-				glm::ivec2(face.x, face.y),
-				glm::ivec2(face.y, face.z),
-				glm::ivec2(face.z, face.x)
+			// hrany face definovane vzdy dvema indexy vrcholu a ukazatelem, kam ulozime index nalezeneho souseda
+			struct Edge {
+				Edge(glm::vec3 A, glm::vec3 B, int* nbrIdx) : pointA(A), pointB(B), neighbourIndex(nbrIdx) {};
+				glm::vec3 pointA;
+				glm::vec3 pointB;
+				int* neighbourIndex;
+			};
+
+			Edge edges[3] = {
+				Edge(vA1, vA2, &facesNeighbours[mesh][faceIA].a),
+				Edge(vA2, vA3, &facesNeighbours[mesh][faceIA].b),
+				Edge(vA3, vA1, &facesNeighbours[mesh][faceIA].c),
 			};
 
 			// porovnat kazdou hranu
 			for (unsigned int edgeI = 0; edgeI < 3; edgeI++)
 			{
-				glm::ivec2 e = edges[edgeI];
+				Edge e = edges[edgeI];				
 
-				int *destEdge = NULL;
-				switch (edgeI) {
-					case 0: destEdge = &facesNeighbours[mesh][faceIA].a; break;
-					case 1: destEdge = &facesNeighbours[mesh][faceIA].b; break;
-					case 2: destEdge = &facesNeighbours[mesh][faceIA].c; break;
-				}
-
-				if (*destEdge != -1)
+				if (*e.neighbourIndex != -1) // pokud uz nejakeho souseda ma, neresime
 					continue;
 
 				for (unsigned int faceIB = 0; faceIB < faces.size(); faceIB++)				
@@ -246,22 +317,26 @@ void ShadowVolumes::computeNeighboursAndVisibilities()
 					if (faceIA == faceIB)
 						continue;
 
-					if ((e.x == faceB.x && e.y == faceB.y) || (e.x == faceB.y && e.y == faceB.x)) {
-						*destEdge = faceIB;
+					glm::vec3 vB1 = vertices[ faceB.x ];
+					glm::vec3 vB2 = vertices[ faceB.y ];
+					glm::vec3 vB3 = vertices[ faceB.z ];
+					
+					if ((VEC3_EQ(e.pointA, vB1) && VEC3_EQ(e.pointB, vB2)) || (VEC3_EQ(e.pointA, vB2) && VEC3_EQ(e.pointB, vB1))) {
+						*e.neighbourIndex = faceIB;
 						facesNeighbours[mesh][faceIB].a = faceIA;
-						continue;
+						break;
 					}
 
-					if ((e.x == faceB.y && e.y == faceB.z) || (e.x == faceB.z && e.y == faceB.y)) {
-						*destEdge = faceIB;
+					if ((VEC3_EQ(e.pointA, vB2) && VEC3_EQ(e.pointB, vB3)) || (VEC3_EQ(e.pointA, vB3) && VEC3_EQ(e.pointB, vB2))) {
+						*e.neighbourIndex = faceIB;
 						facesNeighbours[mesh][faceIB].b = faceIA;
-						continue;
+						break;
 					}
 
-					if ((e.x == faceB.z && e.y == faceB.x) || (e.x == faceB.x && e.y == faceB.z)) {
-						*destEdge = faceIB;
+					if ((VEC3_EQ(e.pointA, vB3) && VEC3_EQ(e.pointB, vB1)) || (VEC3_EQ(e.pointA, vB1) && VEC3_EQ(e.pointB, vB3))) {
+						*e.neighbourIndex = faceIB;
 						facesNeighbours[mesh][faceIB].c = faceIA;
-						continue;
+						break;
 					}					
 				}
 			}
@@ -286,39 +361,22 @@ void ShadowVolumes::draw(unsigned int lightI, glm::mat4 mView, glm::mat4 mProjec
 	glUniformMatrix4fv(activeBinding.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
 	glUniformMatrix4fv(activeBinding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));	
 
-	// zdroje dat
+	// vykreslit steny ------------------------------------------------------------
 	glBindBuffer(GL_ARRAY_BUFFER, VBOs[lightI]);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[lightI]);
 		
 	glEnableVertexAttribArray(activeBinding.positionAttrib);
 	glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		
-/*
-	glDisable(GL_BLEND); // We don't want lighting. We are only writing in stencil buffer for now
-    glClear(GL_STENCIL_BUFFER_BIT); // We clear the stencil buffer
-    glDepthFunc(GL_LESS); // We change the z-testing function to LESS, to avoid little bugs in shadow
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); // We dont draw it to the screen
-    glStencilFunc(GL_ALWAYS, 0, 0); // We always draw whatever we have in the stencil buffer
-		
-	glCullFace(GL_FRONT); // We are drawing the back faces first 
-    glStencilOp(GL_KEEP, GL_INCR, GL_KEEP); // We increment if the depth test fails
+			
+	glDrawElements(GL_TRIANGLE_STRIP, shadowVolumeIndices, GL_UNSIGNED_INT, NULL);
 
-	glDrawElements(GL_QUADS, shadowVolumeIndices, GL_UNSIGNED_INT, NULL);
-
-    glCullFace(GL_BACK); // We are now drawing the front faces
-    glStencilOp(GL_KEEP, GL_DECR, GL_KEEP); // We decrement if the depth test fails
-*/
-    glDrawElements(GL_QUADS, shadowVolumeIndices, GL_UNSIGNED_INT, NULL);
 	
+	// vykreslit vika -------------------------------------------------------------
+	glBindBuffer(GL_ARRAY_BUFFER, capVBOs[lightI]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, capEBOs[lightI]);
+		
+	glEnableVertexAttribArray(activeBinding.positionAttrib);
+	glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
-	/*
-	// We draw our lighting now that we created the shadows area in the stencil buffer
-    glDepthFunc(GL_LEQUAL); // we put it again to LESS or EQUAL (or else you will get some z-fighting)
-    glCullFace(GL_BACK); // we draw the front face
-    glEnable(GL_BLEND); // We enable blending
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // We enable color buffer
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Drawing will not affect the stencil buffer
-    glStencilFunc(GL_EQUAL, 0x0, 0xff); // And the most important thing, the stencil function. Drawing if equal to 0
-	*/
-	
+	glDrawElements(GL_TRIANGLES, shadowVolumeCapsIndices, GL_UNSIGNED_INT, NULL);
 }

@@ -260,34 +260,41 @@ void Game::onWindowRedraw(const GameTime & gameTime)
     }
 #endif
 	
+
+// vykresleni stinoveho telesa
+#if 1
+	glEnable(GL_DEPTH_TEST); // Activate the depth test
+    glEnable(GL_CULL_FACE); // Activate the culling
+    glCullFace(GL_BACK);   // We are drawing front face
+    
+	scene->draw();
+
+	glm::mat4 mView = getCamera()->GetMatrix();
+	glm::mat4 mPerspective = glm::perspective(45.0f, (float)getWindowAspectRatio(), 1.0f, 1000.0f);	
+	unsigned int lightI = 0;
+
 	
+	glCullFace(GL_BACK);
+	shadowVolumes->draw(lightI, mView, mPerspective);
+#endif
+	
+// puvodni reseni - jak by melo fungovat
+#if 0
 	// vykreslit scenu do z-bufferu ------------------------------	
 #if 1
-	glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-	
-	/*
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_BLEND);	
-    glDepthMask(GL_TRUE);
-    */
-
-	//glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);	
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-	
-	glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
+	glEnable(GL_DEPTH_TEST); // Activate the depth test
+    glEnable(GL_CULL_FACE); // Activate the culling
+    glCullFace(GL_BACK);   // We are drawing front face
+    glDisable(GL_TEXTURE_2D); // no texture here
+    glDisable(GL_BLEND);   // no blending
+    glDepthMask(GL_TRUE);  // Writing on z-buffer
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);  // No writing on color buffer
 
 	scene->draw();
 
-	glDepthMask(GL_FALSE);
-
-	/*
 	glBlendFunc(GL_ONE, GL_ONE); // The blending function scr+dst, to add all the lighting
     glDepthMask(GL_FALSE);  // We stop writing to z-buffer now. We made this in the first pass, now we have it
-    glEnable(GL_STENCIL_TEST); // We enable the stencil testing	
-	*/
+    glEnable(GL_STENCIL_TEST); // We enable the stencil testing
 #endif
 	// -----------------------------------------------------------
 
@@ -298,40 +305,33 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 	
 	unsigned int lightI = 0;
 	
-	//glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    //glEnable(GL_STENCIL_TEST);
+	glDisable(GL_BLEND); // We don't want lighting. We are only writing in stencil buffer for now
+    glClear(GL_STENCIL_BUFFER_BIT); // We clear the stencil buffer
+    glDepthFunc(GL_LESS); // We change the z-testing function to LESS, to avoid little bugs in shadow
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); // We dont draw it to the screen
+    glStencilFunc(GL_ALWAYS, 0, 0); // We always draw whatever we have in the stencil buffer
 
-	glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+	glCullFace(GL_FRONT); // We are drawing the back faces first 
+    glStencilOp(GL_KEEP, GL_INCR, GL_KEEP); // We increment if the depth test fails
 
-	glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
+	shadowVolumes->draw( lightI, mView, mPerspective );
 
-    //glStencilFunc(GL_ALWAYS, 0, 0);
-    //glStencilOpSeparate(GL_FRONT, GL_INCR, GL_KEEP, GL_KEEP);
-    //glStencilOpSeparate(GL_BACK, GL_INCR, GL_KEEP, GL_KEEP);
+	glCullFace(GL_BACK); // We are now drawing the front faces
+    glStencilOp(GL_KEEP, GL_DECR, GL_KEEP); // We decrement if the depth test fails
 
 	shadowVolumes->draw( lightI, mView, mPerspective );
 #endif
 	// -----------------------------------------------------------
 
 	// vykreslit scenu normalne ----------------------------------
-#if 0
-	/*
-	glDepthFunc(GL_LEQUAL); // we put it again to LESS or EQUAL (or else you will get some z-fighting)
+#if 1
+	// We draw our lighting now that we created the shadows area in the stencil buffer
+    glDepthFunc(GL_LEQUAL); // we put it again to LESS or EQUAL (or else you will get some z-fighting)
     glCullFace(GL_BACK); // we draw the front face
     glEnable(GL_BLEND); // We enable blending
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // We enable color buffer
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Drawing will not affect the stencil buffer
     glStencilFunc(GL_EQUAL, 0x0, 0xff); // And the most important thing, the stencil function. Drawing if equal to 0
-	*/
-
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE);
-    glStencilFunc(GL_EQUAL, 0, 1);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); 
 
 	scene->draw();
 #endif
@@ -340,6 +340,7 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 	glDepthMask(GL_TRUE);
 	glDisable(GL_STENCIL_TEST);
 
+#endif
 
 
     if (drawWireframe)
