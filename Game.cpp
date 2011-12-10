@@ -296,8 +296,8 @@ void Game::onInit()
 			glm::rotate(glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)),  90.f, glm::vec3(0.f,0.f,1.f)),//deska PRAVO, SJEZD z LAVICE na LAVICI
 
 			glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)), //ROURA NAHORU 3 MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
-			glm::rotate(glm::rotate(17.f, glm::vec3(0.f,0.f,1.f)), 90.f, glm::vec3(0.f,0.f,1.f)), //deska LEVO, SJEZD z LAVICE na LAVICI
-			glm::rotate(glm::rotate(17.f, glm::vec3(0.f,0.f,1.f)), 90.f, glm::vec3(0.f,0.f,1.f)), //deska PRAVO, SJEZD z LAVICE na LAVICI
+			glm::rotate(glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)), 90.f, glm::vec3(0.f,0.f,1.f)), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::rotate(glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)), 90.f, glm::vec3(0.f,0.f,1.f)), //deska PRAVO, SJEZD z LAVICE na LAVICI
 
 			glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)), //ROURA NAHORU 4 MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
 			glm::rotate(glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)),  90.f, glm::vec3(0.f,0.f,1.f)), //deska LEVO, SJEZD z LAVICE na LAVICI
