@@ -41,16 +41,12 @@ class Game : public BaseApp
         Physics *physics;
 
 		// handle retezce ukazujici cas
-		unsigned int guiTime;
+		unsigned int guiTime, guiCheckpoint;
 
 		bool mouseCaptured;
 
-        // ukazatel na frontu kreslenych objektu
-        //std::vector<ModelContainer::DRAWINGQUEUEITEM>* drawingQueue;
-
         // indexy polozek v kreslici fronte
-        unsigned int carQueueItem, e112QueueItem;
-        unsigned int wheelQueueItem[4]; // z pohledu ridice: 0 - predni leve, 3 - zadni prave
+        unsigned int carQueueItem, wheelQueueItem[PhysicsCar::WHEEL_COUNT];
 
         // pomocna promenna pro moznost kreslit wireframe (TAB)
         bool drawWireframe;

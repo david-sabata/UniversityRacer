@@ -1,44 +1,44 @@
-#ifndef CARPHYSICS_H
-#define CARPHYSICS_H
+#ifndef PHYSICSCAR_H
+#define PHYSICSCAR_H
 
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 
-#include "CarConfig.h"
+#include "PhysicsCarConfig.h"
 #include "PhysicsUtils.h"
 
-class CarPhysics
+class PhysicsCar
 {
 public: 
     enum WHEELID {  // z pohledu ridice
         WHEEL_FRONTLEFT = 0,
         WHEEL_FRONTRIGHT,
         WHEEL_REARLEFT,
-        WHEEL_REARRIGHT
+        WHEEL_REARRIGHT,
+        WHEEL_COUNT  // zarazka
     };
 
-    CarPhysics(void);
-    ~CarPhysics(void);
+    PhysicsCar(void);
+    ~PhysicsCar(void);
 
     btCollisionShape* CreateVehicleShape();
 
     void Initialize(btDiscreteDynamicsWorld *refWorld, const btTransform & trans);
     void Deinitialize();
 
-    void SetLastCheckpointPos(btVector3 & pos) { m_lastCheckpointPos = pos; }
-
-    void Reset();
-    void Update(btScalar timeStep);
+    void Reset(const btTransform & trans);
+    void Update(btScalar timeStep = 1/60.f);
 
     void TurnLeft();    
     void TurnRight();    
     void Forward();    
     void Backward();    
-    void HandBrake();
+    void Brake();
 
     btRaycastVehicle* GetVehicle() { return m_vehicle; }
     btTransform GetWorldTransform();
+    btTransform GetInitialTransform() { return m_initialTrans; }
 
 private:
     btDiscreteDynamicsWorld *m_refDynamicsWorld;
@@ -49,13 +49,14 @@ private:
     btRaycastVehicle* m_vehicle;
     btRigidBody* m_carChassis;
 
-    CarConfig m_cfg;
-    bool turned;
-    btVector3 m_lastCheckpointPos;
+    btTransform m_initialTrans;
 
+    CarConfig m_cfg;
+    
     float m_engineForce;
     float m_breakingForce;
     float m_vehicleSteering;
+    bool m_turned;
 };
 
 #endif

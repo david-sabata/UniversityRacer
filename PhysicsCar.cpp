@@ -1,20 +1,19 @@
 
-#include "CarPhysics.h"
+#include "PhysicsCar.h"
 #include <cmath>
 #include <vector>
 
 
 
-CarPhysics::CarPhysics(void): m_engineForce(0.f), m_breakingForce(0.f), m_vehicleSteering(0.f), turned(false),
-                              m_lastCheckpointPos(0.f, 2.f, 0.f)
+PhysicsCar::PhysicsCar(void): m_engineForce(0.f), m_breakingForce(0.f), m_vehicleSteering(0.f), m_turned(false)
 {                             
 }    
 
-CarPhysics::~CarPhysics(void)
+PhysicsCar::~PhysicsCar(void)
 {
 }
 
-btCollisionShape* CarPhysics::CreateVehicleShape()
+btCollisionShape* PhysicsCar::CreateVehicleShape()
 {
     static btScalar baseVertices[] = {                     
         -0.45f * CAR_SCALE, -0.204f * CAR_SCALE, -2.276f * CAR_SCALE,   // back center
@@ -69,11 +68,12 @@ btCollisionShape* CarPhysics::CreateVehicleShape()
     return compound;
 }
 
-void CarPhysics::Initialize(btDiscreteDynamicsWorld *refWorld, const btTransform & trans)
+void PhysicsCar::Initialize(btDiscreteDynamicsWorld *refWorld, const btTransform & trans)
 {
     m_refDynamicsWorld = refWorld;
+    m_initialTrans = trans;
     
-    m_carChassis = PhysicsUtils::CreateRigidBody(m_cfg.mass, trans, CreateVehicleShape());
+    m_carChassis = PhysicsUtils::CreateRigidBody(m_cfg.mass, m_initialTrans, CreateVehicleShape());
     m_refDynamicsWorld->addRigidBody(m_carChassis);
     m_carChassis->setDamping(m_cfg.linearDamping, m_cfg.angularDamping);    
 
@@ -119,28 +119,26 @@ void CarPhysics::Initialize(btDiscreteDynamicsWorld *refWorld, const btTransform
     }
 }
 
-void CarPhysics::Deinitialize()
+void PhysicsCar::Deinitialize()
 {
-
-
-
-
+    delete m_carChassis;
+    delete m_vehicleRayCaster;
+    delete m_vehicle;
 }
 
-void CarPhysics::Reset()
+void PhysicsCar::Reset(const btTransform & trans)
 {
-    m_vehicleSteering = 0.f;
-    
-    btTransform tr = PhysicsUtils::btTransFrom(btVector3(37.19f, 9.5f, -21.7f), btQuaternion(btVector3(0, 1, 0), -3.14159f/2.f));
-    //tr.setIdentity();
-   // tr.setRotation(btQuaternion(btVector3(0.f, 1.f, 0.f), 3.14f));
-    //tr.setOrigin(m_lastCheckpointPos);
-    m_carChassis->setCenterOfMassTransform(tr);
+    m_carChassis->setCenterOfMassTransform(trans);
     m_carChassis->setLinearVelocity(btVector3(0.f, 0.f, 0.f));
     m_carChassis->setAngularVelocity(btVector3(0.f, 0.f, 0.f));
     
+    m_vehicleSteering = 0.f;    
+    m_engineForce = 0.f;
+    m_breakingForce = 0.f;
+    m_turned = false;
 
-    m_refDynamicsWorld->getBroadphase()->getOverlappingPairCache()->cleanProxyFromPairs(m_carChassis->getBroadphaseHandle(), m_refDynamicsWorld->getDispatcher());
+    m_refDynamicsWorld->getBroadphase()->getOverlappingPairCache()->cleanProxyFromPairs(m_carChassis->getBroadphaseHandle(),
+                                                                                        m_refDynamicsWorld->getDispatcher());
     if (m_vehicle)
     {
         m_vehicle->resetSuspension();
@@ -149,34 +147,25 @@ void CarPhysics::Reset()
     }
 }
 
-void CarPhysics::Update(btScalar timeStep)
+void PhysicsCar::Update(btScalar timeStep)
 {
-/*  btScalar speed = std::abs(m_vehicle->getCurrentSpeedKmHour()*10.f);
-       
-    if (speed > 100.f)
-    {
-        m_cfg.steeringClamp = 0.1f;
-        m_cfg.steeringIncrement = 0.004f;
-    }
-    else 
-    {
-        m_cfg.steeringClamp = 0.1f + 0.65f - ((0.65f * speed) / 100.f);
-        m_cfg.steeringIncrement = 0.04f - ((0.004f * speed) / 100.f);
-    }    */       
-    
+    // engine
     m_vehicle->applyEngineForce(m_engineForce, WHEEL_REARLEFT);
-    m_vehicle->setBrake(m_breakingForce, WHEEL_REARLEFT);
     m_vehicle->applyEngineForce(m_engineForce, WHEEL_REARRIGHT);
+    
+    // brakes
+    m_vehicle->setBrake(m_breakingForce, WHEEL_REARLEFT);
     m_vehicle->setBrake(m_breakingForce, WHEEL_REARLEFT);
 
-    
+    // steering
     m_vehicle->setSteeringValue(m_vehicleSteering, WHEEL_FRONTLEFT);
     m_vehicle->setSteeringValue(m_vehicleSteering, WHEEL_FRONTRIGHT);
 
     m_engineForce = 0.f;
     m_breakingForce = 0.f;
     
-    if (!turned)
+    // update
+    if (!m_turned)
     {
         if (m_vehicleSteering > 0.f)
         {
@@ -191,46 +180,46 @@ void CarPhysics::Update(btScalar timeStep)
                 m_vehicleSteering = 0.f;
         }
     }
-    turned = false;
+    m_turned = false;
 }
 
-void CarPhysics::TurnLeft()
+void PhysicsCar::TurnLeft()
 {
     m_vehicleSteering += m_cfg.steeringIncrement;
     if (m_vehicleSteering > m_cfg.steeringClamp)
         m_vehicleSteering = m_cfg.steeringClamp;    
-    turned = true;
+    m_turned = true;
 }
 
-void CarPhysics::TurnRight()
+void PhysicsCar::TurnRight()
 {
     m_vehicleSteering -= m_cfg.steeringIncrement;
     if (m_vehicleSteering < -m_cfg.steeringClamp)
         m_vehicleSteering = -m_cfg.steeringClamp;  
-    turned = true;
+    m_turned = true;
 }
 
-void CarPhysics::Forward()
+void PhysicsCar::Forward()
 {
     if (std::abs(m_vehicle->getCurrentSpeedKmHour()) < m_cfg.maxSpeedClamp)
         m_engineForce = m_cfg.maxEngineForce;
     m_breakingForce = 0.f;    
 }
 
-void CarPhysics::Backward()
+void PhysicsCar::Backward()
 {
     if (std::abs(m_vehicle->getCurrentSpeedKmHour()) < m_cfg.maxSpeedClamp)
         m_engineForce = -m_cfg.maxEngineForce;
     m_breakingForce = 0.f;    
 }
 
-void CarPhysics::HandBrake()
+void PhysicsCar::Brake()
 {   
     m_breakingForce = m_cfg.maxBreakingForce; 
     m_engineForce = 0.f;    
 }
 
-btTransform CarPhysics::GetWorldTransform()
+btTransform PhysicsCar::GetWorldTransform()
 {        
     btTransform vehicleTrans;
     m_vehicle->getRigidBody()->getMotionState()->getWorldTransform(vehicleTrans);

@@ -1,5 +1,5 @@
-#ifndef CARCONFIG_H
-#define CARCONFIG_H
+#ifndef PHYSICSCARCONFIG_H
+#define PHYSICSCARCONFIG_H
 
 #include <btBulletDynamicsCommon.h>
 
@@ -76,12 +76,9 @@ struct CarConfig
                      connectionLength             *= CAR_SCALE;
                      bodyConnectionToChasisHeight *= CAR_SCALE - 0.10833f; //=0.085f;
 
-                  // suspensionRestLength = 0.5f;
-                  // suspensionMaxTravelCm= 20.f;
-                     
                   // suspensionStiffness *= CAR_SCALE;
-                  // suspensionDampingCompression = /*0.59*/ 0.2 * 2.0 * btSqrt(suspensionStiffness);
-                  // suspensionDampingRelaxation = /*0.65*/ 0.35 * 2.0 * btSqrt(suspensionStiffness);    
+                  // suspensionDampingCompression = 0.59 * 2.0 * btSqrt(suspensionStiffness);
+                  // suspensionDampingRelaxation  = 0.65 * 2.0 * btSqrt(suspensionStiffness);    
                 }
 
     btScalar mass, linearDamping, angularDamping;

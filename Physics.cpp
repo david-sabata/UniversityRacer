@@ -3,7 +3,7 @@
 #include "Physics.h"
 
 
-Physics::Physics(void): m_car(NULL), m_checkpointOffset(0)
+Physics::Physics(void): m_car(NULL)
 {
     Initialize();
 }
@@ -28,23 +28,12 @@ void Physics::Initialize()
     m_constraintSolver = new btSequentialImpulseConstraintSolver;
     
     m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher, m_overlappingPairCache, m_constraintSolver, m_collisionConfiguration);
-    m_ghostPairCallback = new btGhostPairCallback();
-    m_dynamicsWorld->getPairCache()->setInternalGhostPairCallback(m_ghostPairCallback);
-   // m_dynamicsWorld->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(m_ghostPairCallback); 
     m_dynamicsWorld->setGravity(btVector3(0, -9.81f, 0));
+
+    m_checkpoint.Initialize(m_dynamicsWorld);
 
     m_debugDraw = new PhysicsDebugDraw;    
     m_dynamicsWorld->setDebugDrawer(m_debugDraw);
-    
-    // checkpoint test
-    btCollisionShape* checkpointShape = new btBoxShape(btVector3(2.f, 2.f, 0.1f));
-    this->AddCollisionShape(checkpointShape);
-    
-    m_ghostObject = new btGhostObject();
-    m_ghostObject->setCollisionShape(checkpointShape);
-    m_ghostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
-    m_dynamicsWorld->addCollisionObject(m_ghostObject);//, btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::AllFilter & ~btBroadphaseProxy::SensorTrigger);
-    m_ghostObject->setWorldTransform(PhysicsUtils::btTransFrom(btVector3(0, -3, -5)));
 }
 
 void Physics::Deinitialize()  //cleanup in the reverse order of creation/initialization
@@ -84,45 +73,22 @@ void Physics::Deinitialize()  //cleanup in the reverse order of creation/initial
 
 void Physics::StepSimulation(btScalar timeStep)
 {
-    if (m_car)
-        m_car->Update(timeStep);
+    if (m_car) m_car->Update(timeStep);
 
-    int numSimSteps = m_dynamicsWorld->stepSimulation(timeStep, MAX_SIMULATION_SUBSTEPS, 1/240.f);
+    int numSimSteps = m_dynamicsWorld->stepSimulation(timeStep, MAX_SIMULATION_SUBSTEPS, FIXED_SIMULATION_TIMESTEP);
 
-   /* if (!numSimSteps)
-			std::cout << "Interpolated transforms" << std::endl;
-	else
-    {
-		if (numSimSteps > MAX_SIMULATION_SUBSTEPS)
-		{
-			//detect dropping frames
+   /* if (!numSimSteps)	std::cout << "Interpolated transforms" << std::endl;
+	else  {
+		if (numSimSteps > MAX_SIMULATION_SUBSTEPS) // detect dropping frames			
 			std::cout << "Dropped " << numSimSteps - MAX_SIMULATION_SUBSTEPS << " simulation steps out of " << numSimSteps << std::endl;
-		}
         else
-		{
 			std::cout << "Simulated " << numSimSteps << " steps" << std::endl;
-		}
 	}*/
-
     
-  /*  if (m_car)
-    for(int i = 0; i < m_ghostObject->getNumOverlappingObjects(); i++)
-    {
-        btRigidBody *pRigidBody = static_cast<btRigidBody *>(m_ghostObject->getOverlappingObject(i));
-        if (pRigidBody == m_car->GetVehicle()->getRigidBody())
-        {
-            btTransform transform;
-            transform.setIdentity();
-            m_car->SetLastCheckpointPos(btVector3(0.f, -3.f, -5.f - m_checkpointOffset));
-            m_checkpointOffset += 10;
-            transform.setOrigin(btVector3(0.f, -3.f, -5.f - m_checkpointOffset));  //-10
-            m_ghostObject->setWorldTransform(transform);            
-            
-            std::cout << "collision";// << std::endl;
+   if (!m_car) return;
 
-        }
-        // do whatever you want to do with these pairs of colliding objects
-    }*/
+   if (m_checkpoint.Collision(m_car->GetVehicle()->getRigidBody()))
+       std::cout << "collision";
 }
 
 btRigidBody * Physics::AddRigidBody(float mass, const btTransform & startTransform, btCollisionShape * shape)
@@ -171,11 +137,19 @@ std::vector<btCollisionShape *> Physics::CreateStaticCollisionShapes(BaseModel *
     return CreateStaticCollisionShapes(model, btVector3(scale, scale, scale));
 }
 
-void Physics::AddStaticModel(std::vector<btCollisionShape *> & collisionShapes, const btTransform & trans, bool debugDraw)
+void Physics::AddStaticModel(std::vector<btCollisionShape *> & collisionShapes, const btTransform & trans, bool debugDraw, const btVector3 & scale)
 {
     for (unsigned int i = 0; i < collisionShapes.size(); i++)
     {
-        btRigidBody *body = AddRigidBody(0, trans, collisionShapes[i]); //->getCollisionFlags;
+        btCollisionShape *colShape;
+        
+        if (scale != btVector3(1,1,1))
+            colShape = new btScaledBvhTriangleMeshShape((btBvhTriangleMeshShape*)collisionShapes[i], scale);
+        else
+            colShape = collisionShapes[i];
+
+        btRigidBody *body = AddRigidBody(0, trans, colShape);
+
         if (!debugDraw)
             body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
     }

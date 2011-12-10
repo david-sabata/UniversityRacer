@@ -15,7 +15,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////
 
 
-Game::Game(): mouseCaptured(false), /*drawingQueue(NULL),*/ drawWireframe(false), followCamera(false)
+Game::Game(): mouseCaptured(false), /*drawingQueue(NULL),*/ drawWireframe(false), followCamera(true)
 {
 	gui = new Gui(windowWidth, windowHeight);
 	scene = new Scene(*this);
@@ -54,20 +54,21 @@ void Game::onInit()
     BaseModel* car =  container->load3DS("models/car.3ds");
     BaseModel* wheel =  container->load3DS("models/wheel.3ds");
 	BaseModel* plank =  container->load3DS("models/plank.3ds");
+    BaseModel* checkpoint =  container->load3DS("models/checkpoint.3ds");
 
     cout << "- initializing physics" << endl;
 
     physics = new Physics();
-    physics->AddCar(PhysicsUtils::btTransFrom(btVector3(37.19f, 9.5f, -21.7f), btQuaternion(btVector3(0, 1, 0), -M_PI/2.f))); // 0,2,5
+    physics->AddCar(PhysicsUtils::btTransFrom(btVector3(37.2f, 9.5f, -21.7f), btQuaternion(btVector3(0, 1, 0), -M_PI/2.f))); // 0,2,5
    //physics->AddRigidBody(5., PhysicsUtils::btTransFrom(btVector3(0, 3, 1)), new btBoxShape(btVector3(0.75,0.75,0.75)))->setAngularVelocity(btVector3(1,1,1)); // TODO konstruktor se neprelozi kvuli Debug.h    
     		
 	cout << "- setting up drawing queue" << endl;
 		
-	// vykresli E112 zmensenou na 20%
+	// vykresli E112
 	if (1) {
 		container->addModel("e112", e112);
 		glm::mat4 modelmat = glm::scale(glm::vec3(STATICS_SCALE));
-		e112QueueItem = container->queueDraw(e112, modelmat);
+		container->queueDraw(e112, modelmat);
 
         physics->AddStaticModel(Physics::CreateStaticCollisionShapes(e112, STATICS_SCALE), PhysicsUtils::btTransFrom(btVector3(0, 0, 0)), false);
 	}
@@ -186,24 +187,20 @@ void Game::onInit()
     {
 		container->addModel("wheel", wheel);
 		for (unsigned int i = 0; i < 4; i++)
-        {
             wheelQueueItem[i] = container->queueDraw(wheel);
-        }
 	}
 
 	// pridat desticky
 	{        
 		container->addModel("plank", plank);
-        std::vector<btCollisionShape*> plankShapes1 = Physics::CreateStaticCollisionShapes(plank, btVector3(0.006f,0.0006f,0.009f));
-        std::vector<btCollisionShape*> plankShapes2 = Physics::CreateStaticCollisionShapes(plank, btVector3(0.006f,0.0006f,0.0115f));
-        std::vector<btCollisionShape*> plankShapes3 = Physics::CreateStaticCollisionShapes(plank, btVector3(0.006f,0.0006f,0.006f));
+        std::vector<btCollisionShape*> plankShapes = Physics::CreateStaticCollisionShapes(plank);
 
         //deska spojujici stoly nahore v pravo
 		glm::mat4 pos = glm::translate(glm::vec3(20.8f, 8.62f, -21.8f));
 	    glm::mat4 scale = glm::scale(glm::vec3(0.006,0.0006,0.009));
 		glm::mat4 rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes1, PhysicsUtils::btTransFrom(pos * rot));
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.006f,0.0006f,0.009f));
 		
 		//deska v levo jede se na zem z horniho stolu
 		pos = glm::translate(glm::vec3(-21.36f, 6.82f, -21.8f));
@@ -211,14 +208,14 @@ void Game::onInit()
 		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
 		rot = glm::rotate(rot, -30.f, glm::vec3(1.f,0.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes2, PhysicsUtils::btTransFrom(pos * rot));
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.006,0.0006,0.0115));
 		
 		//deska v v evo jede se smere dolu
 		pos = glm::translate(glm::vec3(-30.36f, 4.20f, -18.9f));
 	    scale = glm::scale(glm::vec3(0.006,0.0006,0.006));
 		rot = glm::rotate(25.f, glm::vec3(1.f,0.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.006,0.0006,0.006));
 
 
 		//po sjeti o patro nize prejizdime pres MOST (v levo)
@@ -226,14 +223,14 @@ void Game::onInit()
 	    scale = glm::scale(glm::vec3(0.006,0.0006,0.009));
 		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes1, PhysicsUtils::btTransFrom(pos * rot));
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.006,0.0006,0.009));
 
 		//deska uprosred  jede se smerem dolu ve smeru jizdy
 		pos = glm::translate(glm::vec3(-3.36f, 3.19f, -13.95f));
 	    scale = glm::scale(glm::vec3(0.006,0.0006,0.006));
 		rot = glm::rotate(25.f, glm::vec3(1.f,0.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.006,0.0006,0.006));
 
 
 		//deska uprosred  jede se smerem dolu ve smeru jizdy - ploska 2
@@ -241,7 +238,7 @@ void Game::onInit()
 	    scale = glm::scale(glm::vec3(0.006,0.0006,0.006));
 		rot = glm::rotate(25.f, glm::vec3(1.f,0.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.006,0.0006,0.006));
 
 		//deska v levo jede ze zeme nahoru na levy stul
 		pos = glm::translate(glm::vec3(-19.5f, 3.50f, -7.0f));
@@ -249,7 +246,7 @@ void Game::onInit()
 		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
 		rot = glm::rotate(rot, 27.f, glm::vec3(1.f,0.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes2, PhysicsUtils::btTransFrom(pos * rot));
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.006,0.0006,0.015));
 
 		//ROURA DOLU MEZI ZIDLEMA
 		//deska LEVO, SJEZD z LAVICE na LAVICI
@@ -257,7 +254,7 @@ void Game::onInit()
 	    scale = glm::scale(glm::vec3(0.0045,0.0006,0.006));
 		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0045,0.0006,0.006));
 
 		//deska LEVO, SJEZD z LAVICE na LAVICI
 		pos = glm::translate(glm::vec3(-37.29f, 5.10f, -4.00f));
@@ -265,7 +262,7 @@ void Game::onInit()
 		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
 		rot = glm::rotate(rot, 90.f, glm::vec3(0.f,0.f,1.f));
 		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0009,0.0006,0.006));
 
 				//deska LEVO, SJEZD z LAVICE na LAVICI
 		pos = glm::translate(glm::vec3(-36.40f, 5.10f, -4.00f));
@@ -273,10 +270,28 @@ void Game::onInit()
 		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
 		rot = glm::rotate(rot, 90.f, glm::vec3(0.f,0.f,1.f));
 		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0009,0.0006,0.006));
 
 		//KONEC ROURA 1 MEZI ZIDLEMA
 	}
+
+    // vykresli checkpointy
+    {
+        container->addModel("checkpoint", checkpoint);
+        
+        // prvni checkpoint
+        glm::mat4 mat = glm::rotate(glm::translate(glm::vec3(30.8f, 9.02f, -21.8f)), -90.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+        
+        // druhy checkpoint
+        mat = glm::rotate(glm::translate(glm::vec3(-10.8f, 9.02f, -21.8f)), -90.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+
+        // ...
+        
+    }
 
 
 	cout << "- constructing scene" << endl;
@@ -293,6 +308,9 @@ void Game::onInit()
 	// testovaci gui text	
 	Gui::POSITION pos = {Gui::TOP, Gui::LEFT};
 	guiTime = gui->addString(".", pos);
+
+    pos.left = Gui::RIGHT;
+    guiCheckpoint = gui->addString(".", pos);
 
 	ShaderManager::loadProgram("line");
 }
@@ -330,7 +348,7 @@ void Game::onWindowRedraw(const GameTime & gameTime)
         physics->GetCar()->GetVehicle()->updateWheelTransform(i, true); //synchronize the wheels with the (interpolated) chassis worldtransform        
         glm::mat4 wheelMatrix = glm::scale(PhysicsUtils::glmMat4From(physics->GetCar()->GetVehicle()->getWheelInfo(i).m_worldTransform), glm::vec3(CAR_SCALE));
         
-        if (i == CarPhysics::WHEEL_FRONTRIGHT || i == CarPhysics::WHEEL_REARRIGHT)
+        if (i == PhysicsCar::WHEEL_FRONTRIGHT || i == PhysicsCar::WHEEL_REARRIGHT)
             wheelMatrix = glm::rotate(wheelMatrix, 180.f, glm::vec3(0.f, 1.f, 0.f));
 
         container->updateDrawingMatrix(wheelQueueItem[i], wheelMatrix);
@@ -352,8 +370,13 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 	
 	ostringstream time;
     time << physics->GetCar()->GetVehicle()->getCurrentSpeedKmHour(); //gameTime.Total();
+    gui->updateString(guiTime, time.str());
 
-	gui->updateString(guiTime, time.str());
+    ostringstream checkpoint;
+    checkpoint << "Checkpoint:" << physics->Checkpoint().PassedNum();
+    gui->updateString(guiCheckpoint, checkpoint.str());
+    
+
 	gui->draw();
 
 
@@ -453,7 +476,7 @@ void Game::handleActiveKeys(const GameTime & gameTime)
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_DOWN) != activeKeys.end() )
         physics->GetCar()->Backward();
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_b) != activeKeys.end() ) 
-        physics->GetCar()->HandBrake();
+        physics->GetCar()->Brake();
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_LEFT) != activeKeys.end() )
         physics->GetCar()->TurnLeft();
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_RIGHT) != activeKeys.end() )
@@ -487,9 +510,21 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 	}
 
     if (key == SDLK_RETURN) {
-        physics->GetCar()->Reset();
+        if (physics->Checkpoint().FirstPassed())
+            physics->GetCar()->Reset(physics->Checkpoint().GetLastTrans());
+        else
+            physics->GetCar()->Reset(physics->GetCar()->GetInitialTransform());         
+
         camera.ResetFollow();
     }
+
+    if (key == SDLK_r)
+    {
+        physics->Checkpoint().Reset();
+        physics->GetCar()->Reset(physics->GetCar()->GetInitialTransform());
+        camera.ResetFollow();
+    }
+
 
     if (key == SDLK_f)
         followCamera = !followCamera;
