@@ -4,6 +4,7 @@
 #include <btBulletDynamicsCommon.h>
 
 #define CAR_SCALE 0.25f
+#define CAR_RAISE_BOTTOM 0.1f // zvyseni spodku kolizniho telesa auta
 
 struct CarConfig
 {

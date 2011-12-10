@@ -3,8 +3,6 @@
 #include <cmath>
 #include <vector>
 
-
-
 PhysicsCar::PhysicsCar(void): m_engineForce(0.f), m_breakingForce(0.f), m_vehicleSteering(0.f), m_turned(false)
 {                             
 }    
@@ -17,10 +15,10 @@ btCollisionShape* PhysicsCar::CreateVehicleShape()
 {
     static btScalar baseVertices[] = {                     
         -0.45f * CAR_SCALE, -0.204f * CAR_SCALE, -2.276f * CAR_SCALE,   // back center
-        -0.45f * CAR_SCALE, -0.472f * CAR_SCALE, -2.238f * CAR_SCALE,   // back lower
-        -0.85f * CAR_SCALE, -0.597f * CAR_SCALE, -1.789f * CAR_SCALE,   // back bottom
-        -0.85f * CAR_SCALE, -0.615f * CAR_SCALE,  1.728f * CAR_SCALE,   // front new bottom
-        -0.35f * CAR_SCALE, -0.620f * CAR_SCALE,  2.198f * CAR_SCALE,   // front bottom 
+        -0.45f * CAR_SCALE, (-0.472f+C) * CAR_SCALE, -2.238f * CAR_SCALE,   // back lower
+        -0.85f * CAR_SCALE, (-0.597f+C) * CAR_SCALE, -1.789f * CAR_SCALE,   // back bottom
+        -0.85f * CAR_SCALE, (-0.615f+C) * CAR_SCALE,  1.728f * CAR_SCALE,   // front new bottom
+        -0.35f * CAR_SCALE, (-0.620f+C) * CAR_SCALE,  2.198f * CAR_SCALE,   // front bottom 
         -0.35f * CAR_SCALE, -0.276f * CAR_SCALE,  2.273f * CAR_SCALE,   // front center
         -0.35f * CAR_SCALE, -0.046f * CAR_SCALE,  2.122f * CAR_SCALE,   // front upper
         -0.85f * CAR_SCALE,  0.069f * CAR_SCALE,  1.728f * CAR_SCALE,   // front new top
@@ -29,10 +27,10 @@ btCollisionShape* PhysicsCar::CreateVehicleShape()
         -0.45f * CAR_SCALE,  0.207f * CAR_SCALE, -2.174f * CAR_SCALE,   // back upper    
 
          0.45f * CAR_SCALE, -0.204f * CAR_SCALE, -2.276f * CAR_SCALE,   // back center
-         0.45f * CAR_SCALE, -0.472f * CAR_SCALE, -2.238f * CAR_SCALE,   // back lower
-         0.85f * CAR_SCALE, -0.597f * CAR_SCALE, -1.789f * CAR_SCALE,   // back bottom
-         0.85f * CAR_SCALE, -0.615f * CAR_SCALE,  1.728f * CAR_SCALE,   // front new bottom
-         0.35f * CAR_SCALE, -0.620f * CAR_SCALE,  2.198f * CAR_SCALE,   // front bottom 
+         0.45f * CAR_SCALE, (-0.472f+C) * CAR_SCALE, -2.238f * CAR_SCALE,   // back lower
+         0.85f * CAR_SCALE, (-0.597f+C) * CAR_SCALE, -1.789f * CAR_SCALE,   // back bottom
+         0.85f * CAR_SCALE, (-0.615f+C) * CAR_SCALE,  1.728f * CAR_SCALE,   // front new bottom
+         0.35f * CAR_SCALE, (-0.620f+C) * CAR_SCALE,  2.198f * CAR_SCALE,   // front bottom 
          0.35f * CAR_SCALE, -0.276f * CAR_SCALE,  2.273f * CAR_SCALE,   // front center
          0.35f * CAR_SCALE, -0.046f * CAR_SCALE,  2.122f * CAR_SCALE,   // front upper
          0.85f * CAR_SCALE,  0.069f * CAR_SCALE,  1.728f * CAR_SCALE,   // front new top

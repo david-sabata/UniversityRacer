@@ -111,8 +111,6 @@ private:
     int m_round;
 
     TimeSpan m_startTime, m_finishTime;
-    
-    
 
 };
 
