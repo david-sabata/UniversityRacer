@@ -1,9 +1,16 @@
 #version 130
 
+//Studium osvetlovaciho modelu
+//potrebne zdroje:
+//point-light(studium): http://www.lighthouse3d.com/tutorials/glsl-tutorial/point-light-per-pixel/
+//blinn-phong(studium): http://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/lighting.php
+
 #define MAX_LIGHTS 4
+
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
+//zdroj : http://www.ogre3d.org/tikiwiki/-Point+Light+Attenuation
 #define LINEAR_ATTENUATION 0.022
 #define QUADR_ATTENUATION 0.0019 
 

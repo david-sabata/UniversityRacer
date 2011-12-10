@@ -1,7 +1,13 @@
 #version 130
 
+//Studium osvetlovaciho modelu
+//potrebne zdroje:
+//point-light(studium): http://www.lighthouse3d.com/tutorials/glsl-tutorial/point-light-per-pixel/
+//blinn-phong(studium): http://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/lighting.php
+
 #define MAX_LIGHTS 4
 
+//zdroj : http://www.ogre3d.org/tikiwiki/-Point+Light+Attenuation
 #define LINEAR_ATTENUATION 0.022
 #define QUADR_ATTENUATION 0.0019 
 
@@ -36,7 +42,7 @@ in vec3 oPosition;
 
 ////////////////////GENEROVANI SUMU////////////////////////
 //SMEROVE VEKTORY
-
+//nastudovano zde - http://staffwww.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf
 const vec3 grad3D[] = vec3[](vec3(1,1,0), vec3(-1,1,0), vec3(1,-1,0), vec3(-1,-1,0), 
 				  vec3(1,0,1),vec3(-1,0,1), vec3(1,0,-1), vec3(-1,0,-1), 
 				  vec3(0,1,1), vec3(0,-1,1), vec3(0,1,-1), vec3(0,-1,-1));
