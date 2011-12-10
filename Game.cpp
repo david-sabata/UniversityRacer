@@ -10,12 +10,13 @@ using namespace std;
 
 #define WALK_SPEED 0.01f
 #define STATICS_SCALE 0.05f
+#define INTRO_TIME_MS 2000
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
 
-Game::Game(): mouseCaptured(false), /*drawingQueue(NULL),*/ drawWireframe(false), followCamera(true)
+Game::Game(): mouseCaptured(false), drawWireframe(false), followCamera(true)
 {
 	gui = new Gui(windowWidth, windowHeight);
 	scene = new Scene(*this);
@@ -59,7 +60,7 @@ void Game::onInit()
     cout << "- initializing physics" << endl;
 
     physics = new Physics();
-    physics->AddCar(PhysicsUtils::btTransFrom(btVector3(37.2f, 9.5f, -21.7f), btQuaternion(btVector3(0, 1, 0), -M_PI/2.f))); // 0,2,5
+    physics->AddCar(PhysicsUtils::btTransFrom(btVector3(37.2f, 8.95f, -21.7f), btQuaternion(btVector3(0, 1, 0), -M_PI/2.f))); // 0,2,5
    //physics->AddRigidBody(5., PhysicsUtils::btTransFrom(btVector3(0, 3, 1)), new btBoxShape(btVector3(0.75,0.75,0.75)))->setAngularVelocity(btVector3(1,1,1)); // TODO konstruktor se neprelozi kvuli Debug.h    
     		
 	cout << "- setting up drawing queue" << endl;
@@ -278,6 +279,7 @@ void Game::onInit()
     // vykresli checkpointy
     {
         container->addModel("checkpoint", checkpoint);
+        //std::vector<btCollisionShape*> checkpointShapes = Physics::CreateStaticCollisionShapes(checkpoint, CHECKPOINT_SCALE);
         
         // prvni checkpoint
         glm::mat4 mat = glm::rotate(glm::translate(glm::vec3(30.8f, 9.02f, -21.8f)), -90.f, glm::vec3(0, 1, 0)); 
@@ -324,7 +326,8 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
 	handleActiveKeys(gameTime);
 
-    physics->StepSimulation(gameTime.Elapsed() * 0.001f);
+    physics->StepSimulation(gameTime.Elapsed().ms() * 0.001f);
+    physics->Checkpoint().Collision(physics->GetCar()->GetVehicle()->getRigidBody(), gameTime);
     
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
@@ -340,7 +343,9 @@ void Game::onWindowRedraw(const GameTime & gameTime)
     if (followCamera)
     {
         btVector3 vel = physics->GetCar()->GetVehicle()->getRigidBody()->getLinearVelocity();        
-        camera.Follow(carMatrix, glm::vec3(vel.x(), vel.y(), vel.z()), gameTime);
+        
+        if (gameTime.Total() > INTRO_TIME_MS)
+            camera.Follow(carMatrix, glm::vec3(vel.x(), vel.y(), vel.z()), gameTime);
     }    
  
     for (int i = 0; i < physics->GetCar()->GetVehicle()->getNumWheels(); i++)
@@ -369,11 +374,14 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 	// Vykresleni ingame gui
 	
 	ostringstream time;
-    time << physics->GetCar()->GetVehicle()->getCurrentSpeedKmHour(); //gameTime.Total();
+    time << physics->Checkpoint().GetTime(gameTime); //physics->GetCar()->GetVehicle()->getCurrentSpeedKmHour(); //gameTime.Total();
     gui->updateString(guiTime, time.str());
 
     ostringstream checkpoint;
-    checkpoint << "Checkpoint:" << physics->Checkpoint().PassedNum();
+    if (physics->Checkpoint().PassedFinish())
+        checkpoint << "R-restart";
+    else
+        checkpoint << "CP:" << physics->Checkpoint().PassedNum()+1 << "/" << physics->Checkpoint().Count();
     gui->updateString(guiCheckpoint, checkpoint.str());
     
 
@@ -463,7 +471,7 @@ void Game::handleActiveKeys(const GameTime & gameTime)
 	//float f_fps = float(1 / getFPS());
 	//float f_step = float(WALK_SPEED / f_fps);
 	//float f_step = float(WALK_SPEED / getFPS());
-    float f_step = gameTime.Elapsed() * WALK_SPEED;
+    float f_step = gameTime.Elapsed().ms() * WALK_SPEED;
 
 	// vysledkem jsou slozky vektoru ve smerech X ("strafe", ne otaceni) a Z
 	float x = -( (-1.0f * aDown) + (1.0f * dDown) ) * f_step;	

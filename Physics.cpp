@@ -84,11 +84,6 @@ void Physics::StepSimulation(btScalar timeStep)
         else
 			std::cout << "Simulated " << numSimSteps << " steps" << std::endl;
 	}*/
-    
-   if (!m_car) return;
-
-   if (m_checkpoint.Collision(m_car->GetVehicle()->getRigidBody()))
-       std::cout << "collision";
 }
 
 btRigidBody * Physics::AddRigidBody(float mass, const btTransform & startTransform, btCollisionShape * shape)
