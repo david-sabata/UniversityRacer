@@ -12,7 +12,6 @@ using namespace std;
 #define STATICS_SCALE 0.05f
 #define INTRO_TIME_MS 2000
 
-
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -20,12 +19,14 @@ Game::Game(): mouseCaptured(false), drawWireframe(false), followCamera(true)
 {
 	gui = new Gui(windowWidth, windowHeight);
 	scene = new Scene(*this);
+	shadowVolumes = new ShadowVolumes();
 }
 
 Game::~Game()
 {
 	delete gui;
 	delete scene;
+	delete shadowVolumes;
 }
 
 
@@ -34,6 +35,7 @@ Game::~Game()
 // Event handlers
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
 
 
 void Game::onInit()
@@ -47,10 +49,10 @@ void Game::onInit()
 	// nacist modely	
 	container = new ModelContainer;	
 
-
+	// modely pro kresleni
 	BaseModel* chairs = container->load3DS("models/chairs.3ds");
 	BaseModel* e112 = container->load3DS("models/e112.3ds");
-	BaseModel* middesk = container->load3DS("models/desk-mid.3ds");
+	BaseModel* middesk = container->load3DS("models/desk-mid.3ds");	
   	BaseModel* sidedesk = container->load3DS("models/desk-side.3ds");
     BaseModel* car =  container->load3DS("models/car.3ds");
     BaseModel* wheel =  container->load3DS("models/wheel.3ds");
@@ -61,6 +63,7 @@ void Game::onInit()
 
     physics = new Physics();
     physics->AddCar(PhysicsUtils::btTransFrom(btVector3(37.2f, 8.95f, -21.7f), btQuaternion(btVector3(0, 1, 0), -M_PI/2.f))); // 0,2,5
+
    //physics->AddRigidBody(5., PhysicsUtils::btTransFrom(btVector3(0, 3, 1)), new btBoxShape(btVector3(0.75,0.75,0.75)))->setAngularVelocity(btVector3(1,1,1)); // TODO konstruktor se neprelozi kvuli Debug.h    
     		
 	cout << "- setting up drawing queue" << endl;
@@ -75,7 +78,7 @@ void Game::onInit()
 	}
 
     // vykresli zidle
-	{
+	if (0) {
 		container->addModel("chairs", chairs);
                 
 		glm::mat4 scale = glm::scale(glm::vec3(STATICS_SCALE));
@@ -108,7 +111,7 @@ void Game::onInit()
 	}
 
 	// vykresli prostredni lavice
-	{
+	if (1) {
 		container->addModel("middesk", middesk);
 
 		glm::mat4 scale = glm::scale(glm::vec3(STATICS_SCALE));
@@ -125,14 +128,16 @@ void Game::onInit()
 		for (unsigned int rowI = 0; rowI < 5; rowI++)
 		{
 			glm::mat4 col = glm::translate(rows[rowI], glm::vec3(0, 0, 0));
-			container->queueDraw(middesk, col);
 
             physics->AddStaticModel(middeskShapes, PhysicsUtils::btTransFrom(glm::scale(col, glm::vec3(1/STATICS_SCALE))), false);
+
+			container->queueDraw(middesk, col);
+			shadowVolumes->addModel(middesk, col);
 		}
 	}
 
 	// vykresli postranni lavice
-	{
+	if (1) {
 		container->addModel("sidedesk", sidedesk);
 
 		glm::mat4 scale = glm::scale(glm::vec3(STATICS_SCALE));
@@ -159,6 +164,7 @@ void Game::onInit()
 			// prava strana
 			glm::mat4 mat = glm::translate(col, otherside);
 			container->queueDraw(sidedesk, mat);
+			//shadowVolumes->addModel(sidedesk, mat);
 
             physics->AddStaticModel(sidedeskShapes, PhysicsUtils::btTransFrom(glm::scale(mat, glm::vec3(1/STATICS_SCALE))), false);
 		}
@@ -175,16 +181,19 @@ void Game::onInit()
 			glm::vec4 pos = (*it).Position();
 			glm::mat4 mat = glm::scale(glm::translate(pos.x, pos.y, pos.z), glm::vec3(0.001));
 			//glm::mat4 mat = glm::translate(glm::scale(glm::vec3(0.01)), pos.x, pos.y, pos.z);
-		
+
 			container->queueDraw(sphere, mat);
+			shadowVolumes->addLight(glm::vec3(pos));
 		}
 	}
 
+	// pridat auto
     {
 		container->addModel("car", car);
 		carQueueItem = container->queueDraw(car);
 	}
 
+	// pridat kola auta
     {
 		container->addModel("wheel", wheel);
 		for (unsigned int i = 0; i < 4; i++)
@@ -372,9 +381,17 @@ void Game::onInit()
 	// vyrobit scenu
 	scene->addModelContainer(container);
 	scene->init();
+
+	cout << "- constructing shadow volumes" << endl;
+
+	// vygenerovat stinova telesa (pro vsechna svetla; nehlede na to jestli sviti nebo ne)
+	shadowVolumes->generate();
 	
 	cout << "- done!" << endl;
 	
+	// rozsvitit vsechna svetla
+	enabledLights = vector<bool>(shadowVolumes->getLightsCount(), true);
+
 	// nacist vsechny materialy	
 	ShaderManager::loadPrograms();
 
@@ -397,18 +414,13 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
 	handleActiveKeys(gameTime);
 
+
+	// fyzika -------------------------------------------------
     physics->StepSimulation(gameTime.Elapsed().ms() * 0.001f);
     physics->Checkpoint().Collision(physics->GetCar()->GetVehicle()->getRigidBody(), gameTime);
     
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    glEnable(GL_DEPTH_TEST);    
-	glEnable(GL_CULL_FACE);
-	glDisable(GL_BLEND);
-
-    glDepthFunc(GL_LESS);
-
     glm::mat4 carMatrix = glm::scale(PhysicsUtils::glmMat4From(physics->GetCar()->GetWorldTransform()), glm::vec3(CAR_SCALE));
+
     container->updateDrawingMatrix(carQueueItem, carMatrix);
 
     if (followCamera)
@@ -429,9 +441,86 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
         container->updateDrawingMatrix(wheelQueueItem[i], wheelMatrix);
     }
+	// ---------------------------------------------------------
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	
-	// vykreslit scenu
-	scene->draw();
+	// pohledova a projekcni matice - pro kresleni stinovych teles
+	glm::mat4 mView = getCamera()->GetMatrix();
+	glm::mat4 mPerspective = glm::perspective(45.0f, (float)getWindowAspectRatio(), 0.1f, 1000.0f);
+
+
+	// ===================================================================================================
+	// vicepruchodove kresleni se stencil stiny podle:
+	// http://www.angelfire.com/games5/duktroa/RealTimeShadowTutorial.htm
+	
+	// vykreslit scenu ambientne se zapisem do z-bufferu ---------
+	glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glDisable(GL_BLEND);   // vypnout blending (kreslime nejnizsi vrstvu)
+    glDepthMask(GL_TRUE);  // zapisovat do z-bufferu
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // zapisovat do color bufferu
+
+	// vykreslit scenu ambientnimi slozkami vsech rozsvicenych svetel
+	scene->draw(true, false, enabledLights);
+	
+	glBlendFunc(GL_ONE, GL_ONE); // budeme pricitat prispevky (difuzni+spekularni) od jednotlivych svetel
+    glDepthMask(GL_FALSE);  // pri kresleni stinovych teles bude z-buffer read-only
+    glEnable(GL_STENCIL_TEST); // budeme pouzivat stencil buffer
+	// -----------------------------------------------------------
+
+	for (unsigned int lightI = 0; lightI < enabledLights.size(); lightI++)
+	{
+		// zhasnute svetla neni treba blendovat
+		if (enabledLights[lightI] == false)
+			continue;
+
+		glDisable(GL_BLEND); // nezapisovat barvu (pouze stencil)
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+		glClear(GL_STENCIL_BUFFER_BIT); // vycistit stencil
+		glDepthFunc(GL_LESS); // pouziti LESS by melo zabranit artefaktum
+		
+		glStencilFunc(GL_ALWAYS, 0, 0); // stencil test vzdy projde		
+
+		glCullFace(GL_FRONT); // kreslime odvracene facy	
+		glStencilOp(GL_KEEP, GL_INCR, GL_KEEP); // inkrementujeme stencil, pokud z-test failne
+    
+		shadowVolumes->draw( lightI, mView, mPerspective );
+
+		glCullFace(GL_BACK); // kreslime privracene facy
+		glStencilOp(GL_KEEP, GL_DECR, GL_KEEP); // dekrementujeme stencil, pokud z-test failne
+
+		shadowVolumes->draw( lightI, mView, mPerspective );
+		// -----------------------------------------------------------
+
+		// vykreslit scenu normalne ----------------------------------
+
+		// We draw our lighting now that we created the shadows area in the stencil buffer
+		glDepthFunc(GL_LEQUAL); // we put it again to LESS or EQUAL (or else you will get some z-fighting)
+		glCullFace(GL_BACK); // we draw the front face
+		glEnable(GL_BLEND); // We enable blending
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // We enable color buffer
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Drawing will not affect the stencil buffer
+		glStencilFunc(GL_EQUAL, 0x0, 0xff); // And the most important thing, the stencil function. Drawing if equal to 0
+
+		// v poli priznaku rozsvitit jen jedno svetlo
+		vector<bool> lght = vector<bool>(enabledLights.size(), false);
+		lght[lightI] = true;
+
+		// vykreslit scenu osvetlenou pouze jednim svetlem a pouze difuznimi a spekularnimi slozkami
+		scene->draw(false, true, lght);
+	}
+
+	// ================================================================================================
+	
+	glDisable(GL_STENCIL_TEST);
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+
 
     if (drawWireframe)
     {
@@ -443,7 +532,7 @@ void Game::onWindowRedraw(const GameTime & gameTime)
     
     // ---------------------------------------
 	// Vykresleni ingame gui
-	
+#if 1
 	ostringstream time;
     time << physics->Checkpoint().GetTime(gameTime); //physics->GetCar()->GetVehicle()->getCurrentSpeedKmHour(); //gameTime.Total();
     gui->updateString(guiTime, time.str());
@@ -457,12 +546,13 @@ void Game::onWindowRedraw(const GameTime & gameTime)
     
 
 	gui->draw();
-
-
+#endif
 	// ---------------------------------------
 
     SDL_GL_SwapBuffers(); 
 }
+
+
 
 void Game::drawLines(vector<PhysicsDebugDraw::LINE> & lines)
 {
@@ -531,6 +621,7 @@ void Game::drawLines(vector<PhysicsDebugDraw::LINE> & lines)
     lines.clear();
 }
 
+
 void Game::handleActiveKeys(const GameTime & gameTime)
 {
 	bool wDown = ( find(activeKeys.begin(), activeKeys.end(), SDLK_w) != activeKeys.end() );
@@ -559,7 +650,7 @@ void Game::handleActiveKeys(const GameTime & gameTime)
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_LEFT) != activeKeys.end() )
         physics->GetCar()->TurnLeft();
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_RIGHT) != activeKeys.end() )
-        physics->GetCar()->TurnRight();			
+        physics->GetCar()->TurnRight();
 }
 
 
@@ -610,6 +701,12 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 
     if (key == SDLK_c)
         camera.DebugDump();
+
+	if (key >= SDLK_1 && key <= SDLK_9) {
+		unsigned int lightI = key - SDLK_1;
+		if (enabledLights.size() > lightI)
+			enabledLights[lightI] = !enabledLights[lightI];
+	}
 }
 
 
@@ -660,3 +757,5 @@ string Game::statsString()
     
     return "---";
 }
+
+

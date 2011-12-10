@@ -45,9 +45,10 @@ class Scene
 
 		/**
 		 * Vykresleni cele sceny
+		 * Moznost zvolit, ktere slozky se budou kreslit a predat pole
+		 * priznaku rozsvicenych svetel
 		 */
-		void draw();
-
+		void draw(bool drawAmbient = true, bool drawLighting = true, std::vector<bool> enabledLights = std::vector<bool>());
 
 	protected:
 		/**

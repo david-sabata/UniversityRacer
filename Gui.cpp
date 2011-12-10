@@ -179,4 +179,8 @@ void Gui::draw()
 	
 	// kresleni ctvercu
 	glDrawElements(GL_QUADS, indices.size(), GL_UNSIGNED_INT, (void*)&(indices.at(0)));
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
 }
