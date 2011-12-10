@@ -14,9 +14,16 @@ Camera::Camera(void): currentSettleTime(0.f) {
 
 void Camera::Reset() {
 	//eye = glm::vec3(2.78f, 2.73f, -2.5f);	
-	eye = glm::vec3(0.0f, 0.0f, -10.0f);
+	
+    /*eye = glm::vec3(0.0f, 0.0f, -10.0f);
 	up = glm::vec3(0.0f, 1.0f, 0.0f);		
 	target = glm::vec3(0.0f, 0.0f, 1.0f);
+	angle_horiz = 0.0f;
+	angle_vert = 0.0f;*/
+
+    eye = glm::vec3(39.067f, 11.268f, -26.525f);
+	up = glm::vec3(0.0f, 1.0f, 0.0f);		
+	target = glm::vec3(-0.58f, -0.179f, 0.794f);
 	angle_horiz = 0.0f;
 	angle_vert = 0.0f;
 
@@ -133,7 +140,7 @@ void Camera::Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameT
         else
             lastBaseLookFromPos = defaultPos;
         viewDistance += (settleTime - currentSettleTime) * (settleTime - currentSettleTime);
-        currentSettleTime += gameTime.Elapsed() * 0.001f;
+        currentSettleTime += gameTime.Elapsed().ms() * 0.001f;
     }
 
     // First we nudge the previous camera position to get it to behave exactly the way we want.

@@ -10,11 +10,12 @@ using namespace std;
 
 #define WALK_SPEED 0.01f
 #define STATICS_SCALE 0.05f
+#define INTRO_TIME_MS 2000
 
 ////////////////////////////////////////////////////////////////////////////////
 
 
-Game::Game(): mouseCaptured(false), /*drawingQueue(NULL),*/ drawWireframe(false), followCamera(false)
+Game::Game(): mouseCaptured(false), drawWireframe(false), followCamera(true)
 {
 	gui = new Gui(windowWidth, windowHeight);
 	scene = new Scene(*this);
@@ -56,11 +57,13 @@ void Game::onInit()
     BaseModel* car =  container->load3DS("models/car.3ds");
     BaseModel* wheel =  container->load3DS("models/wheel.3ds");
 	BaseModel* plank =  container->load3DS("models/plank.3ds");
+    BaseModel* checkpoint =  container->load3DS("models/checkpoint.3ds");
 
     cout << "- initializing physics" << endl;
 
     physics = new Physics();
-	physics->AddCar(PhysicsUtils::btTransFrom(btVector3(37.19f, 9.5f, -21.7f), btQuaternion(btVector3(0, 1, 0), btScalar(-M_PI/2.f)))); // 0,2,5
+    physics->AddCar(PhysicsUtils::btTransFrom(btVector3(37.2f, 8.95f, -21.7f), btQuaternion(btVector3(0, 1, 0), -M_PI/2.f))); // 0,2,5
+
    //physics->AddRigidBody(5., PhysicsUtils::btTransFrom(btVector3(0, 3, 1)), new btBoxShape(btVector3(0.75,0.75,0.75)))->setAngularVelocity(btVector3(1,1,1)); // TODO konstruktor se neprelozi kvuli Debug.h    
     		
 	cout << "- setting up drawing queue" << endl;
@@ -69,7 +72,7 @@ void Game::onInit()
 	if (1) {
 		container->addModel("e112", e112);
 		glm::mat4 modelmat = glm::scale(glm::vec3(STATICS_SCALE));
-		e112QueueItem = container->queueDraw(e112, modelmat);
+		container->queueDraw(e112, modelmat);
 
         physics->AddStaticModel(Physics::CreateStaticCollisionShapes(e112, STATICS_SCALE), PhysicsUtils::btTransFrom(btVector3(0, 0, 0)), false);
 	}
@@ -194,97 +197,183 @@ void Game::onInit()
     {
 		container->addModel("wheel", wheel);
 		for (unsigned int i = 0; i < 4; i++)
-        {
             wheelQueueItem[i] = container->queueDraw(wheel);
-        }
 	}
 
 	// pridat desticky
 	{        
 		container->addModel("plank", plank);
-        std::vector<btCollisionShape*> plankShapes1 = Physics::CreateStaticCollisionShapes(plank, btVector3(0.006f,0.0006f,0.009f));
-        std::vector<btCollisionShape*> plankShapes2 = Physics::CreateStaticCollisionShapes(plank, btVector3(0.006f,0.0006f,0.0115f));
-        std::vector<btCollisionShape*> plankShapes3 = Physics::CreateStaticCollisionShapes(plank, btVector3(0.006f,0.0006f,0.006f));
+        std::vector<btCollisionShape*> plankShapes = Physics::CreateStaticCollisionShapes(plank);
 
-        //deska spojujici stoly nahore v pravo
-		glm::mat4 pos = glm::translate(glm::vec3(20.8f, 8.62f, -21.8f));
-	    glm::mat4 scale = glm::scale(glm::vec3(0.006,0.0006,0.009));
-		glm::mat4 rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
-		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes1, PhysicsUtils::btTransFrom(pos * rot));
-		
-		//deska v levo jede se na zem z horniho stolu
-		pos = glm::translate(glm::vec3(-21.36f, 6.82f, -21.8f));
-	    scale = glm::scale(glm::vec3(0.006,0.0006,0.0115));
-		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
-		rot = glm::rotate(rot, -30.f, glm::vec3(1.f,0.f,0.f));
-		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes2, PhysicsUtils::btTransFrom(pos * rot));
-		
-		//deska v v evo jede se smere dolu
-		pos = glm::translate(glm::vec3(-30.36f, 4.20f, -18.9f));
-	    scale = glm::scale(glm::vec3(0.006,0.0006,0.006));
-		rot = glm::rotate(25.f, glm::vec3(1.f,0.f,0.f));
-		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
+		glm::vec3 pos[] = {
+			glm::vec3(20.8f, 8.62f, -21.8f), //deska spojujici stoly nahore v pravo 1
+			glm::vec3(-21.36f, 6.82f, -21.8f), //deska v levo jede se na zem z horniho stolu
+			glm::vec3(-30.36f, 4.20f, -18.9f), //deska v v evo jede se smere dolu
+			glm::vec3(-20.8f, 4.0f, -17.0f), //po sjeti o patro nize prejizdime pres MOST (v levo)
+			glm::vec3(-6.36f, 3.19f, -13.95f), //deska uprosred  jede se smerem dolu ve smeru jizdy
+			glm::vec3(-6.36f, 2.19f, -9.0f), //deska uprosred  jede se smerem dolu ve smeru jizdy - ploska 2
+			glm::vec3(-19.5f, 3.50f, -7.0f), //deska v levo jede ze zeme nahoru na levy stul
 
+			glm::vec3(-36.85f, 5.10f, -4.00f), //ROURA DOLU MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(-37.29f, 5.10f, -4.00f), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(-36.40f, 5.10f, -4.00f), //deska LEVO, SJEZD z LAVICE na LAVICI
 
-		//po sjeti o patro nize prejizdime pres MOST (v levo)
-		pos = glm::translate(glm::vec3(-20.8f, 4.0f, -17.0f));
-	    scale = glm::scale(glm::vec3(0.006,0.0006,0.009));
-		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
-		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes1, PhysicsUtils::btTransFrom(pos * rot));
+			glm::vec3(-27.85f, 2.071f, 7.61f),//deska LEVO, SJEZD z LAVICE na LINO
+			glm::vec3(-17.725f, 0.273f, 20.0f), //vyjezd za katedru
+			glm::vec3(17.55f, 0.273f, 20.0f), //sjezd u katedry
+			glm::vec3(35.36f, 0.273f, 2.08f), //deska v pravo jede se smerem nahoru ve smeru jizdy - ploska 1
+			glm::vec3(24.3f, 2.47f, -2.0f), //deska v pravo jede ze zeme nahoru na prosredni stul
 
-		//deska uprosred  jede se smerem dolu ve smeru jizdy
-		pos = glm::translate(glm::vec3(-3.36f, 3.19f, -13.95f));
-	    scale = glm::scale(glm::vec3(0.006,0.0006,0.006));
-		rot = glm::rotate(25.f, glm::vec3(1.f,0.f,0.f));
-		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
+			glm::vec3(-10.85f, 5.072f, -4.017f), //ROURA NAHORU 2 MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(-11.29f, 5.072f, -4.017f), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(-10.41, 5.072f, -4.017f), //deska LEVO, SJEZD z LAVICE na LAVICI
 
+			glm::vec3(-10.85f, 6.07f, -9.02f), //ROURA NAHORU 3 MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(-11.29f, 6.07f, -9.02f), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(-10.41f, 6.07f, -9.02f), //deska LEVO, SJEZD z LAVICE na LAVICI
 
-		//deska uprosred  jede se smerem dolu ve smeru jizdy - ploska 2
-		pos = glm::translate(glm::vec3(-3.36f, 2.19f, -9.0f));
-	    scale = glm::scale(glm::vec3(0.006,0.0006,0.006));
-		rot = glm::rotate(25.f, glm::vec3(1.f,0.f,0.f));
-		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
+			glm::vec3(4.9f, 7.075f, -14.023f), //ROURA NAHORU 4 MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(5.34f, 7.075f, -14.023f), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(4.46f, 7.075f, -14.023f), //deska LEVO, SJEZD z LAVICE na LAVICI
 
-		//deska v levo jede ze zeme nahoru na levy stul
-		pos = glm::translate(glm::vec3(-19.5f, 3.50f, -7.0f));
-	    scale = glm::scale(glm::vec3(0.006,0.0006,0.015));
-		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
-		rot = glm::rotate(rot, 27.f, glm::vec3(1.f,0.f,0.f));
-		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes2, PhysicsUtils::btTransFrom(pos * rot));
+			glm::vec3(20.8f, 7.62f, -16.9), //deska spojujici stoly nahore v pravo 2 (ta niz)
 
-		//ROURA DOLU MEZI ZIDLEMA
-		//deska LEVO, SJEZD z LAVICE na LAVICI
-		pos = glm::translate(glm::vec3(-36.85f, 5.10f, -4.00f));
-	    scale = glm::scale(glm::vec3(0.0045,0.0006,0.006));
-		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
-		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
+			glm::vec3(36.15f, 8.07f, -18.99f), //ROURA NAHORU 5 MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(36.59f, 8.07f, -18.99f), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(35.71f, 8.07f, -18.99f) //deska PRAVO, SJEZD z LAVICE na LAVICI
+		};
 
-		//deska LEVO, SJEZD z LAVICE na LAVICI
-		pos = glm::translate(glm::vec3(-37.29f, 5.10f, -4.00f));
-	    scale = glm::scale(glm::vec3(0.0009,0.0006,0.006));
-		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
-		rot = glm::rotate(rot, 90.f, glm::vec3(0.f,0.f,1.f));
-		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
+		glm::vec3 scale[] = {
+			glm::vec3(0.006,0.0006,0.009),  //deska spojujici stoly nahore v pravo 1
+			glm::vec3(0.006,0.0006,0.0115), //deska v levo jede se na zem z horniho stolu
+			glm::vec3(0.006,0.0006,0.006), //deska v v evo jede se smere dolu
+			glm::vec3(0.006,0.0006,0.009), //po sjeti o patro nize prejizdime pres MOST (v levo)
+			glm::vec3(0.006,0.0006,0.006), //deska uprosred  jede se smerem dolu ve smeru jizdy
+			glm::vec3(0.006,0.0006,0.006), //deska uprosred  jede se smerem dolu ve smeru jizdy - ploska 2
+			glm::vec3(0.006,0.0006,0.015), //deska v levo jede ze zeme nahoru na levy stul
 
-				//deska LEVO, SJEZD z LAVICE na LAVICI
-		pos = glm::translate(glm::vec3(-36.40f, 5.10f, -4.00f));
-	    scale = glm::scale(glm::vec3(0.0009,0.0006,0.006));
-		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
-		rot = glm::rotate(rot, 90.f, glm::vec3(0.f,0.f,1.f));
-		container->queueDraw(plank, pos * rot * scale);
-        physics->AddStaticModel(plankShapes3, PhysicsUtils::btTransFrom(pos * rot));
+			glm::vec3(0.0045,0.0006,0.006), //ROURA DOLU MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(0.0009,0.0006,0.006), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(0.0009,0.0006,0.006), //deska LEVO, SJEZD z LAVICE na LAVICI
 
-		//KONEC ROURA 1 MEZI ZIDLEMA
+			glm::vec3(0.007,0.0006,0.028),//deska LEVO, SJEZD z LAVICE na LINO
+			glm::vec3(0.006,0.0006,0.009), //vyjezd za katedru
+			glm::vec3(0.006,0.0006,0.009), //sjezd u katedry
+			glm::vec3(0.006,0.0006,0.009), //deska v pravo jede se smerem nahoru ve smeru jizdy - ploska 1
+			glm::vec3(0.006,0.0006,0.020), //deska v pravo jede ze zeme nahoru na prosredni stul
+
+			glm::vec3(0.0045,0.0006,0.006), //ROURA NAHORU 2 MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(0.0009,0.0006,0.006), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(0.0009,0.0006,0.006), //deska LEVO, SJEZD z LAVICE na LAVICI
+
+			glm::vec3(0.0045,0.0006,0.006),//ROURA NAHORU 3 MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(0.0009,0.0006,0.006), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(0.0009,0.0006,0.006), //deska LEVO, SJEZD z LAVICE na LAVICI
+
+			glm::vec3(0.0045,0.0006,0.006), //ROURA NAHORU 4 MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(0.0009,0.0006,0.006), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(0.0009,0.0006,0.006), //deska LEVO, SJEZD z LAVICE na LAVICI
+
+			glm::vec3(0.006,0.0006,0.009), //deska spojujici stoly nahore v pravo 2 (ta niz)
+
+			glm::vec3(0.0045,0.0006,0.006), //ROURA NAHORU 5 MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(0.0009,0.0006,0.006), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::vec3(0.0009,0.0006,0.006) //deska PRAVO, SJEZD z LAVICE na LAVICI
+			
+		};
+
+		glm::mat4 rot[] = {
+			glm::rotate(90.f, glm::vec3(0.f,1.f,0.f)),  //deska spojujici stoly nahore v pravo 1
+			glm::rotate(glm::rotate(90.f, glm::vec3(0.f,1.f,0.f)), -30.f, glm::vec3(1.f,0.f,0.f)),  //deska v levo jede se na zem z horniho stolu
+			glm::rotate(25.f, glm::vec3(1.f,0.f,0.f)), //deska v v evo jede se smere dolu
+			glm::rotate(90.f, glm::vec3(0.f,1.f,0.f)), //po sjeti o patro nize prejizdime pres MOST (v levo)
+			glm::rotate(25.f, glm::vec3(1.f,0.f,0.f)), //deska uprosred  jede se smerem dolu ve smeru jizdy
+			glm::rotate(25.f, glm::vec3(1.f,0.f,0.f)), //deska uprosred  jede se smerem dolu ve smeru jizdy - ploska 2
+			glm::rotate(glm::rotate(90.f, glm::vec3(0.f,1.f,0.f)), 27.f, glm::vec3(1.f,0.f,0.f)),  //deska v levo jede ze zeme nahoru na levy stul
+
+			glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)), //ROURA DOLU MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::rotate(glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)),  90.f, glm::vec3(0.f,0.f,1.f)), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::rotate(glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)),  90.f, glm::vec3(0.f,0.f,1.f)), //deska LEVO, SJEZD z LAVICE na LAVICI
+
+			glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)), //deska LEVO, SJEZD z LAVICE na LINO
+			glm::rotate(glm::rotate(90.f, glm::vec3(0.f,1.f,0.f)), -15.f, glm::vec3(1.f,0.f,0.f)), //vyjezd za katedru
+			glm::rotate(glm::rotate(90.f, glm::vec3(0.f,1.f,0.f)),  15.f, glm::vec3(1.f,0.f,0.f)), //sjezd u katedry
+			glm::rotate(15.f, glm::vec3(1.f,0.f,0.f)), //deska v pravo jede se smerem nahoru ve smeru jizdy - ploska 1
+			glm::rotate(glm::rotate(90.f, glm::vec3(0.f,1.f,0.f)), 20.f, glm::vec3(1.f,0.f,0.f)), //deska v pravo jede ze zeme nahoru na prosredni stul
+
+			glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)), //ROURA NAHORU 2 MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::rotate(glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)),  90.f, glm::vec3(0.f,0.f,1.f)), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::rotate(glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)),  90.f, glm::vec3(0.f,0.f,1.f)),//deska PRAVO, SJEZD z LAVICE na LAVICI
+
+			glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)), //ROURA NAHORU 3 MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::rotate(glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)), 90.f, glm::vec3(0.f,0.f,1.f)), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::rotate(glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)), 90.f, glm::vec3(0.f,0.f,1.f)), //deska PRAVO, SJEZD z LAVICE na LAVICI
+
+			glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)), //ROURA NAHORU 4 MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::rotate(glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)),  90.f, glm::vec3(0.f,0.f,1.f)), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::rotate(glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)),  90.f, glm::vec3(0.f,0.f,1.f)), //deska PRAVO, SJEZD z LAVICE na LAVICI
+
+			glm::rotate(90.f, glm::vec3(0.f,1.f,0.f)), //deska spojujici stoly nahore v pravo 2 (ta niz)
+
+			glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)), //ROURA NAHORU 5 MEZI ZIDLEMA //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::rotate(glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)), 90.f, glm::vec3(0.f,0.f,1.f)), //deska LEVO, SJEZD z LAVICE na LAVICI
+			glm::rotate(glm::rotate(17.f, glm::vec3(1.f,0.f,0.f)), 90.f, glm::vec3(0.f,0.f,1.f)) //deska PRAVO, SJEZD z LAVICE na LAVICI
+
+		};
+
+		int arrLen = sizeof(pos) / sizeof(glm::vec3);
+		for(int i = 0; i < arrLen; i++) {
+			container->queueDraw(plank, glm::translate(pos[i]) * rot[i] * glm::scale(scale[i]));
+			physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(glm::translate(pos[i]) * rot[i]), true, btVector3(scale[i].x,scale[i].y,scale[i].z));
+		}
+
 	}
+
+    // vykresli checkpointy
+    {
+        container->addModel("checkpoint", checkpoint);
+
+        glm::mat4 rows[] = {
+			//prvni checkpoint
+			glm::rotate(glm::translate(glm::vec3(30.8f, 9.02f, -21.8f)), -90.f, glm::vec3(0, 1, 0)),
+			// druhy checkpoint
+			glm::rotate(glm::translate(glm::vec3(-10.8f, 9.02f, -21.8f)), -90.f, glm::vec3(0, 1, 0)), 
+			// treti checkpoint
+			glm::rotate(glm::translate(glm::vec3(-30.36f, 5.43f, -20.7f)), 0.f, glm::vec3(0, 1, 0)), 
+			// ctvrty checkpoint
+			glm::rotate(glm::translate(glm::vec3(-6.36f, 4.43f, -15.8f)), 0.f, glm::vec3(0, 1, 0)), 
+			// paty checkpoint
+			glm::rotate(glm::translate(glm::vec3(-6.36f, 3.43f, -10.9f)), 0.f, glm::vec3(0, 1, 0)),
+			// sesty checkpoint
+            glm::rotate(glm::translate(glm::vec3(-16.36f, 2.41f, -7.f)), -90.f, glm::vec3(0, 1, 0)),
+			//sedmy checkpoint
+			glm::rotate(glm::translate(glm::vec3(-36.85f, 5.99f, -5.82f)), 0.f, glm::vec3(0, 1, 0)),
+			//osmy checkpoint
+			glm::rotate(glm::translate(glm::vec3(-27.85f, 4.99f, -0.8f)), 0.f, glm::vec3(0, 1, 0)),
+			//devaty checkpoint
+			glm::rotate(glm::translate(glm::vec3(-26.85f, 0.25f, 18.5f)), 45.f, glm::vec3(0, 1, 0)),
+			//desaty checkpoint
+			glm::rotate(glm::translate(glm::vec3(-18.725f, 0.25f, 20.0f)), 90.f, glm::vec3(0, 1, 0)),
+			//jedenacty checkpoint
+			glm::rotate(glm::translate(glm::vec3(14.725f, 1.25f, 20.0f)), 90.f, glm::vec3(0, 1, 0)),
+			//dvanacty checkpoint
+			glm::rotate(glm::translate(glm::vec3(35.36f, 0.25f, 3.1f)), 180.f, glm::vec3(0, 1, 0)),
+			//trinacty checkpoint
+			glm::rotate(glm::translate(glm::vec3(28.4f, 1.35f, -2.0f)), -90.f, glm::vec3(0, 1, 0)),
+			//ctrnacty checkpoint
+			glm::rotate(glm::translate(glm::vec3(-10.85f, 5.f, -2.3f)), 180.f, glm::vec3(0, 1, 0)),
+			//patnacty checkpoint
+			glm::rotate(glm::translate(glm::vec3(4.9f, 7.0f, -12.256f)), 180.f, glm::vec3(0, 1, 0)),
+			//sestnacty checkpoint
+			glm::rotate(glm::translate(glm::vec3(36.15f, 8.0f, -17.0f)), 180.f, glm::vec3(0, 1, 0))
+		};
+
+		int arrLen = sizeof(rows) / sizeof(glm::mat4);
+		for (int i = 0 ; i < arrLen ; i++) {
+			container->queueDraw(checkpoint, glm::scale(rows[i], glm::vec3(CHECKPOINT_SCALE)));
+			physics->Checkpoint().Add(PhysicsUtils::btTransFrom(rows[i]));
+		}	
+    }
 
 
 	cout << "- constructing scene" << endl;
@@ -310,6 +399,9 @@ void Game::onInit()
 	Gui::POSITION pos = {Gui::TOP, Gui::LEFT};
 	guiTime = gui->addString(".", pos);
 
+    pos.left = Gui::RIGHT;
+    guiCheckpoint = gui->addString(".", pos);
+
 	ShaderManager::loadProgram("line");
 }
  
@@ -322,8 +414,10 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
 	handleActiveKeys(gameTime);
 
+
 	// fyzika -------------------------------------------------
-    physics->StepSimulation(gameTime.Elapsed() * 0.001f);
+    physics->StepSimulation(gameTime.Elapsed().ms() * 0.001f);
+    physics->Checkpoint().Collision(physics->GetCar()->GetVehicle()->getRigidBody(), gameTime);
     
     glm::mat4 carMatrix = glm::scale(PhysicsUtils::glmMat4From(physics->GetCar()->GetWorldTransform()), glm::vec3(CAR_SCALE));
 
@@ -332,7 +426,9 @@ void Game::onWindowRedraw(const GameTime & gameTime)
     if (followCamera)
     {
         btVector3 vel = physics->GetCar()->GetVehicle()->getRigidBody()->getLinearVelocity();        
-        camera.Follow(carMatrix, glm::vec3(vel.x(), vel.y(), vel.z()), gameTime);
+        
+        if (gameTime.Total() > INTRO_TIME_MS)
+            camera.Follow(carMatrix, glm::vec3(vel.x(), vel.y(), vel.z()), gameTime);
     }    
  
     for (int i = 0; i < physics->GetCar()->GetVehicle()->getNumWheels(); i++)
@@ -340,7 +436,7 @@ void Game::onWindowRedraw(const GameTime & gameTime)
         physics->GetCar()->GetVehicle()->updateWheelTransform(i, true); //synchronize the wheels with the (interpolated) chassis worldtransform        
         glm::mat4 wheelMatrix = glm::scale(PhysicsUtils::glmMat4From(physics->GetCar()->GetVehicle()->getWheelInfo(i).m_worldTransform), glm::vec3(CAR_SCALE));
         
-        if (i == CarPhysics::WHEEL_FRONTRIGHT || i == CarPhysics::WHEEL_REARRIGHT)
+        if (i == PhysicsCar::WHEEL_FRONTRIGHT || i == PhysicsCar::WHEEL_REARRIGHT)
             wheelMatrix = glm::rotate(wheelMatrix, 180.f, glm::vec3(0.f, 1.f, 0.f));
 
         container->updateDrawingMatrix(wheelQueueItem[i], wheelMatrix);
@@ -438,9 +534,17 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 	// Vykresleni ingame gui
 #if 1
 	ostringstream time;
-    time << physics->GetCar()->GetVehicle()->getCurrentSpeedKmHour(); //gameTime.Total();
+    time << physics->Checkpoint().GetTime(gameTime); //physics->GetCar()->GetVehicle()->getCurrentSpeedKmHour(); //gameTime.Total();
+    gui->updateString(guiTime, time.str());
 
-	gui->updateString(guiTime, time.str());
+    ostringstream checkpoint;
+    if (physics->Checkpoint().PassedFinish())
+        checkpoint << "R-restart";
+    else
+        checkpoint << "CP:" << physics->Checkpoint().PassedNum()+1 << "/" << physics->Checkpoint().Count();
+    gui->updateString(guiCheckpoint, checkpoint.str());
+    
+
 	gui->draw();
 #endif
 	// ---------------------------------------
@@ -529,7 +633,7 @@ void Game::handleActiveKeys(const GameTime & gameTime)
 	//float f_fps = float(1 / getFPS());
 	//float f_step = float(WALK_SPEED / f_fps);
 	//float f_step = float(WALK_SPEED / getFPS());
-    float f_step = gameTime.Elapsed() * WALK_SPEED;
+    float f_step = gameTime.Elapsed().ms() * WALK_SPEED;
 
 	// vysledkem jsou slozky vektoru ve smerech X ("strafe", ne otaceni) a Z
 	float x = -( (-1.0f * aDown) + (1.0f * dDown) ) * f_step;	
@@ -542,7 +646,7 @@ void Game::handleActiveKeys(const GameTime & gameTime)
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_DOWN) != activeKeys.end() )
         physics->GetCar()->Backward();
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_b) != activeKeys.end() ) 
-        physics->GetCar()->HandBrake();
+        physics->GetCar()->Brake();
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_LEFT) != activeKeys.end() )
         physics->GetCar()->TurnLeft();
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_RIGHT) != activeKeys.end() )
@@ -576,9 +680,21 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 	}
 
     if (key == SDLK_RETURN) {
-        physics->GetCar()->Reset();
+        if (physics->Checkpoint().FirstPassed())
+            physics->GetCar()->Reset(physics->Checkpoint().GetLastTrans());
+        else
+            physics->GetCar()->Reset(physics->GetCar()->GetInitialTransform());         
+
         camera.ResetFollow();
     }
+
+    if (key == SDLK_r)
+    {
+        physics->Checkpoint().Reset();
+        physics->GetCar()->Reset(physics->GetCar()->GetInitialTransform());
+        camera.ResetFollow();
+    }
+
 
     if (key == SDLK_f)
         followCamera = !followCamera;

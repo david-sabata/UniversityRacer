@@ -2,21 +2,20 @@
 #define PHYSICS_H
 
 #include <btBulletDynamicsCommon.h>
-#include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "PhysicsUtils.h"
-#include "CarPhysics.h"
+#include "PhysicsCar.h"
+#include "PhysicsCheckpoint.h"
 #include "PhysicsDebugDraw.h"
-
 #include "BaseModel.h"
 
+#define MAX_SIMULATION_SUBSTEPS   10
+#define FIXED_SIMULATION_TIMESTEP 1/60.f
 
-class Physics  // TODO Singleton
+class Physics
 {
 public:
-    static const int MAX_SIMULATION_SUBSTEPS = 100;
-
     Physics(void); 
     ~Physics(void);
 
@@ -33,19 +32,16 @@ public:
     static std::vector<btCollisionShape *> CreateStaticCollisionShapes(BaseModel * model, const btVector3 & scale);
     static std::vector<btCollisionShape *> CreateStaticCollisionShapes(BaseModel * model, float scale = 1.f);
 
-    void AddStaticModel(std::vector<btCollisionShape *> & collisionShapes, const btTransform & trans, bool debugDraw = true);
+    void AddStaticModel(std::vector<btCollisionShape *> & collisionShapes, const btTransform & trans, bool debugDraw = true, const btVector3 & scale = btVector3(1,1,1));
     
-    CarPhysics * GetCar() { return m_car; }
-    btDiscreteDynamicsWorld * GetDynamicsWorld() { return m_dynamicsWorld; }    
+    PhysicsCar * GetCar() { return m_car; }
+    PhysicsCheckpoint & Checkpoint() { return m_checkpoint; }
+
     PhysicsDebugDraw *GetDebugDrawer() { return m_debugDraw; }
+    btDiscreteDynamicsWorld * GetDynamicsWorld() { return m_dynamicsWorld; }    
 
-    void AddCar(const btTransform & trans)
-    {
-        m_car = new CarPhysics();
-        m_car->Initialize(m_dynamicsWorld, trans);
-    }
-
-
+    void AddCar(const btTransform & trans) { (m_car = new PhysicsCar())->Initialize(m_dynamicsWorld, trans); }
+    
 
 private:
 
@@ -53,17 +49,13 @@ private:
     btBroadphaseInterface* m_overlappingPairCache;
     btSequentialImpulseConstraintSolver* m_constraintSolver;
     btDefaultCollisionConfiguration* m_collisionConfiguration;
-
-    btGhostPairCallback *m_ghostPairCallback;
-    btGhostObject *m_ghostObject;
-    int m_checkpointOffset;
     
     btDiscreteDynamicsWorld *m_dynamicsWorld;
     btAlignedObjectArray<btCollisionShape*> m_collisionShapes;
 
+    PhysicsCar *m_car;
+    PhysicsCheckpoint m_checkpoint;
     PhysicsDebugDraw *m_debugDraw;
-
-    CarPhysics *m_car;
 };
 
 #endif
