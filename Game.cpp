@@ -196,7 +196,7 @@ void Game::onInit()
 		container->addModel("plank", plank);
         std::vector<btCollisionShape*> plankShapes = Physics::CreateStaticCollisionShapes(plank);
 
-        //deska spojujici stoly nahore v pravo
+        //deska spojujici stoly nahore v pravo 1
 		glm::mat4 pos = glm::translate(glm::vec3(20.8f, 8.62f, -21.8f));
 	    glm::mat4 scale = glm::scale(glm::vec3(0.006,0.0006,0.009));
 		glm::mat4 rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
@@ -227,7 +227,7 @@ void Game::onInit()
         physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.006,0.0006,0.009));
 
 		//deska uprosred  jede se smerem dolu ve smeru jizdy
-		pos = glm::translate(glm::vec3(-3.36f, 3.19f, -13.95f));
+		pos = glm::translate(glm::vec3(-6.36f, 3.19f, -13.95f));
 	    scale = glm::scale(glm::vec3(0.006,0.0006,0.006));
 		rot = glm::rotate(25.f, glm::vec3(1.f,0.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
@@ -235,7 +235,7 @@ void Game::onInit()
 
 
 		//deska uprosred  jede se smerem dolu ve smeru jizdy - ploska 2
-		pos = glm::translate(glm::vec3(-3.36f, 2.19f, -9.0f));
+		pos = glm::translate(glm::vec3(-6.36f, 2.19f, -9.0f));
 	    scale = glm::scale(glm::vec3(0.006,0.0006,0.006));
 		rot = glm::rotate(25.f, glm::vec3(1.f,0.f,0.f));
 		container->queueDraw(plank, pos * rot * scale);
@@ -265,7 +265,7 @@ void Game::onInit()
 		container->queueDraw(plank, pos * rot * scale);
         physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0009,0.0006,0.006));
 
-				//deska LEVO, SJEZD z LAVICE na LAVICI
+		//deska LEVO, SJEZD z LAVICE na LAVICI
 		pos = glm::translate(glm::vec3(-36.40f, 5.10f, -4.00f));
 	    scale = glm::scale(glm::vec3(0.0009,0.0006,0.006));
 		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
@@ -274,6 +274,163 @@ void Game::onInit()
         physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0009,0.0006,0.006));
 
 		//KONEC ROURA 1 MEZI ZIDLEMA
+
+
+		
+		//deska LEVO, SJEZD z LAVICE na LINO
+		pos = glm::translate(glm::vec3(-27.85f, 2.071f, 7.61f));
+	    scale = glm::scale(glm::vec3(0.007,0.0006,0.028));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.007,0.0006,0.028));
+
+		//vyjezd za katedru
+		pos = glm::translate(glm::vec3(-17.725f, 0.273f, 20.0f));
+	    scale = glm::scale(glm::vec3(0.006,0.0006,0.009));
+		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
+		rot = glm::rotate(rot, -15.f, glm::vec3(1.f,0.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.006,0.0006,0.009));
+
+		//sjezd u katedry
+		pos = glm::translate(glm::vec3(17.55f, 0.273f, 20.0f));
+	    scale = glm::scale(glm::vec3(0.006,0.0006,0.009));
+		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
+		rot = glm::rotate(rot, 15.f, glm::vec3(1.f,0.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.006,0.0006,0.009));
+
+
+		//deska v pravo jede se smerem nahoru ve smeru jizdy - ploska 1
+		pos = glm::translate(glm::vec3(35.36f, 0.273f, 2.08f));
+	    scale = glm::scale(glm::vec3(0.006,0.0006,0.009));
+		rot = glm::rotate(15.f, glm::vec3(1.f,0.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.006,0.0006,0.006));
+
+
+		//deska v pravo jede ze zeme nahoru na prosredni stul
+		pos = glm::translate(glm::vec3(24.3f, 2.47f, -2.0f));
+	    scale = glm::scale(glm::vec3(0.006,0.0006,0.020));
+		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
+		rot = glm::rotate(rot, 20.f, glm::vec3(1.f,0.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.006,0.0006,0.020));
+
+
+		//ROURA NAHORU 2 MEZI ZIDLEMA
+		//deska LEVO, SJEZD z LAVICE na LAVICI
+		pos = glm::translate(glm::vec3(-10.85f, 5.072f, -4.017f));
+	    scale = glm::scale(glm::vec3(0.0045,0.0006,0.006));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0045,0.0006,0.006));
+
+		//deska LEVO, SJEZD z LAVICE na LAVICI
+		pos = glm::translate(glm::vec3(-11.29f, 5.072f, -4.017f));
+	    scale = glm::scale(glm::vec3(0.0009,0.0006,0.006));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		rot = glm::rotate(rot, 90.f, glm::vec3(0.f,0.f,1.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0009,0.0006,0.006));
+
+		//deska LEVO, SJEZD z LAVICE na LAVICI
+		pos = glm::translate(glm::vec3(-10.41, 5.072f, -4.017f));
+	    scale = glm::scale(glm::vec3(0.0009,0.0006,0.006));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		rot = glm::rotate(rot, 90.f, glm::vec3(0.f,0.f,1.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0009,0.0006,0.006));
+
+		//ROURA NAHORU 2 MEZI ZIDLEMA
+
+
+		//ROURA NAHORU 3 MEZI ZIDLEMA
+		//deska LEVO, SJEZD z LAVICE na LAVICI
+		pos = glm::translate(glm::vec3(-10.85f, 6.07f, -9.02f));
+	    scale = glm::scale(glm::vec3(0.0045,0.0006,0.006));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0045,0.0006,0.006));
+
+		//deska LEVO, SJEZD z LAVICE na LAVICI
+		pos = glm::translate(glm::vec3(-11.29f, 6.07f, -9.02f));
+	    scale = glm::scale(glm::vec3(0.0009,0.0006,0.006));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		rot = glm::rotate(rot, 90.f, glm::vec3(0.f,0.f,1.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0009,0.0006,0.006));
+
+		//deska LEVO, SJEZD z LAVICE na LAVICI
+		pos = glm::translate(glm::vec3(-10.41f, 6.07f, -9.02f));
+	    scale = glm::scale(glm::vec3(0.0009,0.0006,0.006));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		rot = glm::rotate(rot, 90.f, glm::vec3(0.f,0.f,1.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0009,0.0006,0.006));
+
+		//ROURA NAHORU 3 MEZI ZIDLEMA
+
+
+		//ROURA NAHORU 4 MEZI ZIDLEMA
+		//deska LEVO, SJEZD z LAVICE na LAVICI
+		pos = glm::translate(glm::vec3(4.9f, 7.075f, -14.023f));
+	    scale = glm::scale(glm::vec3(0.0045,0.0006,0.006));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0045,0.0006,0.006));
+
+		//deska LEVO, SJEZD z LAVICE na LAVICI
+		pos = glm::translate(glm::vec3(5.34f, 7.075f, -14.023f));
+	    scale = glm::scale(glm::vec3(0.0009,0.0006,0.006));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		rot = glm::rotate(rot, 90.f, glm::vec3(0.f,0.f,1.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0009,0.0006,0.006));
+
+		//deska LEVO, SJEZD z LAVICE na LAVICI
+		pos = glm::translate(glm::vec3(4.46f, 7.075f, -14.023f));
+	    scale = glm::scale(glm::vec3(0.0009,0.0006,0.006));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		rot = glm::rotate(rot, 90.f, glm::vec3(0.f,0.f,1.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0009,0.0006,0.006));
+
+		// KONEC ROURA NAHORU 4 MEZI ZIDLEMA
+
+		//deska spojujici stoly nahore v pravo 2 (ta niz)
+		pos = glm::translate(glm::vec3(20.8f, 7.62f, -16.9));
+	    scale = glm::scale(glm::vec3(0.006,0.0006,0.009));
+		rot = glm::rotate(90.f, glm::vec3(0.f,1.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.006f,0.0006f,0.009f));
+
+		//ROURA NAHORU 5 MEZI ZIDLEMA
+		//deska LEVO, SJEZD z LAVICE na LAVICI
+		pos = glm::translate(glm::vec3(36.15f, 8.07f, -18.99f));
+	    scale = glm::scale(glm::vec3(0.0045,0.0006,0.006));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0045,0.0006,0.006));
+
+		//deska LEVO, SJEZD z LAVICE na LAVICI
+		pos = glm::translate(glm::vec3(36.59f, 8.07f, -18.99f));
+	    scale = glm::scale(glm::vec3(0.0009,0.0006,0.006));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		rot = glm::rotate(rot, 90.f, glm::vec3(0.f,0.f,1.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0009,0.0006,0.006));
+
+		//deska LEVO, SJEZD z LAVICE na LAVICI
+		pos = glm::translate(glm::vec3(35.71f, 8.07f, -18.99f));
+	    scale = glm::scale(glm::vec3(0.0009,0.0006,0.006));
+		rot = glm::rotate(17.f, glm::vec3(1.f,0.f,0.f));
+		rot = glm::rotate(rot, 90.f, glm::vec3(0.f,0.f,1.f));
+		container->queueDraw(plank, pos * rot * scale);
+        physics->AddStaticModel(plankShapes, PhysicsUtils::btTransFrom(pos * rot), true, btVector3(0.0009,0.0006,0.006));
+		//KONEC ROURA 5 NAHORU
+
+
 	}
 
     // vykresli checkpointy
@@ -291,8 +448,77 @@ void Game::onInit()
         container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
         physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
 
-        // ...
-        
+        // treti checkpoint
+        mat = glm::rotate(glm::translate(glm::vec3(-30.36f, 5.43f, -20.7f)), 0.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+
+		// ctvrty checkpoint
+        mat = glm::rotate(glm::translate(glm::vec3(-6.36f, 4.43f, -15.8f)), 0.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+
+        // paty checkpoint
+        mat = glm::rotate(glm::translate(glm::vec3(-6.36f, 3.43f, -10.9f)), 0.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+
+		// sesty checkpoint
+        mat = glm::rotate(glm::translate(glm::vec3(-16.36f, 2.41f, -7.f)), -90.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+
+		//sedmy checkpoint
+		mat = glm::rotate(glm::translate(glm::vec3(-36.85f, 5.99f, -5.82f)), 0.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+
+		//osmy checkpoint
+		mat = glm::rotate(glm::translate(glm::vec3(-27.85f, 4.99f, -0.8f)), 0.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+
+		//devaty checkpoint
+		mat = glm::rotate(glm::translate(glm::vec3(-26.85f, 0.25f, 18.5f)), 45.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+
+		//desaty checkpoint
+		mat = glm::rotate(glm::translate(glm::vec3(-18.725f, 0.25f, 20.0f)), 90.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+
+	    //jedenacty checkpoint
+		mat = glm::rotate(glm::translate(glm::vec3(14.725f, 1.25f, 20.0f)), 90.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+
+		//dvanacty checkpoint
+		mat = glm::rotate(glm::translate(glm::vec3(35.36f, 0.25f, 3.1f)), 180.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+
+		//trinacty checkpoint
+		mat = glm::rotate(glm::translate(glm::vec3(28.4f, 1.35f, -2.0f)), -90.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+
+		//ctrnacty checkpoint
+		mat = glm::rotate(glm::translate(glm::vec3(-10.85f, 5.f, -2.3f)), 180.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+
+		//patnacty checkpoint
+		mat = glm::rotate(glm::translate(glm::vec3(4.9f, 7.0f, -12.256f)), 180.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+
+		//sestnacty checkpoint
+		mat = glm::rotate(glm::translate(glm::vec3(36.15f, 8.0f, -17.0f)), 180.f, glm::vec3(0, 1, 0)); 
+        container->queueDraw(checkpoint, glm::scale(mat, glm::vec3(CHECKPOINT_SCALE)));
+        physics->Checkpoint().Add(PhysicsUtils::btTransFrom(mat));
+		
+		
     }
 
 
