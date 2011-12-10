@@ -58,6 +58,14 @@ class ShadowVolumes {
 			lights.push_back(position);
 		}
 
+		/**
+		 * Vraci pocet svetel schopnych vrhat stin (pridanych pres addLight)
+		 */
+		inline unsigned int getLightsCount()
+		{
+			return lights.size();
+		}
+
 
 		/**
 		 * Vypocte stinova telesa a a pripravi data ke kresleni;

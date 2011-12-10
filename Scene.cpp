@@ -209,35 +209,30 @@ void Scene::buildBufferObjects()
 
 
 
-
-void Scene::draw() 
+void Scene::draw(bool drawAmbient, bool drawLighting, vector<bool> enabledLights) 
 {	
 	string activeMaterial = "?_dummy_?";
 	ShaderManager::PROGRAMBINDING activeBinding;
 	
 	// pripravit si pole svetel ze vsech kontejneru
 	vector<glm::vec4> lights;
-
-	for (vector<ModelContainer*>::iterator it = containers.begin(); it != containers.end(); it++)
-	{
-		GLenum lightEnums[] = { GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3, GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7 };
-		unsigned int i = 0;
-		if ((*it)->getLights().size() > 0 && i < 8)
-		{
-			glEnable(lightEnums[i]);
-			Light l = (*it)->getLights().at(i);
-			glLightfv(lightEnums[i], GL_POSITION, &l.Position().x);
-		}
-	}
-		
+	
+	unsigned int lightI = 0;
 	for (unsigned int i = 0; i < containers.size(); i++)
 	{
 		vector<Light> containerLights = containers.at(i)->getLights();
 		for (vector<Light>::iterator it = containerLights.begin(); it != containerLights.end(); it++)
 		{
-			lights.push_back((*it).Position());
-			lights.push_back((*it).Diffuse());
-			lights.push_back((*it).Ambient());
+			// pridat svetlo pouze pokud ma byt rozsvicene nebo pokud jsme pouzili implicitni
+			// parametr a pole enabledLights je prazdne
+			if (enabledLights.size() > lightI && enabledLights[lightI] == true || enabledLights.size() == 0)
+			{
+				lights.push_back((*it).Position());
+				lights.push_back((*it).Diffuse());
+				lights.push_back((*it).Ambient());
+			}
+
+			lightI++;
 		}
 	}
 
@@ -279,11 +274,10 @@ void Scene::draw()
 				glVertexAttribPointer(activeBinding.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
 
 				// nastavit svetla
-				glUniform1i(activeBinding.iEnabledLightsUniform, (unsigned int)(lights.size() / 3));
-				glUniform4fv(activeBinding.vLightsUniform, lights.size(), &(lights[0].x));
-
-				// ? glUniform4fv(activeBinding.vLightsUniform, lights.size() * 4, &(lights[0].x));
-
+				glUniform1i(activeBinding.iEnabledLightsUniform, (lights.size() / 3));
+				if (lights.size() > 0)
+					glUniform4fv(activeBinding.vLightsUniform, lights.size(), &(lights[0].x));
+				
 				counter++; // pomocne pocitadlo zmen shaderu v jednom snimku
 			}				
 
@@ -310,6 +304,13 @@ void Scene::draw()
 			glm::mat3 mSubModelView = glm::mat3(mView) * glm::mat3((*it).matrix);
 			glm::mat3 mMVInverseTranspose = glm::transpose(glm::inverse(mSubModelView)); // transpose(inverse(modelview))
 			glUniformMatrix3fv(activeBinding.mMVInverseTranspose, 1, GL_FALSE, glm::value_ptr(mMVInverseTranspose));
+
+			// co vsechno se bude kreslit
+			GLuint amb = glGetUniformLocation(activeBinding.program, "paintAmbient");
+			glUniform1i(amb, drawAmbient);
+			GLuint lght = glGetUniformLocation(activeBinding.program, "paintDiffSpec");
+			glUniform1i(lght, drawLighting);
+
 
 			// samotne vykresleni
 			unsigned int count = mesh->getFaces().size() * 3;

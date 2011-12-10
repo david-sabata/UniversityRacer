@@ -60,6 +60,8 @@ class Game : public BaseApp
         // pomocna promenna pro moznost zapnuti kamery ktera nasleduje auto (F)
         bool followCamera;
 
+		// pole priznaku rozsvicenych a zhasnutych svetel (moznost prepinani klavesami 1-9)
+		std::vector<bool> enabledLights;
 };
 
 #endif
