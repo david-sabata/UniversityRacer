@@ -29,6 +29,10 @@ struct Material {
 };
 uniform Material material;
 
+//umoznuji vybrat ktere svetlo se bude kreslit
+uniform bool paintDiffSpec;
+uniform bool paintAmbient;
+
 in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
 in vec3 eyeLightPos[MAX_LIGHTS];
@@ -56,9 +60,9 @@ void main() {
 	vec3 V = normalize(-eyePosition);
 
 	//////////////////////////////////////SVETLA/////////////////////////////////////
-	for(int i = 0; i < MAX_LIGHTS ; i++) {
-		
-		finalColor += material.ambient * lights[i * 3 + 2];
+	for(int i = 0; i < enabledLights ; i++) {
+		if(paintAmbient)
+			finalColor += material.ambient * lights[i * 3 + 2];
 
 		lightDir = eyeLightPos[i] - eyePosition;
 
@@ -74,23 +78,24 @@ void main() {
 									  
 		vec3 L = normalize(lightDir);
 
+		if(paintDiffSpec) {
+			//difuzni slozka
+			float diffuse = max(dot(N,L),0.0);
+			diffuseF = 	material.diffuse * lights[i * 3 + 1];
+			vec4 diff = attenuation * diffuse * diffuseF;
 	
-		//difuzni slozka
-		float diffuse = max(dot(N,L),0.0);
-		diffuseF = 	material.diffuse * lights[i * 3 + 1];
-		vec4 diff = attenuation * diffuse * diffuseF;
+			//halfvector = L + V - mezi light a pozorovatelem
+			vec3 H = normalize(L + V);
 	
-		//halfvector = L + V - mezi light a pozorovatelem
-		vec3 H = normalize(L + V);
+			//spocitame spekularni odlesk
+			float specular = pow(dot(N,H), material.shininess + 100);
 	
-		//spocitame spekularni odlesk
-		float specular = pow(dot(N,H), material.shininess + 100);
-	
-		vec4 spec = vec4(0.0,0.0,0.0,1.0);
-		//pricteme spekulární složku k výsledné barvì
-		if(specular >= 0.0)
-			spec = attenuation *  specular * material.specular;
-		finalColor +=  diff +  spec;
+			vec4 spec = vec4(0.0,0.0,0.0,1.0);
+			//pricteme spekulární složku k výsledné barvì
+			if(specular >= 0.0)
+				spec = attenuation *  specular * material.specular;
+			finalColor +=  diff +  spec;
+		}
 	} 
 	
 

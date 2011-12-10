@@ -22,6 +22,10 @@ struct Material {
 };
 uniform Material material;
 
+//umoznuji vybrat ktere svetlo se bude kreslit
+uniform bool paintDiffSpec;
+uniform bool paintAmbient;
+
 in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
 
@@ -49,9 +53,9 @@ void main() {
 	vec3 V = normalize(-eyePosition);
 
 	//////////////////////////////////////SVETLA/////////////////////////////////////
-	for(int i = 0; i < MAX_LIGHTS ; i++) {
-		
-		finalColor += material.ambient * lights[i * 3 + 2];
+	for(int i = 0; i < enabledLights ; i++) {
+		if(paintAmbient)
+			finalColor += material.ambient * lights[i * 3 + 2];
 
 		lightDir = eyeLightPos[i] - eyePosition;
 
@@ -67,13 +71,14 @@ void main() {
 									  
 		vec3 L = normalize(lightDir);
 
+		if(paintDiffSpec) {
+			//difuzni slozka
+			float diffuse = max(dot(N,L),0.0);
+			diffuseF = 	material.diffuse * lights[i * 3 + 1];
+			vec4 diff = attenuation * diffuse * diffuseF;
 	
-		//difuzni slozka
-		float diffuse = max(dot(N,L),0.0);
-		diffuseF = 	material.diffuse * lights[i * 3 + 1];
-		vec4 diff = attenuation * diffuse * diffuseF;
-	
-		finalColor +=  diff;
+			finalColor +=  diff;
+		}
 	} 
 	
 	//gl_FragColor = texture2D(textureNormal,t);

@@ -30,6 +30,10 @@ struct Material {
 };
 uniform Material material;
 
+//umoznuji vybrat ktere svetlo se bude kreslit
+uniform bool paintDiffSpec;
+uniform bool paintAmbient;
+
 in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
 in vec3 eyeLightPos[MAX_LIGHTS];
@@ -176,10 +180,10 @@ void main() {
 
 
 	//////////////////////////////////////SVETLA/////////////////////////////////////
-	for(int i = 0; i < MAX_LIGHTS ; i++) {
-		
-		//ambientni slozka svetla
-		finalColor += material.ambient * lights[i * 3 + 2];
+	for(int i = 0; i < enabledLights; i++) {
+		if(paintAmbient)
+			//ambientni slozka svetla
+			finalColor += material.ambient * lights[i * 3 + 2];
 
 		lightDir = eyeLightPos[i] - eyePosition;
 
@@ -194,15 +198,16 @@ void main() {
 									  
 		vec3 L = normalize(lightDir);
 
-	
-		//difuzni slozka 
-		float diffuse = max(dot(N,L),0.0);
-		diffuseF = 	material.diffuse * lights[i * 3 + 1];
-		vec4 diff = attenuation * diffuse * diffuseF;
+		if(paintDiffSpec) {
+			//difuzni slozka 
+			float diffuse = max(dot(N,L),0.0);
+			diffuseF = 	material.diffuse * lights[i * 3 + 1];
+			vec4 diff = attenuation * diffuse * diffuseF;
 		
-		//spekularni nepocitame, jedna se o matny material
+			//spekularni nepocitame, jedna se o matny material
 
-		finalColor +=  diff ;
+			finalColor +=  diff ;
+		}
 	} 
 	
 	vec4 texel = texture(tex, t / scaleTexCoord);

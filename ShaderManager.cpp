@@ -46,9 +46,6 @@ bool ShaderManager::loadProgram(string material)
 	if (programs.find(material) != programs.end())
 		return true;
 
-	if (material != "simple" && material != "gui" && material != "test")
-		return false;
-
 	PROGRAMBINDING mat;
 	
 	// VS
