@@ -5,6 +5,7 @@
 #include <map>
 #include <iostream>
 #include <algorithm>
+#include <string>
 
 #ifndef GLM_INCLUDED
 #define GLM_INCLUDED

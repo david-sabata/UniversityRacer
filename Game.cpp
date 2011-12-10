@@ -54,9 +54,6 @@ void Game::onInit()
     BaseModel* car =  container->load3DS("models/car.3ds");
     BaseModel* wheel =  container->load3DS("models/wheel.3ds");
 
-	// modely pro vypocet stinu - low poly; optimalizovano az na 10% puvodnich vrcholu
-	BaseModel* low_middesk = container->load3DS("models/low-desk-mid.3ds");
-
     cout << "- initializing physics" << endl;
 
     physics = new Physics();
@@ -110,7 +107,7 @@ void Game::onInit()
 	}
 
 	// vykresli prostredni lavice
-	{
+	if (1) {
 		container->addModel("middesk", middesk);
 
 		glm::mat4 scale = glm::scale(glm::vec3(0.2));
@@ -124,18 +121,18 @@ void Game::onInit()
 
         std::vector<btCollisionShape*> middeskShapes = Physics::CreateStaticCollisionShapes(middesk, 0.2f);
 
-		for (unsigned int rowI = 0; rowI < 1; rowI++) // 5 !!!
+		for (unsigned int rowI = 0; rowI < 5; rowI++)
 		{
 			glm::mat4 col = glm::translate(rows[rowI], glm::vec3(0, 0, 0));
 
 			container->queueDraw(middesk, col);
-			shadowVolumes->addModel(low_middesk, col); // stiny se pocitaji nad low-poly modelem
+			shadowVolumes->addModel(middesk, col); // stiny se pocitaji nad low-poly modelem
             physics->AddStaticModel(middeskShapes, PhysicsUtils::btTransFrom(glm::scale(col, glm::vec3(1/0.2f))), false);
 		}
 	}
 
 	// vykresli postranni lavice
-	if (0) {
+	if (1) {
 		container->addModel("sidedesk", sidedesk);
 
 		glm::mat4 scale = glm::scale(glm::vec3(0.2));
@@ -162,6 +159,7 @@ void Game::onInit()
 			// prava strana
 			glm::mat4 mat = glm::translate(col, otherside);
 			container->queueDraw(sidedesk, mat);
+			//shadowVolumes->addModel(sidedesk, mat);
 
             physics->AddStaticModel(sidedeskShapes, PhysicsUtils::btTransFrom(glm::scale(mat, glm::vec3(1/0.2f))), false);
 		}
@@ -209,8 +207,6 @@ void Game::onInit()
 
 	// vygenerovat stinova telesa
 	shadowVolumes->generate();
-	// a uvolnit pomocne modely - jiz nebudou treba
-	delete low_middesk;
 	
 	cout << "- done!" << endl;
 	
@@ -261,25 +257,6 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 #endif
 	
 
-// vykresleni stinoveho telesa
-#if 1
-	glEnable(GL_DEPTH_TEST); // Activate the depth test
-    glEnable(GL_CULL_FACE); // Activate the culling
-    glCullFace(GL_BACK);   // We are drawing front face
-    
-	scene->draw();
-
-	glm::mat4 mView = getCamera()->GetMatrix();
-	glm::mat4 mPerspective = glm::perspective(45.0f, (float)getWindowAspectRatio(), 1.0f, 1000.0f);	
-	unsigned int lightI = 0;
-
-	
-	glCullFace(GL_BACK);
-	shadowVolumes->draw(lightI, mView, mPerspective);
-#endif
-	
-// puvodni reseni - jak by melo fungovat
-#if 0
 	// vykreslit scenu do z-bufferu ------------------------------	
 #if 1
 	glEnable(GL_DEPTH_TEST); // Activate the depth test
@@ -339,8 +316,6 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 
 	glDepthMask(GL_TRUE);
 	glDisable(GL_STENCIL_TEST);
-
-#endif
 
 
     if (drawWireframe)
@@ -469,7 +444,7 @@ void Game::handleActiveKeys(const GameTime & gameTime)
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_LEFT) != activeKeys.end() )
         physics->GetCar()->TurnLeft();
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_RIGHT) != activeKeys.end() )
-        physics->GetCar()->TurnRight();			
+        physics->GetCar()->TurnRight();
 }
 
 

@@ -12,7 +12,14 @@
 
 #define PROGRAM_NAME "test"
 #define INFINITY 1
-#define EPSILON 0.0000f
+#define EPSILON 0.0005f
+
+
+// pomocne definy pro testovani
+#define DRAW_VISIBLE_FACES 0
+#define DRAW_VOLUME 1
+#define DRAW_VOLUME_LINES 0
+#define DRAW_CAPS 1
 
 using namespace std;
 
@@ -43,6 +50,10 @@ void ShadowVolumes::generate()
 		for (vector<Mesh*>::iterator meshIt = (*modelIt).first->getMeshes().begin(); meshIt != (*modelIt).first->getMeshes().end(); meshIt++)
 		{
 			Mesh* mesh = (*meshIt);
+
+			if (mesh->getName() != "deskastolu")
+				continue;
+
 			Mesh* newMesh = new Mesh((*mesh) * (*modelIt).second);
 			meshes.push_back(newMesh);
 		}
@@ -91,7 +102,20 @@ void ShadowVolumes::generate()
 						pair<glm::ivec2, int>(glm::ivec2(face.y, face.z), neighbours.b),
 						pair<glm::ivec2, int>(glm::ivec2(face.z, face.x), neighbours.c)
 					};
-					
+
+#if DRAW_VISIBLE_FACES
+					unsigned int x = glVertices.size();
+
+					glVertices.push_back(vertices[face.x]);
+					glVertices.push_back(vertices[face.y]);
+					glVertices.push_back(vertices[face.z]);
+
+					glIndices.push_back(x);
+					glIndices.push_back(x+1);
+					glIndices.push_back(x+2);
+#endif
+
+#if DRAW_VOLUME
 					// steny telesa
 					for (unsigned int edgeI = 0; edgeI < 3; edgeI++)
 					{		
@@ -110,25 +134,28 @@ void ShadowVolumes::generate()
 
 							unsigned int index = glVertices.size();
 
-							// kreslit se budou 4 vrcholy jako triangle strip							
+#if DRAW_VOLUME_LINES
+							glVertices.push_back(v1);
+							glVertices.push_back(v2);
+
+							glIndices.push_back(index);
+							glIndices.push_back(index + 1);
+
+#else
+							// kreslit se budou 4 vrcholy jako ctverec
+							glVertices.push_back(v2);
 							glVertices.push_back(v1);
 							glVertices.push_back(v3);
-							glVertices.push_back(v2);
 							glVertices.push_back(v4);
-
-							// indexy sten telesa
-							if (glIndices.size() > 0)
-								glIndices.push_back(index);
 
 							glIndices.push_back(index);
 							glIndices.push_back(index + 1);
 							glIndices.push_back(index + 2);
 							glIndices.push_back(index + 3);
-							
-							glIndices.push_back(index + 3);
+#endif
 						}
 					}
-
+#endif
 				} // jestlize je face viditelny od svetla
 				
 				// z facu odvracenych od svetla vyrobime horni a dolni viko
@@ -280,6 +307,14 @@ void ShadowVolumes::computeNeighboursAndVisibilities()
 			{
 				glm::vec3 lightPosition = lights[lightI];
 				visibilities[lightI] = ( (a * lightPosition.x + b * lightPosition.y + c * lightPosition.z + d) > 0 );					
+				/*
+				glm::vec3 normal = glm::cross(
+					vA2 - vA1,
+					vA3 - vA1
+				);	
+				
+				visibilities[lightI] = glm::dot(lightPosition, normal) < 0;
+				*/
 			}
 
 			faceVisibilities[faceIA] = visibilities;
@@ -367,9 +402,22 @@ void ShadowVolumes::draw(unsigned int lightI, glm::mat4 mView, glm::mat4 mProjec
 		
 	glEnableVertexAttribArray(activeBinding.positionAttrib);
 	glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-			
-	glDrawElements(GL_TRIANGLE_STRIP, shadowVolumeIndices, GL_UNSIGNED_INT, NULL);
+	
+	glLineWidth(3);
 
+#if DRAW_VISIBLE_FACES
+	glDrawElements(GL_TRIANGLES, shadowVolumeIndices, GL_UNSIGNED_INT, NULL);
+#endif
+
+#if DRAW_VOLUME
+#if DRAW_VOLUME_LINES
+	glDrawElements(GL_LINES, shadowVolumeIndices, GL_UNSIGNED_INT, NULL);
+#else
+	glDrawElements(GL_QUADS, shadowVolumeIndices, GL_UNSIGNED_INT, NULL);
+#endif
+#endif
+
+	glLineWidth(1);
 	
 	// vykreslit vika -------------------------------------------------------------
 	glBindBuffer(GL_ARRAY_BUFFER, capVBOs[lightI]);
@@ -378,5 +426,10 @@ void ShadowVolumes::draw(unsigned int lightI, glm::mat4 mView, glm::mat4 mProjec
 	glEnableVertexAttribArray(activeBinding.positionAttrib);
 	glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
+#if DRAW_CAPS
 	glDrawElements(GL_TRIANGLES, shadowVolumeCapsIndices, GL_UNSIGNED_INT, NULL);
+#endif
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
