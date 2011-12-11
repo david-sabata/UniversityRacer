@@ -76,7 +76,7 @@ void main() {
 	float linearAtt = LINEAR_ATTENUATION;
 	float quadraticAtt = QUADR_ATTENUATION;
 	vec4 diffuseF;
-	for(int i = 0; i < MAX_LIGHTS; i++) { 
+	for(int i = 0; i < enabledLights; i++) { 
 		
 		if(paintAmbient)
 			finalColor += material.ambient * lights[i * 3 + 2]; 

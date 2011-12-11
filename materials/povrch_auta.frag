@@ -95,5 +95,5 @@ void main() {
 		}
 	} 
 	
-	gl_FragColor = texture(tex,t) + finalColor;
+	gl_FragColor = texture(tex,t) *  finalColor;
 }

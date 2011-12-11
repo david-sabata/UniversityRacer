@@ -52,7 +52,7 @@ void main() {
 	vec3 V = normalize(-eyePosition);
 
 	//////////////////////////////////////SVETLA/////////////////////////////////////
-	for(int i = 0; i < MAX_LIGHTS ; i++) {
+	for(int i = 0; i < enabledLights; i++) {
 		if(paintAmbient)
 			finalColor += material.ambient * lights[i * 3 + 2];
 
