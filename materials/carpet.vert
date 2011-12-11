@@ -60,7 +60,7 @@ void main() {
 	eyePosition = eyePosition4.xyz / eyePosition4.w;
 	
 	// Transformujeme pozice svetel do eyespace				
-	for(int i=0; i < MAX_LIGHTS; i++) {
+	for(int i=0; i < enabledLights; i++) {
 		// predpokladame enabledLights > 0
 		vec4 lightPosition = lights[i * 3 + 0]; // 0 == prvni hodnota prvniho svetla == pozice
 
@@ -85,7 +85,7 @@ void main() {
 	//prevedeme kameru, pozici svetla, plosku do tangent space
 	tanCam = eyeCam * tbnMatrix;
 
-	for( int i = 0; i < MAX_LIGHTS; i++) {
+	for( int i = 0; i < enabledLights; i++) {
 		vec3 lightDir = eyeLightPos[i] - eyePosition;
 		tanLightDir[i] = lightDir * tbnMatrix;
 	}

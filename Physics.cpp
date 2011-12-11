@@ -77,7 +77,7 @@ void Physics::StepSimulation(btScalar timeStep)
 
     int numSimSteps = m_dynamicsWorld->stepSimulation(timeStep, MAX_SIMULATION_SUBSTEPS, FIXED_SIMULATION_TIMESTEP);
 
-   /* if (!numSimSteps)	std::cout << "Interpolated transforms" << std::endl;
+    /*if (!numSimSteps)	std::cout << "Interpolated transforms" << std::endl;
 	else  {
 		if (numSimSteps > MAX_SIMULATION_SUBSTEPS) // detect dropping frames			
 			std::cout << "Dropped " << numSimSteps - MAX_SIMULATION_SUBSTEPS << " simulation steps out of " << numSimSteps << std::endl;

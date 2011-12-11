@@ -55,7 +55,7 @@ void main() {
 
 	// predpokladame enabledLights > 0
 	////////////////////////////SVETLO /////////////////////////////////////
-	for(int i =0; i < MAX_LIGHTS; i++) {
+	for(int i =0; i < enabledLights; i++) {
 		vec4 lightPosition = lights[i * 3 + 0]; // 0 == prvni hodnota prvniho svetla == pozice
 
 		//transformace svetla do eyespace (TODO : zeptat se Davida kam ho umistil : pravdepodobne je ve worldspace?)

@@ -11,7 +11,7 @@
 #include "BaseModel.h"
 
 #define MAX_SIMULATION_SUBSTEPS   10
-#define FIXED_SIMULATION_TIMESTEP 1/60.f
+#define FIXED_SIMULATION_TIMESTEP 1/120.f
 
 class Physics
 {

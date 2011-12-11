@@ -17,13 +17,10 @@ void Camera::Reset() {
 	
     /*eye = glm::vec3(0.0f, 0.0f, -10.0f);
 	up = glm::vec3(0.0f, 1.0f, 0.0f);		
-	target = glm::vec3(0.0f, 0.0f, 1.0f);
-	angle_horiz = 0.0f;
-	angle_vert = 0.0f;*/
-
-    eye = glm::vec3(39.067f, 11.268f, -26.525f);
+	target = glm::vec3(0.0f, 0.0f, 1.0f);*/
+    eye = glm::vec3(38.435f, 11.41f, -27.451f);
 	up = glm::vec3(0.0f, 1.0f, 0.0f);		
-	target = glm::vec3(-0.58f, -0.179f, 0.794f);
+	target = glm::vec3(-0.623f, -0.124f, 0.772f);
 	angle_horiz = 0.0f;
 	angle_vert = 0.0f;
 
@@ -116,11 +113,13 @@ void Camera::toggleObserve() {
 }
 */
 
+
+// portnuto z TrueAxis Physics SDK - demo Cars
 void Camera::Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameTime & gameTime)
 {
     const glm::vec3 lookAtPos(0, 1, 0);
-    const glm::vec3 lookFromPos(0, 4*0.25, 4*0.25);  //0, 3, -2
-    float viewDistance = 10.0f*0.25;
+    const glm::vec3 lookFromPos(0, 1, 1);  //0, 3, -2   0,4,4
+    float viewDistance = 2.5f; // 10.f
     const float settleTime = 2.f;
 
     glm::mat3 targetRot(targetMat);
@@ -159,7 +158,7 @@ void Camera::Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameT
     // Nudged the camera a bit so that it swings around a bit more to face
     // the direction that the car is moving.
     // This makes it a little easier to see around corners.
-    lastBaseLookFromPos -= targetVelocity * 0.1f;
+    lastBaseLookFromPos -= targetVelocity * (gameTime.Elapsed().ms() * 0.0003f);//* 0.005f;
 
     // Nudge the camera so that is a bit more likely to look in the direction
     // that the car is facing. This helps most when maneuvering at low speed.
@@ -170,11 +169,8 @@ void Camera::Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameT
     // Smoothly choose whether the car is facing forwards or backwards for the above code.
     float dot = glm::dot(targetPos - lastBaseLookFromPos, targetRot[2]);
     facing = dot * 0.1f;
-    // ClampPosNeg
-    if (facing > 1.f)
-        facing = 1.f;
-    else if (facing < -1.f)
-        facing = -1.f;
+    if      (facing >  1.f) facing =  1.f;  // ClampPosNeg
+    else if (facing < -1.f) facing = -1.f;
 
     // Now we make the camera follow the new object position.
     glm::vec3 lookDirection = targetPos - lastBaseLookFromPos;
@@ -194,9 +190,8 @@ void Camera::Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameT
         glm::mat3 m(tmp);
 
         currentLookFromPos += lookFromPos * m;
-       
-        // glm::vec3 actLookAtPos = targetPos + lookAtPos * m;  // nefunguje podle originalu, proc?
-        glm::vec3 currentLookAtPos = lookDirection;  // nahrada, problem pri velmi pomale zmene smeru (kamera jde moc pod sledovany objekt)
+        glm::vec3 currentLookAtPos = lookDirection;
+        // glm::vec3 currentLookAtPos = targetPos + lookAtPos * m;
 
         eye = currentLookFromPos;
         target = currentLookAtPos;
