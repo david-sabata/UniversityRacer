@@ -174,7 +174,7 @@ ShaderManager::PROGRAMBINDING ShaderManager::useProgram(string program)
 			binding.MAG_FILTER == GL_TEXTURE_MAX_LOD || binding.MAG_FILTER == GL_TEXTURE_BASE_LEVEL || binding.MAG_FILTER == GL_TEXTURE_MAX_LEVEL)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, binding.MAG_FILTER);
 		else
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		if (binding.MIN_FILTER == GL_NEAREST || binding.MIN_FILTER == GL_LINEAR || binding.MIN_FILTER == GL_NEAREST_MIPMAP_LINEAR ||
 			binding.MIN_FILTER == GL_NEAREST_MIPMAP_NEAREST || binding.MIN_FILTER == GL_LINEAR_MIPMAP_LINEAR || 
@@ -182,7 +182,7 @@ ShaderManager::PROGRAMBINDING ShaderManager::useProgram(string program)
 			binding.MIN_FILTER == GL_TEXTURE_MAX_LOD || binding.MIN_FILTER == GL_TEXTURE_BASE_LEVEL || binding.MIN_FILTER == GL_TEXTURE_MAX_LEVEL)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, binding.MIN_FILTER);
 		else
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
 		glUniform1i(binding.uniform, i);
 	}
