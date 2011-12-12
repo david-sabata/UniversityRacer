@@ -30,10 +30,10 @@ void Physics::Initialize()
     m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher, m_overlappingPairCache, m_constraintSolver, m_collisionConfiguration);
     m_dynamicsWorld->setGravity(btVector3(0, -9.81f, 0));
 
-    m_checkpoint.Initialize(m_dynamicsWorld);
-
     m_debugDraw = new PhysicsDebugDraw;    
     m_dynamicsWorld->setDebugDrawer(m_debugDraw);
+
+    m_checkpoint.Initialize(m_dynamicsWorld);
 }
 
 void Physics::Deinitialize()  //cleanup in the reverse order of creation/initialization
@@ -45,26 +45,21 @@ void Physics::Deinitialize()  //cleanup in the reverse order of creation/initial
         btRigidBody* body = btRigidBody::upcast(obj);
         if (body && body->getMotionState())
             delete body->getMotionState();
-        m_dynamicsWorld->removeCollisionObject( obj );
+        m_dynamicsWorld->removeCollisionObject(obj);
         delete obj;
     }
 
     //delete collision shapes
-    for (int j = 0; j < m_collisionShapes.size(); j++)
-        delete m_collisionShapes[j];
-    
-    //delete m_indexVertexArrays;
-    //delete m_vertices;
+  //  for (int j = 0; j < m_collisionShapes.size(); j++)
+  //      delete m_collisionShapes[j];
 
-    //delete dynamics world
-    delete m_dynamicsWorld;
-            
     if (m_car)
         delete m_car;
-    //delete m_vehicleRayCaster;
-    //delete m_vehicle;
-    //delete m_wheelShape;
 
+    m_checkpoint.Deinitialize();
+
+    delete m_debugDraw;
+    delete m_dynamicsWorld;
     delete m_constraintSolver;
     delete m_overlappingPairCache;
     delete m_dispatcher;

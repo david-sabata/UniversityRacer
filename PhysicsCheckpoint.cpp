@@ -10,12 +10,19 @@
 
         m_ghostObject = new btGhostObject();
     
-        btCollisionShape* checkpointShape = new btBoxShape(btVector3(CHECKPOINT_SIZE_X, CHECKPOINT_SIZE_Y, CHECKPOINT_SIZE_Z));
-        m_ghostObject->setCollisionShape(checkpointShape);
+        m_checkpointShape = new btBoxShape(btVector3(CHECKPOINT_SIZE_X, CHECKPOINT_SIZE_Y, CHECKPOINT_SIZE_Z));
+        m_ghostObject->setCollisionShape(m_checkpointShape);
 
         m_ghostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
         refWorld->addCollisionObject(m_ghostObject);
+}
+
+void PhysicsCheckpoint::Deinitialize()
+{
+    delete m_ghostObject;
+    delete m_checkpointShape;
+    delete m_ghostPairCallback;
 }
 
 bool PhysicsCheckpoint::Collision(btRigidBody *body, const GameTime & gameTime)

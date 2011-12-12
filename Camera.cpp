@@ -158,7 +158,7 @@ void Camera::Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameT
     // Nudged the camera a bit so that it swings around a bit more to face
     // the direction that the car is moving.
     // This makes it a little easier to see around corners.
-    lastBaseLookFromPos -= targetVelocity * (gameTime.Elapsed().ms() * 0.0003f);//* 0.005f;
+    lastBaseLookFromPos -= targetVelocity * (gameTime.Elapsed().ms() * 0.000001f);
 
     // Nudge the camera so that is a bit more likely to look in the direction
     // that the car is facing. This helps most when maneuvering at low speed.

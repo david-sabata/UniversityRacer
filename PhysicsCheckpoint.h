@@ -17,10 +17,12 @@
 class PhysicsCheckpoint
 {
 public:
-    PhysicsCheckpoint(void): m_passedNum(-1), m_round(0) {};
-    ~PhysicsCheckpoint(void) {};
+    PhysicsCheckpoint(void): m_passedNum(-1), m_round(0) {}
+    ~PhysicsCheckpoint(void) {}
 
     void Initialize(btDiscreteDynamicsWorld *refWorld);
+    void Deinitialize();
+
     bool Collision(btRigidBody *body, const GameTime & gameTime);
     void Add(const btTransform & trans);
     void Reset();
@@ -39,6 +41,7 @@ public:
 private:
     btGhostPairCallback *m_ghostPairCallback;
     btGhostObject *m_ghostObject;
+    btCollisionShape* m_checkpointShape;
 
     btAlignedObjectArray<btTransform> m_transforms;
 
