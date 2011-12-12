@@ -6,9 +6,10 @@ in vec3 normal; // normaly
 in vec2 texpos; //texturovaci souradnice
 
 //matice
-uniform mat4 model;
-uniform mat4 projection;
 uniform mat4 view;
+uniform mat4 model;
+uniform mat4 modelView;
+uniform mat4 modelViewProjection;
 uniform mat3 mv_inverse_transpose;
 
 //vlastnosti materialu
@@ -32,16 +33,14 @@ out vec2 t; //texturovaci souradnice
 
 void main() {
 	vec4 pos = vec4(position, 1.0);
-	mat4 mv = view * model;
-	mat4 mvp = projection * view * model;
-	gl_Position = mvp * pos;
+	gl_Position = modelViewProjection * pos;
 	t = texpos;
 
 	//transformace normaly do eyespace
 	eyeNormal = normalize(mv_inverse_transpose * normal);
 
 	//transformace zkoumaneho bodu do eyespace
-	vec4 eyePosition4 = mv * pos;
+	vec4 eyePosition4 = modelView * pos;
 	eyePosition = eyePosition4.xyz / eyePosition4.w;
 
 	////////////////////////////SVETLO /////////////////////////////////////

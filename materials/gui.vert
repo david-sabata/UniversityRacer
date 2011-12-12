@@ -8,8 +8,6 @@
 in vec2 position;
 in vec2 texpos;
 
-//uniform mat4 mvp;
-uniform mat4 projection;
 
 out vec2 texcoords;
 /////////////////////////////////////////////////
