@@ -247,17 +247,23 @@ void Scene::draw(bool drawAmbient, bool drawLighting, vector<bool> enabledLights
 		// postupne provadet kreslici frontu meshi kontejneru, slozenou z kreslene meshe a jeji matice;
 		// pokud probehla optimalizace, budou meshe navic serazene podle pouzivaneho materialu
 		vector<ModelContainer::MESHDRAWINGQUEUEITEM> drawingQueue = containers[i]->getMeshDrawingQueue();
-		
-		unsigned int counter = 0;
+	
 
 		for (vector<ModelContainer::MESHDRAWINGQUEUEITEM>::iterator it = drawingQueue.begin(); it != drawingQueue.end(); it++)
 		{
 			Mesh* mesh = (*it).mesh;
+			string meshMaterial = mesh->getMaterialName();			
 
 			// prepinat shadery jen pokud je treba
-			if (activeMaterial != mesh->getMaterialName())
-			{				
-				activeMaterial = mesh->getMaterialName();
+			if (activeMaterial != meshMaterial)
+			{
+				// overit substituci shaderu
+				map<string, string>::iterator substIt = shaderSubstitutions.find(meshMaterial);
+				if (substIt != shaderSubstitutions.end())
+					meshMaterial = (*substIt).second;
+
+				// prepnout na novy shader
+				activeMaterial = meshMaterial;
 				activeBinding = ShaderManager::useProgram(activeMaterial);					
 
 				// nastavit buffery
@@ -276,9 +282,7 @@ void Scene::draw(bool drawAmbient, bool drawLighting, vector<bool> enabledLights
 				// nastavit svetla
 				glUniform1i(activeBinding.iEnabledLightsUniform, (lights.size() / 3));
 				if (lights.size() > 0)
-					glUniform4fv(activeBinding.vLightsUniform, lights.size(), &(lights[0].x));
-				
-				counter++; // pomocne pocitadlo zmen shaderu v jednom snimku
+					glUniform4fv(activeBinding.vLightsUniform, lights.size(), &(lights[0].x));			
 			}				
 
 			// pohledova matice
@@ -322,8 +326,6 @@ void Scene::draw(bool drawAmbient, bool drawLighting, vector<bool> enabledLights
 		// vynuti opetovne nastaveni shaderu pro kazdy kontejner,
 		// muze byt totiz nutne prenastavit ukazatele do bufferu atp.
 		activeMaterial = "?_dummy_?";
-
-		//cout << "prepnuti krat " << counter << endl;
 	}	
 
 	// obnovit vychozi binding bufferu

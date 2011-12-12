@@ -101,6 +101,13 @@ bool ShaderManager::loadProgram(string material)
 
 
 
+
+ShaderManager::MATERIALPARAMS ShaderManager::getMaterialParams(string material)
+{
+	return materialParams.at(material);
+}
+
+
 void ShaderManager::setMaterialParams(string material, MATERIALPARAMS params)
 {
 	materialParams.insert(pair<string, MATERIALPARAMS>(material, params));
