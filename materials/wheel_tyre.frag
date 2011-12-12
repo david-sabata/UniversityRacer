@@ -11,9 +11,6 @@
 #define LINEAR_ATTENUATION 0.022
 #define QUADR_ATTENUATION 0.0019 
 
-// @LOAD materials/textures/tyre_gum.bmp
-uniform sampler2D tex;
-
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
@@ -89,5 +86,5 @@ void main() {
 			finalColor +=  diff +  spec;
 		}
 	} 
-	gl_FragColor = texture(tex,t) * finalColor;
+	gl_FragColor = finalColor;
 }

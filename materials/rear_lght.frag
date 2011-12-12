@@ -6,11 +6,6 @@
 //blinn-phong(studium): http://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/lighting.php
 
 #define MAX_LIGHTS 4
-#define ONE_DIV_MAX_LIGHTS 0.25
-
-// nacitani textur
-// @LOAD materials/textures/rearlight.bmp
-uniform sampler2D tex;
 
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
@@ -95,7 +90,7 @@ void main() {
 			if(specular >= 0.0)
 				spec = attenuation *  specular * material.specular;
 			finalColor +=  diff +  spec;
-			finalColor = (texture(tex,t) * finalColor) * ONE_DIV_MAX_LIGHTS;
+			
 		}
 	} 
 	 gl_FragColor = finalColor;

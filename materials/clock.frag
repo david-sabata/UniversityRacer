@@ -88,6 +88,10 @@ void main() {
 			finalColor +=  diff +  spec;
 		}
 	} 
-		
-	gl_FragColor = finalColor * texture(tex, t);
+
+		//zajisti, ze hodiny sviti i ve tme
+		vec4 texel = texture(tex, t);
+		vec4 color = finalColor * texture(tex, t);
+		color = max(color,texel);
+		gl_FragColor = color;
 }
