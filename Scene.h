@@ -1,7 +1,9 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#include <string>
 #include <iostream>
+#include <map>
 
 #ifdef USE_GLEE
 # include <GL/GLee.h>
@@ -50,6 +52,34 @@ class Scene
 		 */
 		void draw(bool drawAmbient = true, bool drawLighting = true, std::vector<bool> enabledLights = std::vector<bool>());
 
+
+		/**
+		 * Nastavi nahrazovani shaderu 'what' shaderem 'with'
+		 */
+		inline void addShaderSubstitution(std::string what, std::string with)
+		{
+			shaderSubstitutions.insert(std::pair<std::string, std::string>(what, with));
+		}
+
+		/**
+		 * Odebere nastavenou substituci
+		 */
+		inline void removeShaderSubstitution(std::string what)
+		{
+			std::map<std::string, std::string>::iterator it = shaderSubstitutions.find(what);
+			if (it != shaderSubstitutions.end())
+				shaderSubstitutions.erase(it);
+		}
+
+		/**
+		 * Vrati pole aktivnich substituci shaderu
+		 */
+		inline const std::map<std::string, std::string>& getSubstitutions()
+		{
+			return shaderSubstitutions;
+		}
+
+
 	protected:
 		/**
 		 * Kontejnery modelu ktere jsou ve scene
@@ -72,6 +102,12 @@ class Scene
 		 * Reference na objekt aplikace, ktera scenu stvorila
 		 */
 		BaseApp& application;
+
+		/**
+		 * Substituce shaderu - pomoci nich muzeme za behu programu
+		 * shadery prepinat (napr. pouzit vykonove mene narocnou variantu)
+		 */
+		std::map<std::string, std::string> shaderSubstitutions; 
 
 		////////////////////////////////////////////////////////////////
 

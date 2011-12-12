@@ -680,6 +680,7 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
+	// ENTER: vraceni auta na posledni projety checkpoint
     if (key == SDLK_RETURN) {
         if (physics->Checkpoint().FirstPassed())
             physics->GetCar()->Reset(physics->Checkpoint().GetLastTrans());
@@ -689,6 +690,7 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
         camera.ResetFollow();
     }
 
+	// R: reset po dokonceni zavodu
     if (key == SDLK_r)
     {
         physics->Checkpoint().Reset();
@@ -696,17 +698,25 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
         camera.ResetFollow();
     }
 
-
+	// F: follow kamera
     if (key == SDLK_f)
         followCamera = !followCamera;
-
-    if (key == SDLK_c)
-        camera.DebugDump();
-
+    
+	// 1-9: rozsveceni a zhasinani svetel
 	if (key >= SDLK_1 && key <= SDLK_9) {
 		unsigned int lightI = key - SDLK_1;
 		if (enabledLights.size() > lightI)
 			enabledLights[lightI] = !enabledLights[lightI];
+	}
+
+	// F5 - zapnuti/vypnuti generovaneho sumu v shaderu desk lavic
+	if (key == SDLK_F5) {
+		map<string, string>& substitutions = scene->getSubstitutions();
+		map<string, string>::iterator substIt = substitutions.find("desk");
+		if (substIt == substitutions.end())
+			scene->addShaderSubstitution("desk", "desk_soft");
+		else
+			scene->removeShaderSubstitution("desk");
 	}
 }
 
