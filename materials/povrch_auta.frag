@@ -87,7 +87,7 @@ void main() {
 			if(specular >= 0.0)
 				spec = attenuation *  specular * material.specular;
 			finalColor += diff +  spec;
-			finalColor = (texture(tex,t) + finalColor) / MAX_LIGHTS;
+			finalColor = (texture(tex,t) / MAX_LIGHTS) + finalColor;
 		}
 	} 
 	gl_FragColor = finalColor;
