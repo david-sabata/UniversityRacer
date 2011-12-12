@@ -10,10 +10,8 @@ using namespace std;
 #define TEX_ROWS 16
 #define TEX_WIDTH 512
 #define TEX_HEIGHT 512
-#define LETTER_WIDTH ((float)TEX_WIDTH/TEX_COLS)
-#define LETTER_HEIGHT ((float)TEX_HEIGHT/TEX_ROWS)
-
-
+#define LTR_BOX_WIDTH ((float)TEX_WIDTH/TEX_COLS)
+#define LTR_BOX_HEIGHT ((float)TEX_HEIGHT/TEX_ROWS)
 
 
 Gui::Gui(int screenWidth, int screenHeight) : 
@@ -35,9 +33,9 @@ void Gui::updateData()
 
 	unsigned int indexI = 0;
 
-	// rozmery pismena v souradnicich zarizeni
-	float letterWidth = (LETTER_WIDTH / screenWidth) * 2;
-	float letterHeight = (LETTER_HEIGHT / screenHeight) * 2;
+	// rozmery ramecku pismena v souradnicich zarizeni (vcetne paddingu)
+	float letterWidth = (LTR_BOX_WIDTH / screenWidth) * 2;
+	float letterHeight = (LTR_BOX_HEIGHT / screenHeight) * 2;
 
 	for (vector<pair<string, POSITION>>::iterator it = strings.begin(); it != strings.end(); it++)
 	{
@@ -80,12 +78,15 @@ void Gui::updateData()
 				break;
 			default: // procentualni pozice zleva
 				topleft.y = ((float)position.top - 50) / 50;
-		}
-		
+		}	
 
 		for (unsigned int i = 0; i < str.size(); i++)
 		{			
 			LTRTEXCOORDS tex = getCharTexCoords(str[i]);
+			//tex.topleft.x += 0.01;
+			//tex.topright.x -= 0.01;
+			//tex.btmleft.x += 0.01;
+			//tex.btmright -= 0.01;
 
 			vertices.push_back(topleft.x + i * letterWidth);
 			vertices.push_back(topleft.y);

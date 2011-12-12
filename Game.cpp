@@ -400,16 +400,25 @@ void Game::onInit()
 	// nacist vsechny materialy	
 	ShaderManager::loadPrograms();
 
-	// testovaci gui text	
+	// vychozi gui texty
 	Gui::POSITION pos = {Gui::TOP, Gui::LEFT};
 	guiTime = gui->addString(".", pos);
-
     pos.left = Gui::RIGHT;
     guiCheckpoint = gui->addString(".", pos);
 
 	// pomocny shader na kresleni car a na kresleni lavic bez generovaneho sumu
 	ShaderManager::loadProgram("line");
 	ShaderManager::loadProgram("desk_soft");
+
+	// po startu nepouzivat generovane textury - hodne zpomaluji
+	scene->addShaderSubstitution("desk", "desk_soft");
+	ShaderManager::MATERIALPARAMS params = ShaderManager::getMaterialParams("desk");
+	ShaderManager::setMaterialParams("desk_soft", params);
+
+
+	pos.left = 40;
+	pos.top = 40;
+	gui->addString("DLOUHY testovaci text - jsme mistri", pos);
 }
  
 
@@ -744,6 +753,11 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 	// F6 - zapnuti/vypnuti stinovych teles, resp. stencil stinu
 	if (key == SDLK_F6) {
 		drawShadows = !drawShadows;
+	}
+
+	// F1 - zobrazit/skryt napovedu
+	if (key == SDLK_F1) {
+		showHelp = !showHelp;
 	}
 }
 

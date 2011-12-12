@@ -56,7 +56,7 @@ void Physics::Deinitialize()  //cleanup in the reverse order of creation/initial
     if (m_car)
         delete m_car;
 
-    m_checkpoint.Deinitialize();
+    //m_checkpoint.Deinitialize();
 
     delete m_debugDraw;
     delete m_dynamicsWorld;
