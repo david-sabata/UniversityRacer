@@ -6,6 +6,11 @@
 
 #include "GameTime.h"
 
+/**
+ * Pocita FPS a udrzuje nejlepsi, nejhorsi a prumerne hodnoty.
+ * Inspirovano podle knihovny OGRE (http://www.ogre3d.org/)
+ * Konkretne tridou RenderTarget (http://www.ogre3d.org/docs/api/html/classOgre_1_1RenderTarget.html)
+ */
 class FpsCounter
 {
 public:
@@ -36,8 +41,6 @@ public:
         m_totalFrames++;
     }
     
-    //void Reset();
-    
     float Current() const { return m_current; }
     float Average() const { return m_average; }
     float Best()    const { return m_best; }
@@ -53,9 +56,8 @@ public:
 
 private:
     float m_current, m_average, m_best, m_worst;
-    unsigned int m_totalFrames;
+    unsigned int m_frameCount, m_totalFrames;
     TimeSpan m_totalElapsedTime;
-    unsigned int m_frameCount;
 };
 
 #endif

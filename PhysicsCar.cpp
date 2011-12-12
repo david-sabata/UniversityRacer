@@ -3,14 +3,6 @@
 #include <cmath>
 #include <vector>
 
-PhysicsCar::PhysicsCar(void): m_engineForce(0.f), m_breakingForce(0.f), m_vehicleSteering(0.f), m_turned(false)
-{                             
-}    
-
-PhysicsCar::~PhysicsCar(void)
-{
-}
-
 #define CRB CAR_RAISE_BOTTOM
 
 btCollisionShape* PhysicsCar::CreateVehicleShape()
@@ -143,14 +135,12 @@ void PhysicsCar::Reset(const btTransform & trans)
     {
         m_vehicle->resetSuspension();
         for (int i = 0; i < m_vehicle->getNumWheels(); i++)
-            m_vehicle->updateWheelTransform(i, true); //synchronize the wheels with the (interpolated) chassis worldtransform
+            m_vehicle->updateWheelTransform(i, true); // synchronize the wheels with the (interpolated) chassis worldtransform
     }
 }
 
 void PhysicsCar::Update(btScalar timeStep)
 {
-    //btScalar t
-    
     // engine
     m_vehicle->applyEngineForce(m_engineForce, WHEEL_REARLEFT);
     m_vehicle->applyEngineForce(m_engineForce, WHEEL_REARRIGHT);
