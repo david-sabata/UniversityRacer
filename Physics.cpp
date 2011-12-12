@@ -29,7 +29,7 @@ void Physics::Initialize()
     m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher, m_overlappingPairCache, m_constraintSolver, m_collisionConfiguration);
     m_dynamicsWorld->setGravity(btVector3(0, -9.81f, 0));
 
-    m_debugDraw = new PhysicsDebugDraw;    
+    m_debugDraw = new PhysicsDebugDraw();    
     m_dynamicsWorld->setDebugDrawer(m_debugDraw);
 
     m_checkpoint.Initialize(m_dynamicsWorld);
@@ -38,7 +38,7 @@ void Physics::Initialize()
 void Physics::Deinitialize()
 {
     //remove the rigidbodies from the dynamics world and delete them
-    for (int i = m_dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--)
+   for (int i = m_dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--)
     {
         btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[i];
         btRigidBody* body = btRigidBody::upcast(obj);
@@ -58,7 +58,7 @@ void Physics::Deinitialize()
         delete m_car;
     }
 
-    //m_checkpoint.Deinitialize();
+    m_checkpoint.Deinitialize();
 
     delete m_dynamicsWorld;
     delete m_debugDraw;

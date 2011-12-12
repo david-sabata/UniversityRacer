@@ -113,7 +113,6 @@ void PhysicsCar::Initialize(btDiscreteDynamicsWorld *refWorld, const btTransform
 
 void PhysicsCar::Deinitialize()
 {
-    delete m_carChassis;
     delete m_vehicleRayCaster;
     delete m_vehicle;
 }
