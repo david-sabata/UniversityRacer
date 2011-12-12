@@ -4,6 +4,7 @@ using namespace std;
 
 #define PROGRAM_NAME "gui"
 
+#define UNUSED_SHADER_ATTR -1
 
 #define TEX_COLS 16
 #define TEX_ROWS 16
@@ -153,29 +154,36 @@ void Gui::draw()
 
 	ShaderManager::PROGRAMBINDING activeBinding = ShaderManager::useProgram(PROGRAM_NAME);
 
-	glDisableVertexAttribArray(activeBinding.matParams.ambient);
-	glDisableVertexAttribArray(activeBinding.matParams.diffuse);
-	glDisableVertexAttribArray(activeBinding.matParams.specular);
-	glDisableVertexAttribArray(activeBinding.matParams.shininess);
-	glDisableVertexAttribArray(activeBinding.normalAttrib);
-	glDisableVertexAttribArray(activeBinding.tangentAttrib);
-	glDisableVertexAttribArray(activeBinding.texposAttrib);
-	glDisableVertexAttribArray(activeBinding.iEnabledLightsUniform);
-	glDisableVertexAttribArray(activeBinding.vLightsUniform);
-	glDisableVertexAttribArray(activeBinding.mMVInverseTranspose);
-	glDisableVertexAttribArray(activeBinding.normalAttrib);
-	glDisableVertexAttribArray(activeBinding.tangentAttrib);
-	glDisableVertexAttribArray(activeBinding.texposAttrib);
-
-	glEnableVertexAttribArray(activeBinding.positionAttrib);
+	if (activeBinding.matParams.ambient != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.matParams.ambient);
+	if (activeBinding.matParams.diffuse != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.matParams.diffuse);
+	if (activeBinding.matParams.specular != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.matParams.specular);
+	if (activeBinding.matParams.shininess != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.matParams.shininess);
+	if (activeBinding.normalAttrib != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.normalAttrib);
+	if (activeBinding.tangentAttrib != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.tangentAttrib);
+	if (activeBinding.texposAttrib != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.texposAttrib);
+	if (activeBinding.iEnabledLightsUniform != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.iEnabledLightsUniform);
+	if (activeBinding.vLightsUniform != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.vLightsUniform);
+	if (activeBinding.mMVInverseTranspose != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.mMVInverseTranspose);
 
 	// vrcholy
 	glEnableVertexAttribArray(activeBinding.positionAttrib);
 	glVertexAttribPointer(activeBinding.positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)&(vertices.at(0)));
 
 	// texturovaci souradnice
-	glEnableVertexAttribArray(activeBinding.texposAttrib);
-	glVertexAttribPointer(activeBinding.texposAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)&(texcoords.at(0)));
+	if (activeBinding.texposAttrib != UNUSED_SHADER_ATTR) {
+		glEnableVertexAttribArray(activeBinding.texposAttrib);
+		glVertexAttribPointer(activeBinding.texposAttrib, 2, GL_FLOAT, GL_FALSE, 0, (void*)&(texcoords.at(0)));
+	}
 	
 	// kresleni ctvercu
 	glDrawElements(GL_QUADS, indices.size(), GL_UNSIGNED_INT, (void*)&(indices.at(0)));

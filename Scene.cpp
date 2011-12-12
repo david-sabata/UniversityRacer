@@ -4,6 +4,10 @@
 	#define new MYDEBUG_NEW
 #endif
 
+
+#define UNUSED_SHADER_ATTR -1
+
+
 using namespace std;
 
 
@@ -61,21 +65,6 @@ std::vector<ModelContainer*> &Scene::getModelContainers()
 void Scene::init()
 {
 	buildBufferObjects();
-
-
-	// najit vsechna svetla a aktivovat je
-	for (vector<ModelContainer*>::iterator it = containers.begin(); it != containers.end(); it++)
-	{
-		GLenum lightEnums[] = { GL_LIGHT0, GL_LIGHT1, GL_LIGHT2, GL_LIGHT3, GL_LIGHT4, GL_LIGHT5, GL_LIGHT6, GL_LIGHT7 };
-		unsigned int i = 0;
-		if ((*it)->getLights().size() > 0 && i < 8)
-		{
-			glEnable(lightEnums[i]);
-			Light l = (*it)->getLights().at(i);
-			glLightfv(lightEnums[i], GL_POSITION, &l.Position().x);
-		}
-	}
-
 
 	// zoptimalizovat vsechny konterjnery
 	for (vector<ModelContainer*>::iterator it = containers.begin(); it != containers.end(); it++)
@@ -278,14 +267,20 @@ void Scene::draw(bool drawAmbient, bool drawLighting, vector<bool> enabledLights
 				glEnableVertexAttribArray(activeBinding.positionAttrib);
 				glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, x));
 
-				glEnableVertexAttribArray(activeBinding.normalAttrib);
-				glVertexAttribPointer(activeBinding.normalAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, nx));
+				if (activeBinding.normalAttrib != UNUSED_SHADER_ATTR) {
+					glEnableVertexAttribArray(activeBinding.normalAttrib);
+					glVertexAttribPointer(activeBinding.normalAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, nx));
+				}
 
-				glEnableVertexAttribArray(activeBinding.tangentAttrib);
-				glVertexAttribPointer(activeBinding.tangentAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, tx));
+				if (activeBinding.tangentAttrib != UNUSED_SHADER_ATTR) {
+					glEnableVertexAttribArray(activeBinding.tangentAttrib);
+					glVertexAttribPointer(activeBinding.tangentAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, tx));
+				}
 
-				glEnableVertexAttribArray(activeBinding.texposAttrib);
-				glVertexAttribPointer(activeBinding.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
+				if (activeBinding.texposAttrib != UNUSED_SHADER_ATTR) {
+					glEnableVertexAttribArray(activeBinding.texposAttrib);
+					glVertexAttribPointer(activeBinding.texposAttrib, 2, GL_FLOAT, GL_FALSE, sizeof(VBOENTRY), (void*)offsetof(VBOENTRY, u));
+				}
 
 				// nastavit svetla
 				glUniform1i(activeBinding.iEnabledLightsUniform, (lights.size() / 3));

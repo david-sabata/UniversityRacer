@@ -158,6 +158,11 @@ class ShaderManager
 		 */
 		static std::map<std::string, GLuint> textures;
 		
+		/**
+		 * Aktualni nabindovana texturovaci jednotka - cache pro zvyseni vykonosti
+		 */
+		static GLenum activeTexture;
+
 		///////////////////////////////////////////////////////////////
 		
 		/**
