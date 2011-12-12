@@ -93,6 +93,9 @@ bool ShaderManager::loadProgram(string material)
 	mat.matParams.specular = glGetUniformLocation(mat.program, "material.specular");
 	mat.matParams.shininess = glGetUniformLocation(mat.program, "material.shininess");
 
+	mat.bDrawAmbientUniform = glGetUniformLocation(mat.program, "paintAmbient");
+	mat.bDrawDiffSpecUniform = glGetUniformLocation(mat.program, "paintDiffSpec");
+
 	// Nacist textury
 	mat.textures = loadTextures(mat.program, vsSource + fsSource);
 	
@@ -364,8 +367,6 @@ void ShaderManager::loadDefaultProgram()
 	params.shininess = 10;
 
 	setMaterialParams(DEFAULT_PROGRAM, params);
-
-	cout << "Default shader loaded" << endl;
 }
 
 
@@ -440,7 +441,10 @@ GLuint ShaderManager::compileShader(const GLenum type, const char * source)
     glShaderSource(shader, 1, &source, NULL);
     glCompileShader(shader);
 
-    std::cout << "Compile: " << getShaderInfoLog(shader) << endl;
+	// vypisovat jenom pokud nastala chyba
+	string log = getShaderInfoLog(shader);
+	if (log.find("was successfully compiled") == string::npos)
+		std::cout << "Compile: " << log << endl;
 
     int compileStatus;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
@@ -466,7 +470,11 @@ GLuint ShaderManager::linkShader(size_t count, ...)
 
     // Link program and check for errors
     glLinkProgram(program);
-    std::cout << "Link: " << getProgramInfoLog(program) << endl;
+	
+	// vypisovta jen pokud nastala chyba
+	string log = getProgramInfoLog(program);
+	if (log.find("Error") != string::npos || log.find("error") != string::npos || log.find("Warning") != string::npos || log.find("warning") != string::npos)
+		std::cout << "Link: " << log << endl;
 
     int linkStatus;
     glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);

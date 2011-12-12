@@ -668,7 +668,7 @@ void Game::handleActiveKeys(const GameTime & gameTime)
         physics->GetCar()->Forward();
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_DOWN) != activeKeys.end() )
         physics->GetCar()->Backward();
-    if ( find(activeKeys.begin(), activeKeys.end(), SDLK_b) != activeKeys.end() ) 
+    if ( find(activeKeys.begin(), activeKeys.end(), SDLK_SPACE) != activeKeys.end() ) 
         physics->GetCar()->Brake();
     if ( find(activeKeys.begin(), activeKeys.end(), SDLK_LEFT) != activeKeys.end() )
         physics->GetCar()->TurnLeft();
@@ -682,7 +682,7 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 	BaseApp::onKeyDown(key, mod);
 
 	// mezernik zamyka mys pro ovladani kamery
-	if (key == SDLK_SPACE) {
+	if (key == SDLK_m) {
 		mouseCaptured = !mouseCaptured;
 		SDL_ShowCursor(!mouseCaptured);
 

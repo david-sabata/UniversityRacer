@@ -290,13 +290,9 @@ void Scene::draw(bool drawAmbient, bool drawLighting, vector<bool> enabledLights
 				// pohledova matice
 				glUniformMatrix4fv(activeBinding.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
 
-				// co vsechno se bude kreslit
-				GLuint amb = glGetUniformLocation(activeBinding.program, "paintAmbient");
-				glUniform1i(amb, drawAmbient);
-				GLuint lght = glGetUniformLocation(activeBinding.program, "paintDiffSpec");
-				glUniform1i(lght, drawLighting);
-
-
+				// co vsechno se bude kreslit				
+				glUniform1i(activeBinding.bDrawAmbientUniform, drawAmbient);
+				glUniform1i(activeBinding.bDrawDiffSpecUniform, drawLighting);
 			}				
 			
 			// model view

@@ -83,7 +83,7 @@ void Scene3DS::ParseEditObject(Model3DSChunk c)
 			break;
 			
 			case(0x4700):
-				cout << "\tobject camera\n";
+				; //cout << "\tobject camera\n";
 			break;
 			
 			default:

@@ -35,7 +35,7 @@ SDL_Surface * init(unsigned width, unsigned height, unsigned color, unsigned dep
 		// Problem: glewInit failed, something is seriously wrong.
 		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 	}
-	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+	//fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 #endif
 	// Create the Game and set as current application
 	application = new Game;

@@ -83,6 +83,8 @@ class ShaderManager
 			GLuint mMVInverseTranspose;
 			GLuint iEnabledLightsUniform;
 			GLuint vLightsUniform;
+			GLuint bDrawAmbientUniform;
+			GLuint bDrawDiffSpecUniform;
 			struct {
 				GLuint ambient;
 				GLuint diffuse;

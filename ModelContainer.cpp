@@ -113,8 +113,6 @@ void ModelContainer::optimizeDrawingQueue()
 			(*mappingIt).second.push_back( meshDrawingQueue.size() - 1 );
 		}		
 	}
-
-	cout << "mats " << materials.size() << endl;
 }
 
 
@@ -337,7 +335,7 @@ BaseModel* ModelContainer::load3DS(string filename)
 
 		ShaderManager::setMaterialParams(m.Name(), params);
 
-#if 1
+#if 0
 		cout << "------------------------------------------------" << endl;
 		cout << "Material: " << m.Name() << endl;
 		cout << "Ambient: " << m.AmbientColor().r << " / " << m.AmbientColor().g << " / " << m.AmbientColor().b << endl;
@@ -365,10 +363,6 @@ BaseModel* ModelContainer::load3DS(string filename)
 		// pridat svetla s defaultnimi barevnymi vlastnostmi (bile)
 		Light l = Light(glmvert);		
 		addLight(l);
-
-#if 1
-		cout << "Light position: " << glmvert.x << "\t" << glmvert.y << "\t" << glmvert.z << endl;
-#endif
 	}
 
 
