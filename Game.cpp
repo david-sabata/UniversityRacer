@@ -414,11 +414,6 @@ void Game::onInit()
 	scene->addShaderSubstitution("desk", "desk_soft");
 	ShaderManager::MATERIALPARAMS params = ShaderManager::getMaterialParams("desk");
 	ShaderManager::setMaterialParams("desk_soft", params);
-
-
-	pos.left = 40;
-	pos.top = 40;
-	gui->addString("DLOUHY testovaci text - jsme mistri", pos);
 }
  
 
