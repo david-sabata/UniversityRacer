@@ -58,6 +58,9 @@ class Game : public BaseApp
 
 		// pole priznaku rozsvicenych a zhasnutych svetel (moznost prepinani klavesami 1-9)
 		std::vector<bool> enabledLights;
+
+		// kreslit stiny? (F6)
+		bool drawShadows;
 };
 
 #endif

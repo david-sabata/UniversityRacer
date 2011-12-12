@@ -17,6 +17,8 @@ using namespace std;
 
 Game::Game(): mouseCaptured(false), drawWireframe(false), followCamera(true)
 {
+	drawShadows = true; // stiny defaultne zapnute
+
 	gui = new Gui(windowWidth, windowHeight);
 	scene = new Scene(*this);
 	shadowVolumes = new ShadowVolumes();
@@ -455,71 +457,79 @@ void Game::onWindowRedraw(const GameTime & gameTime)
 	glm::mat4 mPerspective = glm::perspective(45.0f, (float)getWindowAspectRatio(), 0.1f, 1000.0f);
 
 
-	// ===================================================================================================
-	// vicepruchodove kresleni se stencil stiny podle:
-	// http://www.angelfire.com/games5/duktroa/RealTimeShadowTutorial.htm
-	
-	// vykreslit scenu ambientne se zapisem do z-bufferu ---------
-	glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glDisable(GL_BLEND);   // vypnout blending (kreslime nejnizsi vrstvu)
-    glDepthMask(GL_TRUE);  // zapisovat do z-bufferu
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // zapisovat do color bufferu
-
-	// vykreslit scenu ambientnimi slozkami vsech rozsvicenych svetel
-	scene->draw(true, false, enabledLights);
-	
-	glBlendFunc(GL_ONE, GL_ONE); // budeme pricitat prispevky (difuzni+spekularni) od jednotlivych svetel
-    glDepthMask(GL_FALSE);  // pri kresleni stinovych teles bude z-buffer read-only
-    glEnable(GL_STENCIL_TEST); // budeme pouzivat stencil buffer
-	// -----------------------------------------------------------
-
-	for (unsigned int lightI = 0; lightI < enabledLights.size(); lightI++)
+	if (drawShadows) 
 	{
-		// zhasnute svetla neni treba blendovat
-		if (enabledLights[lightI] == false)
-			continue;
+		// ===================================================================================================
+		// vicepruchodove kresleni se stencil stiny podle:
+		// http://www.angelfire.com/games5/duktroa/RealTimeShadowTutorial.htm
+	
+		// vykreslit scenu ambientne se zapisem do z-bufferu ---------
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glDisable(GL_BLEND);   // vypnout blending (kreslime nejnizsi vrstvu)
+		glDepthMask(GL_TRUE);  // zapisovat do z-bufferu
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // zapisovat do color bufferu
 
-		glDisable(GL_BLEND); // nezapisovat barvu (pouze stencil)
-		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-		glClear(GL_STENCIL_BUFFER_BIT); // vycistit stencil
-		glDepthFunc(GL_LESS); // pouziti LESS by melo zabranit artefaktum
-		
-		glStencilFunc(GL_ALWAYS, 0, 0); // stencil test vzdy projde		
-
-		glCullFace(GL_FRONT); // kreslime odvracene facy	
-		glStencilOp(GL_KEEP, GL_INCR, GL_KEEP); // inkrementujeme stencil, pokud z-test failne
-    
-		shadowVolumes->draw( lightI, mView, mPerspective );
-
-		glCullFace(GL_BACK); // kreslime privracene facy
-		glStencilOp(GL_KEEP, GL_DECR, GL_KEEP); // dekrementujeme stencil, pokud z-test failne
-
-		shadowVolumes->draw( lightI, mView, mPerspective );
+		// vykreslit scenu ambientnimi slozkami vsech rozsvicenych svetel
+		scene->draw(true, false, enabledLights);
+	
+		glBlendFunc(GL_ONE, GL_ONE); // budeme pricitat prispevky (difuzni+spekularni) od jednotlivych svetel
+		glDepthMask(GL_FALSE);  // pri kresleni stinovych teles bude z-buffer read-only
+		glEnable(GL_STENCIL_TEST); // budeme pouzivat stencil buffer
 		// -----------------------------------------------------------
 
-		// vykreslit scenu normalne ----------------------------------
+		for (unsigned int lightI = 0; lightI < enabledLights.size(); lightI++)
+		{
+			// zhasnute svetla neni treba blendovat
+			if (enabledLights[lightI] == false)
+				continue;
 
-		// We draw our lighting now that we created the shadows area in the stencil buffer
-		glDepthFunc(GL_LEQUAL); // we put it again to LESS or EQUAL (or else you will get some z-fighting)
-		glCullFace(GL_BACK); // we draw the front face
-		glEnable(GL_BLEND); // We enable blending
-		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // We enable color buffer
-		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Drawing will not affect the stencil buffer
-		glStencilFunc(GL_EQUAL, 0x0, 0xff); // And the most important thing, the stencil function. Drawing if equal to 0
+			glDisable(GL_BLEND); // nezapisovat barvu (pouze stencil)
+			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
-		// v poli priznaku rozsvitit jen jedno svetlo
-		vector<bool> lght = vector<bool>(enabledLights.size(), false);
-		lght[lightI] = true;
+			glClear(GL_STENCIL_BUFFER_BIT); // vycistit stencil
+			glDepthFunc(GL_LESS); // pouziti LESS by melo zabranit artefaktum
+		
+			glStencilFunc(GL_ALWAYS, 0, 0); // stencil test vzdy projde		
 
-		// vykreslit scenu osvetlenou pouze jednim svetlem a pouze difuznimi a spekularnimi slozkami
-		scene->draw(false, true, lght);
+			glCullFace(GL_FRONT); // kreslime odvracene facy	
+			glStencilOp(GL_KEEP, GL_INCR, GL_KEEP); // inkrementujeme stencil, pokud z-test failne
+    
+			shadowVolumes->draw( lightI, mView, mPerspective );
+
+			glCullFace(GL_BACK); // kreslime privracene facy
+			glStencilOp(GL_KEEP, GL_DECR, GL_KEEP); // dekrementujeme stencil, pokud z-test failne
+
+			shadowVolumes->draw( lightI, mView, mPerspective );
+			// -----------------------------------------------------------
+
+			// vykreslit scenu normalne ----------------------------------
+
+			// We draw our lighting now that we created the shadows area in the stencil buffer
+			glDepthFunc(GL_LEQUAL); // we put it again to LESS or EQUAL (or else you will get some z-fighting)
+			glCullFace(GL_BACK); // we draw the front face
+			glEnable(GL_BLEND); // We enable blending
+			glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); // We enable color buffer
+			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); // Drawing will not affect the stencil buffer
+			glStencilFunc(GL_EQUAL, 0x0, 0xff); // And the most important thing, the stencil function. Drawing if equal to 0
+
+			// v poli priznaku rozsvitit jen jedno svetlo
+			vector<bool> lght = vector<bool>(enabledLights.size(), false);
+			lght[lightI] = true;
+
+			// vykreslit scenu osvetlenou pouze jednim svetlem a pouze difuznimi a spekularnimi slozkami
+			scene->draw(false, true, lght);
+		}
+
+		// ================================================================================================
+	}
+	// bezne vykresleni bez stinu
+	else {
+		scene->draw(true, true, enabledLights);
 	}
 
-	// ================================================================================================
-	
+
 	glDisable(GL_STENCIL_TEST);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
@@ -723,6 +733,11 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 			ShaderManager::setMaterialParams("desk_soft", params);
 		} else
 			scene->removeShaderSubstitution("desk");
+	}
+
+	// F6 - zapnuti/vypnuti stinovych teles, resp. stencil stinu
+	if (key == SDLK_F6) {
+		drawShadows = !drawShadows;
 	}
 }
 
