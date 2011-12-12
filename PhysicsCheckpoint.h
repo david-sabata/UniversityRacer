@@ -6,14 +6,21 @@
 
 #include "GameTime.h"
 
+/// meritko kolizniho telesa checkpointu 
 #define CHECKPOINT_SCALE 0.1f
 
+/// rozmery kolizniho telesa checkpointu 
 #define CHECKPOINT_SIZE_X 5.5f * CHECKPOINT_SCALE
 #define CHECKPOINT_SIZE_Y 4.f * CHECKPOINT_SCALE
 #define CHECKPOINT_SIZE_Z .5f * CHECKPOINT_SCALE
 
+/// pocet kol
 #define MAX_ROUNDS 1
 
+/**
+ * Sprava checkpointu s detekci kolizi a pocitanim casu.
+ * Prace s btGhostObject na zaklade http://bulletphysics.org/mediawiki-1.5.8/index.php/Collision_Callbacks_and_Triggers#btGhostObject
+ */
 class PhysicsCheckpoint
 {
 public:

@@ -8,10 +8,19 @@
 #include "PhysicsCarConfig.h"
 #include "PhysicsUtils.h"
 
+/**
+ * Fyzikalni simulace auta.
+ * Cerpano z dokumentu Bullet 2.79 Physics SDK Manual a Vehicle Simulation With Bullet (http://tinyurl.com/ydfb7lm).
+ * Dale cerpano z VehicleDemo, z nehoz byla vyuzita zakladni kostra kodu.
+ * VehicleDemo a Bullet 2.79 Physics SDK Manual jsou obsazeny v archivu http://code.google.com/p/bullet/downloads/detail?name=bullet-2.79-rev2440.zip
+ */
 class PhysicsCar
 {
 public: 
-    enum WHEELID {  // z pohledu ridice
+    /**
+     * Identifikatory kol auta; z pohledu ridice.
+     */
+    enum WHEELID {
         WHEEL_FRONTLEFT = 0,
         WHEEL_FRONTRIGHT,
         WHEEL_REARLEFT,
@@ -19,8 +28,8 @@ public:
         WHEEL_COUNT  // zarazka
     };
 
-    PhysicsCar(void);
-    ~PhysicsCar(void);
+    PhysicsCar(void): m_engineForce(0.f), m_breakingForce(0.f), m_vehicleSteering(0.f), m_turned(false) {}
+    ~PhysicsCar(void) {}
 
     btCollisionShape* CreateVehicleShape();
 

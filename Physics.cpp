@@ -1,5 +1,4 @@
 
-
 #include "Physics.h"
 
 
@@ -36,7 +35,7 @@ void Physics::Initialize()
     m_checkpoint.Initialize(m_dynamicsWorld);
 }
 
-void Physics::Deinitialize()  //cleanup in the reverse order of creation/initialization
+void Physics::Deinitialize()
 {
     //remove the rigidbodies from the dynamics world and delete them
     for (int i = m_dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--)
@@ -54,12 +53,15 @@ void Physics::Deinitialize()  //cleanup in the reverse order of creation/initial
   //      delete m_collisionShapes[j];
 
     if (m_car)
+    {
+        m_car->Deinitialize();
         delete m_car;
+    }
 
     //m_checkpoint.Deinitialize();
 
-    delete m_debugDraw;
     delete m_dynamicsWorld;
+    delete m_debugDraw;
     delete m_constraintSolver;
     delete m_overlappingPairCache;
     delete m_dispatcher;

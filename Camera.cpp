@@ -13,11 +13,10 @@ Camera::Camera(void): currentSettleTime(0.f) {
 
 
 void Camera::Reset() {
-	//eye = glm::vec3(2.78f, 2.73f, -2.5f);	
-	
     /*eye = glm::vec3(0.0f, 0.0f, -10.0f);
 	up = glm::vec3(0.0f, 1.0f, 0.0f);		
 	target = glm::vec3(0.0f, 0.0f, 1.0f);*/
+    
     eye = glm::vec3(38.435f, 11.41f, -27.451f);
 	up = glm::vec3(0.0f, 1.0f, 0.0f);		
 	target = glm::vec3(-0.623f, -0.124f, 0.772f);
@@ -114,11 +113,16 @@ void Camera::toggleObserve() {
 */
 
 
-// portnuto z TrueAxis Physics SDK - demo Cars
+/**
+ * Kod naportovan z True Axis Physics SDK (http://trueaxis.com/physics/index.html)
+ * Konkretne ze souboru DemoCars/DemoCars.cpp z archivu http://trueaxis.com/physics/downloadDemosSource.html
+ * A to konkretne z funkce "void UpdateCamera(float fDt)"
+ * Pridana nezavislost pohybu kamery na FPS a upravy hodnot konstant aby sedeli pro nase meritko.
+ */
 void Camera::Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameTime & gameTime)
 {
     const glm::vec3 lookAtPos(0, 1, 0);
-    const glm::vec3 lookFromPos(0, 1, 1);  //0, 3, -2   0,4,4
+    const glm::vec3 lookFromPos(0, 1, 1);  // 0, 3, -2
     float viewDistance = 2.5f; // 10.f
     const float settleTime = 2.f;
 
@@ -128,7 +132,7 @@ void Camera::Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameT
     // Using statics here because of lazy programming
     static glm::vec3 lastBaseLookFromPos = targetPos - targetRot[2] * 20.f;
     static float facing = 1.f;
-    //static float actSettleTime = 0.f;
+  //static float currentSettleTime = 0.f;
 
     // camera intro
     if (currentSettleTime < settleTime)
@@ -191,7 +195,7 @@ void Camera::Follow(glm::mat4 & targetMat, glm::vec3 targetVelocity, const GameT
 
         currentLookFromPos += lookFromPos * m;
         glm::vec3 currentLookAtPos = lookDirection;
-        // glm::vec3 currentLookAtPos = targetPos + lookAtPos * m;
+     // glm::vec3 currentLookAtPos = targetPos + lookAtPos * m;
 
         eye = currentLookFromPos;
         target = currentLookAtPos;
