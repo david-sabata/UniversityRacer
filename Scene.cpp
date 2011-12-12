@@ -296,6 +296,7 @@ void Scene::draw(bool drawAmbient, bool drawLighting, vector<bool> enabledLights
 				GLuint lght = glGetUniformLocation(activeBinding.program, "paintDiffSpec");
 				glUniform1i(lght, drawLighting);
 
+
 			}				
 			
 			// model view
@@ -305,6 +306,7 @@ void Scene::draw(bool drawAmbient, bool drawLighting, vector<bool> enabledLights
 			// mvp
 			glm::mat4 modelViewProjection = mProjection * modelView;
 			glUniformMatrix4fv(activeBinding.mModelViewProjectionUniform, 1, GL_FALSE, glm::value_ptr(modelViewProjection));
+
 
 			// pomocna matice pro vypocty osvetleni - znacne snizeni fps!
 			glm::mat3 mSubModelView = glm::mat3(modelView);

@@ -8,13 +8,11 @@ in vec3 position;
 in vec3 normal;
 in vec2 texpos;
 
-uniform mat4 model;
-uniform mat4 projection;
 uniform mat4 view;
+uniform mat4 model;
+uniform mat4 modelView;
+uniform mat4 modelViewProjection;
 uniform mat3 mv_inverse_transpose;
-
-uniform vec3 eye;
-uniform vec3 sight;
 
 struct Material {
 	vec4 ambient;
@@ -22,8 +20,6 @@ struct Material {
 	vec4 specular;
 	int shininess;
 };
-
-out vec4 specularF;
 
 
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
@@ -41,16 +37,14 @@ out vec2 t;
 
 void main() {
 	vec4 pos = vec4(position, 1.0);
-	mat4 mv = view * model;
-	mat4 mvp = projection * view * model;
-	gl_Position = mvp * pos;
+	gl_Position = modelViewProjection * pos;
 	t = texpos;
 
 	//transformace normaly do eyespace
 	eyeNormal = normalize(mv_inverse_transpose * normal);
 
 	//transformace zkoumaneho bodu do eyespace
-	vec4 eyePosition4 = mv * pos;
+	vec4 eyePosition4 = modelView * pos;
 	eyePosition = eyePosition4.xyz / eyePosition4.w;
 
 	// predpokladame enabledLights > 0
@@ -63,5 +57,4 @@ void main() {
 		eyeLightPos[i] = lightPos4.xyz / lightPos4.w ;
 	} 
 
-	specularF = material.specular;
 }

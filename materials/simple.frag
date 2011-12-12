@@ -5,8 +5,8 @@
 //point-light(studium): http://www.lighthouse3d.com/tutorials/glsl-tutorial/point-light-per-pixel/
 //blinn-phong(studium): http://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/lighting.php
 
-
 #define MAX_LIGHTS 4
+
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
@@ -29,26 +29,21 @@ uniform bool paintAmbient;
 
 in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
+in vec3 eyeLightPos[MAX_LIGHTS]; //pozice svetel v prostoru OKA
 
-in vec3 eyeLightPos[MAX_LIGHTS];
-
-in vec4 specularF;
-
-in vec4 color;
-in vec2 t;
+in vec2 t; //texturovaci souradnice
 
 void main() {
 	
 	vec4 ambientF, diffuseF, specularF, shininessF;
 	vec3 lightDir;
-	float radius = 1.0;
 
+	float radius = 1.0;
 	//kdyz je vse zhasnute, bude tma
 	vec4 finalColor = vec4(0.0,0.0,0.0,1.0);
 
 	vec3 N = normalize(eyeNormal);
 
-	//vypocet half vectoru (HV)
 	//v eyespace muzeme povazovat za vektor pozorovatele eyePosition, jeho otocenim tak ziskame 
 	//vektor z plosky do pozorovaele
 	vec3 V = normalize(-eyePosition);
@@ -76,9 +71,10 @@ void main() {
 		if(paintDiffSpec) {
 			//difuzni slozka
 			float diffuse = max(dot(N,L),0.0);
-			diffuseF = 	material.diffuse * lights[i * 3 + 1];
+			diffuseF = 	material.diffuse * lights[i * 3 + 1]; // i - index svetla
 			vec4 diff = attenuation * diffuse * diffuseF;
 	
+			//vypocet half vectoru (HV)
 			//halfvector = L + V - mezi light a pozorovatelem
 			vec3 H = normalize(L + V);
 	
@@ -92,9 +88,5 @@ void main() {
 			finalColor +=  diff +  spec;
 		}
 	} 
-	
-	//gl_FragColor = texture2D(textureNormal,t);
-	//gl_FragColor = ambientF[2];
-	//gl_FragColor = vec4(diffuse,0.0,0.0,1.0);		
 	gl_FragColor = finalColor;
 }

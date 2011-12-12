@@ -1,9 +1,6 @@
 #version 130
 #define MAX_LIGHTS 4
 
-/////////////////////////////////////////////////
-// Musi zustat stejne
-/////////////////////////////////////////////////
 in vec3 position; 
 in vec3 normal;
 in vec2 texpos;
@@ -14,29 +11,24 @@ uniform mat4 modelView;
 uniform mat4 modelViewProjection;
 uniform mat3 mv_inverse_transpose;
 
-uniform vec3 eye;
-uniform vec3 sight;
-
 struct Material {
 	vec4 ambient;
 	vec4 diffuse;
 	vec4 specular;
 	int shininess;
 };
+uniform Material material;
 
-out vec4 specularF;
-
-
+//INFORMACE O SVETLECH
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
-uniform Material material;
-
-/////////////////////////////////////////////////
+//SOURADNICE OKA
 out vec3 eyeLightPos[MAX_LIGHTS];
 out vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 out vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
 
+//PREDAVANI TEXTUROVACICH SOURADNIC DO FRAGMENT SHADERU
 out vec2 t;
 
 
@@ -52,15 +44,14 @@ void main() {
 	vec4 eyePosition4 = modelView * pos;
 	eyePosition = eyePosition4.xyz / eyePosition4.w;
 
-	// predpokladame enabledLights > 0
+	
 	////////////////////////////SVETLO /////////////////////////////////////
+	// predpokladame enabledLights > 0
 	for(int i =0; i < enabledLights; i++) {
-		vec4 lightPosition = lights[i * 3 + 0]; // 0 == prvni hodnota prvniho svetla == pozice
+		vec4 lightPosition = lights[i * 3 + 0]; // i - index svetla
 
-		//transformace svetla do eyespace (TODO : zeptat se Davida kam ho umistil : pravdepodobne je ve worldspace?)
+		//transformace svetla z worldspace do eyespace
 		vec4 lightPos4 = view * lightPosition;
 		eyeLightPos[i] = lightPos4.xyz / lightPos4.w ;
 	} 
-
-	specularF = material.specular;
 }

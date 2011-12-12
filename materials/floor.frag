@@ -15,11 +15,11 @@
 uniform sampler2D tex;
 
 uniform mat3 mv_inverse_transpose;
-uniform mat4 view;
 
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
+//vlastnosti materialu
 struct Material {
 	vec4 ambient;
 	vec4 diffuse;
@@ -34,37 +34,30 @@ uniform bool paintAmbient;
 
 in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
+in vec3 eyeLightPos[MAX_LIGHTS]; //pozice svetel v prostoru OKA
 
-in vec3 eyeLightPos[MAX_LIGHTS];
-
-in vec4 specularF;
-
-in vec4 color;
-in vec2 t;
+in vec2 t; //texturovaci souradnice
 
 void main() {
-	
-	vec4 ambientF, diffuseF, specularF, shininessF;
 	vec3 lightDir;
 	float radius = 1.0;
 	float scaleCoord = 2.0;
+	
 	//kdyz je vse zhasnute, bude tma
 	vec4 finalColor = vec4(0.0,0.0,0.0,1.0);
 
-	//////////////////////////////////JEDNODUCHY BUMP MAPPING////////////////////////////
-	//prevedeme normaly do eyespace	 
 	vec3 N = normalize(eyeNormal);
-
-	//vypocet half vectoru (HV)
 	//v eyespace muzeme povazovat za vektor pozorovatele eyePosition, jeho otocenim tak ziskame 
 	//vektor z plosky do pozorovaele
 	vec3 V = normalize(-eyePosition);
 
 	//////////////////////////////////////SVETLA/////////////////////////////////////
 	for(int i = 0; i < enabledLights ; i++) {
+		//zda-li se bude vykreslovat ambientni slozka svetla
 		if(paintAmbient)
 			finalColor += material.ambient * lights[i * 3 + 2];
-
+		
+		//smer paprsku svetla
 		lightDir = eyeLightPos[i] - eyePosition;
 
 		//slabnuti svetla
@@ -79,12 +72,14 @@ void main() {
 									  
 		vec3 L = normalize(lightDir);
 
+		//zda-li se bude vykreslovat diffuzni a specularni slozka svetla
 		if(paintDiffSpec) {
 			//difuzni slozka
 			float diffuse = max(dot(N,L),0.0);
-			diffuseF = 	material.diffuse * lights[i * 3 + 1];
+			vec4 diffuseF = 	material.diffuse * lights[i * 3 + 1];
 			vec4 diff = attenuation * diffuse * diffuseF;
-	
+			
+			//vypocet half vectoru (HV)
 			//halfvector = L + V - mezi light a pozorovatelem
 			vec3 H = normalize(L + V);
 	
@@ -97,7 +92,6 @@ void main() {
 				spec = attenuation *  specular * material.specular;
 			finalColor +=  diff +  spec;
 		}
-	} 
-			
+	} 		
 	gl_FragColor = finalColor * texture(tex,t * scaleCoord) ;
 }
