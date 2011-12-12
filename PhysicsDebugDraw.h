@@ -7,6 +7,9 @@
 
 #include <btBulletDynamicsCommon.h>
 
+/**
+ * Pomocna trida pro debug vykresleni koliznich teles pouzitych v simulaci; kresleni pouze pomoci car.
+ */
 class PhysicsDebugDraw : public btIDebugDraw
 {
 public:
@@ -21,8 +24,8 @@ public:
     PhysicsDebugDraw(void): m_debugMode(1) {}
     ~PhysicsDebugDraw(void) {}
 
-    virtual void drawLine(const btVector3& from,const btVector3& to,const btVector3& color);
-    virtual void drawContactPoint(const btVector3& PointOnB,const btVector3& normalOnB,btScalar distance,int lifeTime,const btVector3& color) {}
+    virtual void drawLine(const btVector3& from, const btVector3& to, const btVector3& color);
+    virtual void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) {}
     virtual void drawTriangle(const btVector3 & a, const btVector3 & b, const btVector3 & c, const btVector3 & color, btScalar alpha) {}
 
     void reportErrorWarning(const char * warningString) { std::cout << "Physics debugger warning: " << warningString << std::endl; }

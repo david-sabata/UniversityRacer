@@ -5,8 +5,7 @@
  void PhysicsCheckpoint::Initialize(btDiscreteDynamicsWorld *refWorld)
 {
         m_ghostPairCallback = new btGhostPairCallback();
-        refWorld->getPairCache()->setInternalGhostPairCallback(m_ghostPairCallback);
-     // refWorld->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(m_ghostPairCallback); 
+        refWorld->getPairCache()->setInternalGhostPairCallback(m_ghostPairCallback);        
 
         m_ghostObject = new btGhostObject();
     
@@ -19,8 +18,7 @@
 }
 
 void PhysicsCheckpoint::Deinitialize()
-{
-    delete m_ghostObject;
+{    
     delete m_checkpointShape;
     delete m_ghostPairCallback;
 }
@@ -58,6 +56,7 @@ void PhysicsCheckpoint::Add(const btTransform & trans)
 { 
     if (m_transforms.size() == 0)
         m_ghostObject->setWorldTransform(trans);
+
     m_transforms.push_back(trans);
 }
 

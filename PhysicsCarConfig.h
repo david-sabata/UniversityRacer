@@ -3,9 +3,13 @@
 
 #include <btBulletDynamicsCommon.h>
 
-#define CAR_SCALE 0.25f
-#define CAR_RAISE_BOTTOM 0.1f // zvyseni spodku kolizniho telesa auta
+#define CAR_SCALE 0.25f       /// meritko auta
+#define CAR_RAISE_BOTTOM 0.1f /// zvyseni spodku kolizniho telesa auta
 
+/**
+ * Konfigurace vlastnosti a chovani auta.
+ * Popis hodnot prevzan z dokumentu Vehicle Simulation With Bullet (http://tinyurl.com/ydfb7lm)
+ */
 struct CarConfig
 {
     CarConfig(): mass(5.0f),
@@ -19,13 +23,14 @@ struct CarConfig
                  /// Maximum speed clamp (km/h)
                  maxSpeedClamp(60.f),
                  
-                 steeringIncrement(0.025f),  // 0.03
+                 /// Steering settings
+                 steeringIncrement(0.025f),
                  steeringDecrement(0.1f),
-                 steeringClamp(0.50f),      // 0.75
+                 steeringClamp(0.50f),
                  
-                 // chasis damping
-                 linearDamping(0.25f),  // 0.3
-                 angularDamping(0.0f), // 0.1
+                 /// Chasis damping
+                 linearDamping(0.25f), // 0.3
+                 angularDamping(0.0f),
 
                  /// The direction of ray cast (chassis space). The wheel moves relative to the chassis in this direction, and the suspension force acts along this direction.
                  wheelDirectionCS(0.f, -1.f, 0.f),

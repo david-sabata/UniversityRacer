@@ -4,6 +4,9 @@
 #include <ostream>
 #include <iomanip>
 
+/**
+ * Trida reprezentujici casovy udaj.
+ */
 class TimeSpan
 {
     public:
@@ -43,6 +46,9 @@ class TimeSpan
         unsigned int m_ms;
 };
 
+/**
+ * Reprezentuje herni cas. Na jeho zaklade lze provadet akce nezavisle na FPS ci mereni casu.
+ */
 class GameTime
 {
 public:
