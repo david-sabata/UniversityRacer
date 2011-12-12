@@ -8,6 +8,8 @@ in vec2 texcoords;
 uniform vec4 background; 
 
 // @LOAD font.bmp
+// @MIN_FILTER NEAREST
+// @MAG_FILTER NEAREST
 uniform sampler2D tex;
 
 

@@ -21,7 +21,7 @@ map<string, ShaderManager::MATERIALPARAMS> ShaderManager::materialParams = map<s
 
 map<string, GLuint> ShaderManager::textures = map<string, GLuint>();
 
-
+GLenum ShaderManager::activeTexture = GL_NONE;
 
 
 void ShaderManager::loadPrograms()
@@ -45,6 +45,9 @@ bool ShaderManager::loadProgram(string material)
 	// pokud jiz program existuje, neni treba jej nacitat znovu
 	if (programs.find(material) != programs.end())
 		return true;
+
+	//if (material != "simple")
+	//	return false;
 
 	PROGRAMBINDING mat;
 	
@@ -123,8 +126,7 @@ ShaderManager::PROGRAMBINDING ShaderManager::useProgram(string program)
 	
 	// fallback shaderu
 	if (el == programs.end())
-		el = programs.find(DEFAULT_PROGRAM);
-	
+		el = programs.find(DEFAULT_PROGRAM);	
 
 	PROGRAMBINDING mat = (*el).second;
 
@@ -160,7 +162,11 @@ ShaderManager::PROGRAMBINDING ShaderManager::useProgram(string program)
 	{		
 		TEXTUREBINDING binding = mat.textures[i];
 
-		glActiveTexture(textureEnums[i]);		
+		if (activeTexture != textureEnums[i]) {
+			glActiveTexture(textureEnums[i]);
+			activeTexture = textureEnums[i];
+		}
+
 		glBindTexture(GL_TEXTURE_2D, binding.texture);
 		
 		// nastaveni parametru sampleru

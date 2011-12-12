@@ -149,6 +149,8 @@ void PhysicsCar::Reset(const btTransform & trans)
 
 void PhysicsCar::Update(btScalar timeStep)
 {
+    //btScalar t
+    
     // engine
     m_vehicle->applyEngineForce(m_engineForce, WHEEL_REARLEFT);
     m_vehicle->applyEngineForce(m_engineForce, WHEEL_REARRIGHT);
@@ -169,14 +171,14 @@ void PhysicsCar::Update(btScalar timeStep)
     {
         if (m_vehicleSteering > 0.f)
         {
-            m_vehicleSteering -= m_cfg.steeringIncrement;
-            if (m_vehicleSteering <= 0.f)
+            m_vehicleSteering -= m_cfg.steeringDecrement;
+            if (m_vehicleSteering < 0.f)
                 m_vehicleSteering = 0.f;
         }
         else
         {
-            m_vehicleSteering += m_cfg.steeringIncrement;
-            if (m_vehicleSteering >= 0.f)
+            m_vehicleSteering += m_cfg.steeringDecrement;
+            if (m_vehicleSteering > 0.f)
                 m_vehicleSteering = 0.f;
         }
     }
@@ -185,17 +187,27 @@ void PhysicsCar::Update(btScalar timeStep)
 
 void PhysicsCar::TurnLeft()
 {
-    m_vehicleSteering += m_cfg.steeringIncrement;
+    if (m_vehicleSteering < 0)
+        m_vehicleSteering += m_cfg.steeringDecrement;
+    else    
+        m_vehicleSteering += m_cfg.steeringIncrement;
+
     if (m_vehicleSteering > m_cfg.steeringClamp)
-        m_vehicleSteering = m_cfg.steeringClamp;    
+        m_vehicleSteering = m_cfg.steeringClamp; 
+
     m_turned = true;
 }
 
 void PhysicsCar::TurnRight()
 {
-    m_vehicleSteering -= m_cfg.steeringIncrement;
+    if (m_vehicleSteering > 0)
+        m_vehicleSteering -= m_cfg.steeringDecrement;
+    else
+        m_vehicleSteering -= m_cfg.steeringIncrement;
+
     if (m_vehicleSteering < -m_cfg.steeringClamp)
-        m_vehicleSteering = -m_cfg.steeringClamp;  
+        m_vehicleSteering = -m_cfg.steeringClamp; 
+
     m_turned = true;
 }
 
@@ -203,6 +215,7 @@ void PhysicsCar::Forward()
 {
     if (std::abs(m_vehicle->getCurrentSpeedKmHour()) < m_cfg.maxSpeedClamp)
         m_engineForce = m_cfg.maxEngineForce;
+
     m_breakingForce = 0.f;    
 }
 
@@ -210,6 +223,7 @@ void PhysicsCar::Backward()
 {
     if (std::abs(m_vehicle->getCurrentSpeedKmHour()) < m_cfg.maxSpeedClamp)
         m_engineForce = -m_cfg.maxEngineForce;
+
     m_breakingForce = 0.f;    
 }
 
@@ -224,5 +238,6 @@ btTransform PhysicsCar::GetWorldTransform()
     btTransform vehicleTrans;
     m_vehicle->getRigidBody()->getMotionState()->getWorldTransform(vehicleTrans);
     btCompoundShape* compoundShape = static_cast<btCompoundShape*>(m_vehicle->getRigidBody()->getCollisionShape());
+    
     return vehicleTrans * compoundShape->getChildTransform(0);
 }

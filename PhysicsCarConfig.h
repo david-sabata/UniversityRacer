@@ -20,6 +20,7 @@ struct CarConfig
                  maxSpeedClamp(60.f),
                  
                  steeringIncrement(0.025f),  // 0.03
+                 steeringDecrement(0.1f),
                  steeringClamp(0.50f),      // 0.75
                  
                  // chasis damping
@@ -83,7 +84,7 @@ struct CarConfig
                 }
 
     btScalar mass, linearDamping, angularDamping;
-    btScalar maxEngineForce, maxBreakingForce, maxSpeedClamp, steeringIncrement, steeringClamp;
+    btScalar maxEngineForce, maxBreakingForce, maxSpeedClamp, steeringIncrement, steeringDecrement, steeringClamp;
     btScalar wheelFrictionSlip, wheelRadius, wheelWidth, connectionHeight, connectionWidth, connectionLength, bodyConnectionToChasisHeight;
     btVector3 wheelDirectionCS, wheelAxleCS;
     btScalar suspensionStiffness, suspensionDampingRelaxation, suspensionDampingCompression, suspensionRestLength, suspensionMaxTravelCm, rollInfluence;

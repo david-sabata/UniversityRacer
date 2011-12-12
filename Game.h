@@ -61,6 +61,9 @@ class Game : public BaseApp
 
 		// kreslit stiny? (F6)
 		bool drawShadows;
+
+		// zobrazujeme napovedu? (F1)
+		bool showHelp;
 };
 
 #endif

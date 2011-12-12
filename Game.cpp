@@ -7,6 +7,7 @@
 
 using namespace std;
 
+#define UNUSED_SHADER_ATTR -1
 
 #define WALK_SPEED 0.01f
 #define STATICS_SCALE 0.05f
@@ -399,16 +400,20 @@ void Game::onInit()
 	// nacist vsechny materialy	
 	ShaderManager::loadPrograms();
 
-	// testovaci gui text	
+	// vychozi gui texty
 	Gui::POSITION pos = {Gui::TOP, Gui::LEFT};
 	guiTime = gui->addString(".", pos);
-
     pos.left = Gui::RIGHT;
     guiCheckpoint = gui->addString(".", pos);
 
 	// pomocny shader na kresleni car a na kresleni lavic bez generovaneho sumu
 	ShaderManager::loadProgram("line");
 	ShaderManager::loadProgram("desk_soft");
+
+	// po startu nepouzivat generovane textury - hodne zpomaluji
+	scene->addShaderSubstitution("desk", "desk_soft");
+	ShaderManager::MATERIALPARAMS params = ShaderManager::getMaterialParams("desk");
+	ShaderManager::setMaterialParams("desk_soft", params);
 }
  
 
@@ -594,16 +599,27 @@ void Game::drawLines(vector<PhysicsDebugDraw::LINE> & lines)
 	}
 	
 	ShaderManager::PROGRAMBINDING activeBinding = ShaderManager::useProgram("line");
-	glDisableVertexAttribArray(activeBinding.iEnabledLightsUniform);
-	glDisableVertexAttribArray(activeBinding.vLightsUniform);
-	glDisableVertexAttribArray(activeBinding.mMVInverseTranspose);
-	glDisableVertexAttribArray(activeBinding.normalAttrib);
-	glDisableVertexAttribArray(activeBinding.tangentAttrib);
-	glDisableVertexAttribArray(activeBinding.texposAttrib);
-	glDisableVertexAttribArray(activeBinding.matParams.ambient);
-	glDisableVertexAttribArray(activeBinding.matParams.diffuse);
-	glDisableVertexAttribArray(activeBinding.matParams.specular);
-	glDisableVertexAttribArray(activeBinding.matParams.shininess);
+	
+	if (activeBinding.iEnabledLightsUniform != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.iEnabledLightsUniform);
+	if (activeBinding.vLightsUniform != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.vLightsUniform);
+	if (activeBinding.mMVInverseTranspose != UNUSED_SHADER_ATTR)	
+		glDisableVertexAttribArray(activeBinding.mMVInverseTranspose);
+	if (activeBinding.normalAttrib != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.normalAttrib);
+	if (activeBinding.tangentAttrib != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.tangentAttrib);
+	if (activeBinding.texposAttrib != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.texposAttrib);
+	if (activeBinding.matParams.ambient != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.matParams.ambient);
+	if (activeBinding.matParams.diffuse != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.matParams.diffuse);
+	if (activeBinding.matParams.specular != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.matParams.specular);
+	if (activeBinding.matParams.shininess != UNUSED_SHADER_ATTR)
+		glDisableVertexAttribArray(activeBinding.matParams.shininess);
 
 	// vrcholy
 	glEnableVertexAttribArray(activeBinding.positionAttrib);
@@ -622,14 +638,6 @@ void Game::drawLines(vector<PhysicsDebugDraw::LINE> & lines)
 	glm::mat4 mvp = mProjection * modelView;
 	glUniformMatrix4fv(activeBinding.mModelViewProjectionUniform, 1, GL_FALSE, glm::value_ptr(mvp));
 	
-	// nastaveni kamery
-	glm::vec3 eye = getCamera()->getEye();
-	glm::vec3 sight = getCamera()->getTarget();
-	GLuint eyeUniform = glGetUniformLocation(activeBinding.program, "eye");
-	GLuint sightUniform = glGetUniformLocation(activeBinding.program, "sight");
-	glUniform3f(eyeUniform, eye.x, eye.y, eye.z);
-	glUniform3f(sightUniform, sight.x, sight.y, sight.z);
-
 	// kresleni car
 	glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, (void*)&(indices.at(0)));
 
@@ -740,6 +748,11 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 	// F6 - zapnuti/vypnuti stinovych teles, resp. stencil stinu
 	if (key == SDLK_F6) {
 		drawShadows = !drawShadows;
+	}
+
+	// F1 - zobrazit/skryt napovedu
+	if (key == SDLK_F1) {
+		showHelp = !showHelp;
 	}
 }
 

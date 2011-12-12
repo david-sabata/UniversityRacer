@@ -18,8 +18,8 @@ public:
     	glm::vec3 color;
     };
 
-    PhysicsDebugDraw(void);
-    ~PhysicsDebugDraw(void);
+    PhysicsDebugDraw(void): m_debugMode(1) {}
+    ~PhysicsDebugDraw(void) {}
 
     virtual void drawLine(const btVector3& from,const btVector3& to,const btVector3& color);
     virtual void drawContactPoint(const btVector3& PointOnB,const btVector3& normalOnB,btScalar distance,int lifeTime,const btVector3& color) {}
@@ -33,11 +33,8 @@ public:
 
     std::vector<LINE> & GetLines() { return lines; }
 
-    //static void DrawCylinder(GLfloat *m, GLfloat radius, GLfloat height);
-
 private:
     // pole pomocnych car k vykresleni - caru definuji dva body a barva
-
     std::vector<LINE> lines;
     
     int m_debugMode;
