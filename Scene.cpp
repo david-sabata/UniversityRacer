@@ -238,6 +238,14 @@ void Scene::draw(bool drawAmbient, bool drawLighting, vector<bool> enabledLights
 
 
 
+	// pohledova matice
+	glm::mat4 mView = application.getCamera()->GetMatrix();
+	
+	// projekcni matice
+	glm::mat4 mProjection = glm::perspective(45.0f, (float)application.getWindowAspectRatio(), 0.1f, 1000.0f);	
+	
+
+	
 	// samotne kresleni
 	for (unsigned int i = 0; i < containers.size(); i++)
 	{						
@@ -282,40 +290,32 @@ void Scene::draw(bool drawAmbient, bool drawLighting, vector<bool> enabledLights
 				// nastavit svetla
 				glUniform1i(activeBinding.iEnabledLightsUniform, (lights.size() / 3));
 				if (lights.size() > 0)
-					glUniform4fv(activeBinding.vLightsUniform, lights.size(), &(lights[0].x));			
+					glUniform4fv(activeBinding.vLightsUniform, lights.size(), &(lights[0].x));				
+				
+				// pohledova matice
+				glUniformMatrix4fv(activeBinding.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
+
+				// co vsechno se bude kreslit
+				GLuint amb = glGetUniformLocation(activeBinding.program, "paintAmbient");
+				glUniform1i(amb, drawAmbient);
+				GLuint lght = glGetUniformLocation(activeBinding.program, "paintDiffSpec");
+				glUniform1i(lght, drawLighting);
+
 			}				
+			
+			// model view
+			glm::mat4 modelView = mView * (*it).matrix;
+			glUniformMatrix4fv(activeBinding.mModelViewUniform, 1, GL_FALSE, glm::value_ptr(modelView));
 
-			// pohledova matice
-			glm::mat4 mView = application.getCamera()->GetMatrix();
-			glUniformMatrix4fv(activeBinding.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
-
-			// projekcni matice
-			glm::mat4 mProjection = glm::perspective(45.0f, (float)application.getWindowAspectRatio(), 0.1f, 1000.0f);
-			glUniformMatrix4fv(activeBinding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
-	
-			// nastaveni kamery
-			glm::vec3 eye = application.getCamera()->getEye();
-			glm::vec3 sight = application.getCamera()->getTarget();
-			GLuint eyeUniform = glGetUniformLocation(activeBinding.program, "eye");
-			GLuint sightUniform = glGetUniformLocation(activeBinding.program, "sight");
-			glUniform3f(eyeUniform, eye.x, eye.y, eye.z);
-			glUniform3f(sightUniform, sight.x, sight.y, sight.z);
-
-			// modelova matice
-			glUniformMatrix4fv(activeBinding.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix));
+			// mvp
+			glm::mat4 modelViewProjection = mProjection * modelView;
+			glUniformMatrix4fv(activeBinding.mModelViewProjectionUniform, 1, GL_FALSE, glm::value_ptr(modelViewProjection));
 
 			// pomocna matice pro vypocty osvetleni - znacne snizeni fps!
-			glm::mat3 mSubModelView = glm::mat3(mView) * glm::mat3((*it).matrix);
+			glm::mat3 mSubModelView = glm::mat3(modelView);
 			glm::mat3 mMVInverseTranspose = glm::transpose(glm::inverse(mSubModelView)); // transpose(inverse(modelview))
 			glUniformMatrix3fv(activeBinding.mMVInverseTranspose, 1, GL_FALSE, glm::value_ptr(mMVInverseTranspose));
-
-			// co vsechno se bude kreslit
-			GLuint amb = glGetUniformLocation(activeBinding.program, "paintAmbient");
-			glUniform1i(amb, drawAmbient);
-			GLuint lght = glGetUniformLocation(activeBinding.program, "paintDiffSpec");
-			glUniform1i(lght, drawLighting);
-
-
+			
 			// samotne vykresleni
 			unsigned int count = mesh->getFaces().size() * 3;
 			unsigned int offset = containers[i]->getMeshIndexOffset(mesh);

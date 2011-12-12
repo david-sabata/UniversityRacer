@@ -78,8 +78,8 @@ bool ShaderManager::loadProgram(string material)
 	mat.texposAttrib = glGetAttribLocation(mat.program, "texpos");
 
 	mat.mViewUniform = glGetUniformLocation(mat.program, "view");
-	mat.mProjectionUniform = glGetUniformLocation(mat.program, "projection");
-	mat.mModelUniform = glGetUniformLocation(mat.program, "model");
+	mat.mModelViewUniform = glGetUniformLocation(mat.program, "modelView");
+	mat.mModelViewProjectionUniform = glGetUniformLocation(mat.program, "modelViewProjection");	
 	mat.mMVInverseTranspose = glGetUniformLocation(mat.program, "mv_inverse_transpose");
 
 	mat.iEnabledLightsUniform = glGetUniformLocation(mat.program, "enabledLights");

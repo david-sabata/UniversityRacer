@@ -29,6 +29,7 @@ Game::~Game()
 	delete gui;
 	delete scene;
 	delete shadowVolumes;
+	delete physics;
 }
 
 
@@ -81,7 +82,7 @@ void Game::onInit()
 	}
 
     // vykresli zidle
-	if (0) {
+	if (1) {
 		container->addModel("chairs", chairs);
                 
 		glm::mat4 scale = glm::scale(glm::vec3(STATICS_SCALE));
@@ -608,17 +609,18 @@ void Game::drawLines(vector<PhysicsDebugDraw::LINE> & lines)
 	glEnableVertexAttribArray(activeBinding.positionAttrib);
 	glVertexAttribPointer(activeBinding.positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)&(vertices.at(0)));
 
-	// modelova matice
-	glm::mat4 modelmat = glm::mat4(1.0);
-	glUniformMatrix4fv(activeBinding.mModelUniform, 1, GL_FALSE, glm::value_ptr(modelmat));
-
 	// pohledova matice
 	glm::mat4 mView = getCamera()->GetMatrix();
 	glUniformMatrix4fv(activeBinding.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
 
+	// modelova matice
+	glm::mat4 modelView = mView * glm::mat4(1.0);
+	glUniformMatrix4fv(activeBinding.mModelViewUniform, 1, GL_FALSE, glm::value_ptr(modelView));
+	
 	// projekcni matice
 	glm::mat4 mProjection = glm::perspective(45.0f, (float)getWindowAspectRatio(), 0.1f, 1000.0f);
-	glUniformMatrix4fv(activeBinding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
+	glm::mat4 mvp = mProjection * modelView;
+	glUniformMatrix4fv(activeBinding.mModelViewProjectionUniform, 1, GL_FALSE, glm::value_ptr(mvp));
 	
 	// nastaveni kamery
 	glm::vec3 eye = getCamera()->getEye();

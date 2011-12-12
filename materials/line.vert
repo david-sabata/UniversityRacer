@@ -8,8 +8,8 @@ in vec3 normal;
 in vec2 texpos;
 
 uniform mat4 model;
-uniform mat4 projection;
-uniform mat4 view;
+uniform mat4 modelView;
+uniform mat4 modelViewProjection;
 uniform mat3 mv_inverse_transpose;
 
 uniform vec3 eye;
@@ -38,6 +38,5 @@ flat out int shininessF;
 
 void main() {
 	vec4 pos = vec4(position, 1);
-	mat4 mvp = projection * view * model;
-	gl_Position = mvp * pos;	
+	gl_Position = modelViewProjection * pos;	
 }

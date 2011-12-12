@@ -392,9 +392,11 @@ void ShadowVolumes::draw(unsigned int lightI, glm::mat4 mView, glm::mat4 mProjec
 	
 	// transformacni matice
 	glm::mat4 mModel = glm::mat4(1.0f);
-	glUniformMatrix4fv(activeBinding.mModelUniform, 1, GL_FALSE, glm::value_ptr(mModel));
+	glm::mat4 mModelView = mView * mModel;
+	glm::mat4 mMVP = mProjection * mModelView;
 	glUniformMatrix4fv(activeBinding.mViewUniform, 1, GL_FALSE, glm::value_ptr(mView));
-	glUniformMatrix4fv(activeBinding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));	
+	glUniformMatrix4fv(activeBinding.mModelViewUniform, 1, GL_FALSE, glm::value_ptr(mModelView));	
+	glUniformMatrix4fv(activeBinding.mModelViewProjectionUniform, 1, GL_FALSE, glm::value_ptr(mMVP));
 
 	// vykreslit steny ------------------------------------------------------------
 	glBindBuffer(GL_ARRAY_BUFFER, VBOs[lightI]);

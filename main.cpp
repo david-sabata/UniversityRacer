@@ -129,6 +129,14 @@ void mainLoop()
 
 int main(int /*argc*/, char ** /*argv*/) 
 {
+
+#ifdef _DEBUG
+#ifdef _MSC_VER
+	// hlida stav heapu pri kazde de/alokaci
+	_CrtSetDbgFlag(_CRTDBG_CHECK_ALWAYS_DF);
+#endif
+#endif
+
 	try {
         // Init SDL - only video subsystem will be used
         if(SDL_Init(SDL_INIT_VIDEO) < 0) throw SDL_Exception();
@@ -150,8 +158,11 @@ int main(int /*argc*/, char ** /*argv*/)
 
 	SDL_Quit();
 
+#ifdef _DEBUG
 #ifdef _MSC_VER
+	// vypise pripadne memory leaky
 	_CrtDumpMemoryLeaks();
+#endif
 #endif
 
     return EXIT_SUCCESS;
