@@ -11,10 +11,7 @@ in vec2 texpos;
 uniform mat4 model;
 uniform mat4 projection;
 uniform mat4 view;
-uniform mat3 mv_inverse_transpose;
-
-uniform vec3 eye;
-uniform vec3 sight;
+uniform mat3 mv_inverse_transpose; // ekvivalentni k gl_Normal
 
 struct Material {
 	vec4 ambient;
@@ -22,8 +19,6 @@ struct Material {
 	vec4 specular;
 	int shininess;
 };
-
-out vec4 specularF;
 
 
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
@@ -63,5 +58,4 @@ void main() {
 		eyeLightPos[i] = lightPos4.xyz / lightPos4.w ;
 	} 
 
-	specularF = material.specular;
 }

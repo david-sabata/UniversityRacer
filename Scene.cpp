@@ -290,12 +290,12 @@ void Scene::draw(bool drawAmbient, bool drawLighting, vector<bool> enabledLights
 			glUniformMatrix4fv(activeBinding.mProjectionUniform, 1, GL_FALSE, glm::value_ptr(mProjection));
 	
 			// nastaveni kamery
-			glm::vec3 eye = application.getCamera()->getEye();
+			/*glm::vec3 eye = application.getCamera()->getEye();
 			glm::vec3 sight = application.getCamera()->getTarget();
 			GLuint eyeUniform = glGetUniformLocation(activeBinding.program, "eye");
 			GLuint sightUniform = glGetUniformLocation(activeBinding.program, "sight");
 			glUniform3f(eyeUniform, eye.x, eye.y, eye.z);
-			glUniform3f(sightUniform, sight.x, sight.y, sight.z);
+			glUniform3f(sightUniform, sight.x, sight.y, sight.z);*/
 
 			// modelova matice
 			glUniformMatrix4fv(activeBinding.mModelUniform, 1, GL_FALSE, glm::value_ptr((*it).matrix));

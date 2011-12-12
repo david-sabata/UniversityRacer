@@ -13,7 +13,7 @@ uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 #define LINEAR_ATTENUATION 0.022
 #define QUADR_ATTENUATION 0.0019 
 
-
+//struktura materialu
 struct Material {
 	vec4 ambient;
 	vec4 diffuse;
@@ -28,10 +28,7 @@ uniform bool paintAmbient;
 
 in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
-
-in vec3 eyeLightPos[MAX_LIGHTS];
-
-in vec4 specularF;
+in vec3 eyeLightPos[MAX_LIGHTS]; //pozice svetla v prostoru OKA
 
 in vec4 color;
 in vec2 t;
@@ -91,8 +88,5 @@ void main() {
 		}
 	} 
 	
-	//gl_FragColor = texture2D(textureNormal,t);
-	//gl_FragColor = ambientF[2];
-	//gl_FragColor = vec4(diffuse,0.0,0.0,1.0);		
 	gl_FragColor = finalColor;
 }
