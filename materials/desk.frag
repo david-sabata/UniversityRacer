@@ -30,10 +30,10 @@ in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
 in vec3 eyeLightPos[MAX_LIGHTS]; // pozice svetla v prostoru OKA
 
-in vec4 specularF;
-in vec4 color;
 in vec2 t;
 in vec3 oPosition;
+
+out vec4 fragColor; //vystupni barva
 
 ////////////////////GENEROVANI SUMU////////////////////////
 //SMEROVE VEKTORY
@@ -163,35 +163,34 @@ void main() {
 	vec3 V = normalize(-eyePosition);
 
 	//////////////////////////////////////SVETLA/////////////////////////////////////
+	float constantAtt = 1.0; //konstanta pro ubytek svetla
 	for(int i = 0; i < enabledLights ; i++) {
+		
 		//zda-li se bude vykreslovat ambientni slozka svetla
 		if(paintAmbient)
 			finalColor += material.ambient * lights[i * 3 + 2];
 
-		//smer paprsku svetla
+		//vektor paprsku svetla
 		lightDir = eyeLightPos[i] - eyePosition;
 
 		//slabnuti svetla
 		float attenuation, distance;
 		distance = length(lightDir * radius);	 
 		//pro Range 100 - zdroj : http://www.ogre3d.org/tikiwiki/-Point+Light+Attenuation
-		float constantAtt = 1.0;
-		float linearAtt = LINEAR_ATTENUATION;
-		float quadraticAtt = QUADR_ATTENUATION;
-		attenuation = 1.0 / (constantAtt + linearAtt * distance +
-										   quadraticAtt * distance * distance);
-									  
-		vec3 L = normalize(lightDir);
-
+		attenuation = 1.0 / (constantAtt + LINEAR_ATTENUATION * distance +
+										   QUADR_ATTENUATION * distance * distance);
+	
 		//zda-li se bude kreslit difuzni a specularni slozka svetla
 		if(paintDiffSpec) {
-
+			//normalizovany vektor svetla							  
+			vec3 L = normalize(lightDir);
+			
 			//difuzni slozka
 			float diffuse = max(dot(N,L),0.0);
 			vec4 diffuseF = material.diffuse * lights[i * 3 + 1];
 			vec4 diff = attenuation * diffuse * diffuseF;
 	
-			//halfvector = L + V - mezi light a pozorovatelem
+			//vypocet halfvector = L + V - mezi light a pozorovatelem
 			vec3 H = normalize(L + V);
 	
 			//spocitame spekularni odlesk
@@ -204,6 +203,6 @@ void main() {
 			finalColor +=  diff +  spec;
 		}
 	} 	
-	gl_FragColor = finalColor;
+	fragColor = finalColor;
 }
  

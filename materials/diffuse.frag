@@ -6,7 +6,6 @@
 //blinn-phong(studium): http://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/lighting.php
 
 #define MAX_LIGHTS 4
-
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
@@ -31,7 +30,14 @@ in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
 in vec3 eyeLightPos[MAX_LIGHTS]; //pozice svetel v prostoru OKA
 
+in vec3 oPosition; //pozice vertexu v object space
+
+uniform sampler2D texture1;
+uniform bool useTexture;
+
 in vec2 t; //texturovaci souradnice
+
+out vec4 fragColor; //vystupni barva
 
 void main() {
 	vec3 lightDir;
@@ -46,24 +52,23 @@ void main() {
 	//vektor z plosky do pozorovaele
 	vec3 V = normalize(-eyePosition);
 
+
+	float constantAtt = 1.0;//konstanta pro ubytek svetla
 	//////////////////////////////////////SVETLA/////////////////////////////////////
 	for(int i = 0; i < enabledLights ; i++) {
 		//zda-li se bude vyrkeslovat ambientni slozka svetla
 		if(paintAmbient)
+
 			finalColor += material.ambient * lights[i * 3 + 2];
 
 		//smer paprsku svetla
 		lightDir = eyeLightPos[i] - eyePosition;
 
-		//slabnuti svetla
+		//slabnuti svetla v zavislosti na vzdalenosti od zdroje
 		float attenuation, distance;
 		distance = length(lightDir / radius);	 
-
-		float constantAtt = 1.0;
-		float linearAtt = LINEAR_ATTENUATION;
-		float quadraticAtt = QUADR_ATTENUATION;
-		attenuation = 1.0 / (constantAtt + linearAtt * distance +
-										   quadraticAtt * distance * distance);
+		attenuation = 1.0 / (constantAtt + LINEAR_ATTENUATION * distance +
+										   QUADR_ATTENUATION * distance * distance);
 									  
 		vec3 L = normalize(lightDir);
 
@@ -74,7 +79,11 @@ void main() {
 			vec4 diffuseF = material.diffuse * lights[i * 3 + 1];
 			vec4 diff = attenuation * diffuse * diffuseF;
 			finalColor +=  diff;
+			
+			//pokud je zapnuta textura1, pak ji namichej do barvy
+			if(usetexture)
+				finalColor = (texture(texture1, t) * ONE_DIV_MAX_LIGHTS) + finalColor;
 		}
 	} 	
-	gl_FragColor = finalColor;
+	fragColor = finalColor;
 }

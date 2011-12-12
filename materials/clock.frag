@@ -7,9 +7,6 @@
 
 #define MAX_LIGHTS 4
 
-// @LOAD materials/textures/clock.bmp
-uniform sampler2D tex;
-
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
@@ -33,7 +30,12 @@ in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
 in vec3 eyeLightPos[MAX_LIGHTS]; //pozice svetla v prostoru OKA
 
+uniform sampler2D texture1;
+uniform bool useTexture;
+
 in vec2 t; //texturovaci souradnice
+
+out vec4 fragColor; //vystupni barva
 
 void main() {
 	vec3 lightDir;
@@ -66,10 +68,11 @@ void main() {
 		attenuation = 1.0 / (constantAtt + linearAtt * distance +
 										   quadraticAtt * distance * distance);
 									  
-		vec3 L = normalize(lightDir);
-
 		//zda-li sevykresli specularn ia difuzni slozka svetla
 		if(paintDiffSpec) {
+			//normalizovany vektor svetla
+			vec3 L = normalize(lightDir);
+
 			//difuzni slozka
 			float diffuse = max(dot(N,L),0.0);
 			vec4 diffuseF = material.diffuse * lights[i * 3 + 1];
@@ -90,8 +93,12 @@ void main() {
 	} 
 
 		//zajisti, ze hodiny sviti i ve tme
-		vec4 texel = texture(tex, t);
-		vec4 color = finalColor * texture(tex, t);
-		color = max(color,texel);
-		gl_FragColor = color;
+		if(useTexture) {
+			vec4 texel = texture(tex, t);
+			vec4 color = finalColor * texture(tex, t);
+			color = max(color,texel);
+			fragColor = color;
+		} else {
+			fragColor = finalColor; //pokud neexistuje textura hodin, pak je vykresli standardne
+		}
 }
