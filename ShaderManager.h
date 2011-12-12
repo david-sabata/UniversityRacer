@@ -129,6 +129,13 @@ class ShaderManager
 		 * Vraci strukturu aktualniho shaderu
 		 */
 		static PROGRAMBINDING getCurrentProgram();
+
+		/**
+		 * Vraci parametry daneho materialu, pokud je jiz nacteny;
+		 * pokud ne, vraci parametry vychoziho materialu
+		 */
+		static MATERIALPARAMS getMaterialParams(std::string material);
+
 		
 	protected:
 		/**

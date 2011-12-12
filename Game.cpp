@@ -403,7 +403,9 @@ void Game::onInit()
     pos.left = Gui::RIGHT;
     guiCheckpoint = gui->addString(".", pos);
 
+	// pomocny shader na kresleni car a na kresleni lavic bez generovaneho sumu
 	ShaderManager::loadProgram("line");
+	ShaderManager::loadProgram("desk_soft");
 }
  
 
@@ -711,11 +713,15 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 
 	// F5 - zapnuti/vypnuti generovaneho sumu v shaderu desk lavic
 	if (key == SDLK_F5) {
-		map<string, string>& substitutions = scene->getSubstitutions();
-		map<string, string>::iterator substIt = substitutions.find("desk");
-		if (substIt == substitutions.end())
+		const map<string, string>& substitutions = scene->getSubstitutions();
+		map<string, string>::const_iterator substIt = substitutions.find("desk");
+		if (substIt == substitutions.end()) {
 			scene->addShaderSubstitution("desk", "desk_soft");
-		else
+
+			// je potreba zkopirovat i materialove vlastnosti puvodniho povrchu
+			ShaderManager::MATERIALPARAMS params = ShaderManager::getMaterialParams("desk");
+			ShaderManager::setMaterialParams("desk_soft", params);
+		} else
 			scene->removeShaderSubstitution("desk");
 	}
 }
