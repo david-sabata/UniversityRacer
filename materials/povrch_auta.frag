@@ -10,13 +10,14 @@
 // @LOAD materials/textures/povrch_auta.bmp
 uniform sampler2D tex;
 
-
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
+//zdroj : http://www.ogre3d.org/tikiwiki/-Point+Light+Attenuation
 #define LINEAR_ATTENUATION 0.022
 #define QUADR_ATTENUATION 0.0019  
 
+//vlastnosti materialu
 struct Material {
 	vec4 ambient;
 	vec4 diffuse;
@@ -31,20 +32,14 @@ uniform bool paintAmbient;
 
 in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
+in vec3 eyeLightPos[MAX_LIGHTS]; // pozice svetel v prostoru OKA
 
-in vec3 eyeLightPos[MAX_LIGHTS];
-
-in vec4 specularF;
-
-in vec4 color;
-in vec2 t;
+in vec2 t; // texturovaci souradnice
 
 void main() {
-	
-	vec4 ambientF, diffuseF, specularF, shininessF;
 	vec3 lightDir;
-	float radius = 1.0;
 
+	float radius = 1.0;
 	//kdyz je vse zhasnute, bude tma
 	vec4 finalColor = vec4(0.0,0.0,0.0,1.0);
 
@@ -78,7 +73,7 @@ void main() {
 		if(paintDiffSpec) {
 			//difuzni slozka
 			float diffuse = max(dot(N,L),0.0);
-			diffuseF = 	material.diffuse * lights[i * 3 + 1];
+			vec4 diffuseF = 	material.diffuse * lights[i * 3 + 1];
 			vec4 diff = attenuation * diffuse * diffuseF;
 	
 			//halfvector = L + V - mezi light a pozorovatelem
@@ -92,8 +87,8 @@ void main() {
 			if(specular >= 0.0)
 				spec = attenuation *  specular * material.specular;
 			finalColor += diff +  spec;
+			finalColor = (texture(tex,t) + finalColor) / MAX_LIGHTS;
 		}
 	} 
-	
-	gl_FragColor = texture(tex,t) +  finalColor;
+	gl_FragColor = finalColor;
 }

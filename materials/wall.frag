@@ -22,6 +22,7 @@ uniform sampler2D texNormal;
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
+//vlastnosti materialu
 struct Material {
 	vec4 ambient;
 	vec4 diffuse;
@@ -36,12 +37,10 @@ uniform bool paintAmbient;
 
 in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
-in vec3 eyeLightPos[MAX_LIGHTS];
+in vec3 eyeLightPos[MAX_LIGHTS]; //pozice svetla v prostoru OKA
 
-in vec4 specularF;
-in vec4 color;
-in vec2 t;
-in vec3 oPosition;
+in vec2 t; //texturovaci sourdnice
+in vec3 oPosition; //pozice vertexu, slouzi jako vstup pro sum
 
 
 ////////////////////GENEROVANI SUMU////////////////////////
@@ -150,8 +149,6 @@ float noise3D(float Px,float Py, float Pz) {
 
 
 void main() {
-	
-	vec4 ambientF, diffuseF, specularF, shininessF;
 	vec3 lightDir;
 	float radius = 1.0;
 
@@ -166,7 +163,7 @@ void main() {
 	//vektor z plosky do pozorovaele
 	vec3 V = normalize(-eyePosition);
 
-	/*
+	/* SOUCASNE SE NEPOUZIVA
 	//GENEROVANI TURBULENCE NA ZED - PRILIS NAROCNE, POKUSIT SE OPTIMALIZOVAT
 	float size = 128;
 	float intensity = 0;
@@ -181,10 +178,13 @@ void main() {
 
 	//////////////////////////////////////SVETLA/////////////////////////////////////
 	for(int i = 0; i < enabledLights; i++) {
+
+		//zda-li se vykresli ambientni slozka svetla
 		if(paintAmbient)
 			//ambientni slozka svetla
 			finalColor += material.ambient * lights[i * 3 + 2];
 
+		//vektor paprsku svetla
 		lightDir = eyeLightPos[i] - eyePosition;
 
 		//slabnuti svetla
@@ -198,23 +198,19 @@ void main() {
 									  
 		vec3 L = normalize(lightDir);
 
+		//zda-li se vykresli diffuzni a spekularni slozka svetla
 		if(paintDiffSpec) {
+
 			//difuzni slozka 
 			float diffuse = max(dot(N,L),0.0);
-			diffuseF = 	material.diffuse * lights[i * 3 + 1];
+			vec4 diffuseF = 	material.diffuse * lights[i * 3 + 1];
 			vec4 diff = attenuation * diffuse * diffuseF;
 		
 			//spekularni nepocitame, jedna se o matny material
 
 			finalColor +=  diff ;
 		}
-	} 
-	
-	vec4 texel = texture(tex, t / scaleTexCoord);
-
-	//gl_FragColor = texture2D(textureNormal,t);
-	//gl_FragColor = ambientF[2];
-	//gl_FragColor = vec4(diffuse,0.0,0.0,1.0);		
-	gl_FragColor =  texel * finalColor ;
+	} 	
+	gl_FragColor =  texture(tex, t / scaleTexCoord) * finalColor ;
 }
  

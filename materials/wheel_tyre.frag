@@ -14,10 +14,10 @@
 // @LOAD materials/textures/tyre_gum.bmp
 uniform sampler2D tex;
 
-
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
+//vlastnosti materialu
 struct Material {
 	vec4 ambient;
 	vec4 diffuse;
@@ -32,17 +32,11 @@ uniform bool paintAmbient;
 
 in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
+in vec3 eyeLightPos[MAX_LIGHTS]; //pozice svetla v prostoru OKA
 
-in vec3 eyeLightPos[MAX_LIGHTS];
-
-in vec4 specularF;
-
-in vec4 color;
 in vec2 t;
 
 void main() {
-	
-	vec4 ambientF, diffuseF, specularF, shininessF;
 	vec3 lightDir;
 	float radius = 1.0;
 
@@ -51,16 +45,16 @@ void main() {
 
 	vec3 N = normalize(eyeNormal);
 
-	//vypocet half vectoru (HV)
 	//v eyespace muzeme povazovat za vektor pozorovatele eyePosition, jeho otocenim tak ziskame 
 	//vektor z plosky do pozorovaele
 	vec3 V = normalize(-eyePosition);
 
 	//////////////////////////////////////SVETLA/////////////////////////////////////
 	for(int i = 0; i < enabledLights ; i++) {
+		//zda-li se vykresli ambientni slozka svetla
 		if(paintAmbient)
 			finalColor += material.ambient * lights[i * 3 + 2];
-
+		//vektor paprsku svetla
 		lightDir = eyeLightPos[i] - eyePosition;
 
 		//slabnuti svetla
@@ -75,10 +69,11 @@ void main() {
 									  
 		vec3 L = normalize(lightDir);
 
+		//zda-li se vykresli diffuzni a spekularni slozka svetla
 		if(paintDiffSpec) {
 			//difuzni slozka
 			float diffuse = max(dot(N,L),0.0);
-			diffuseF = 	material.diffuse * lights[i * 3 + 1];
+			vec4 diffuseF = material.diffuse * lights[i * 3 + 1];
 			vec4 diff = attenuation * diffuse * diffuseF;
 	
 			//halfvector = L + V - mezi light a pozorovatelem
@@ -94,9 +89,5 @@ void main() {
 			finalColor +=  diff +  spec;
 		}
 	} 
-	
-	//gl_FragColor = texture2D(textureNormal,t);
-	//gl_FragColor = ambientF[2];
-	//gl_FragColor = vec4(diffuse,0.0,0.0,1.0);		
-	gl_FragColor = texture(tex,t);
+	gl_FragColor = texture(tex,t) * finalColor;
 }

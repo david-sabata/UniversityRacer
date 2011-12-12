@@ -10,7 +10,6 @@
 // @LOAD materials/textures/platno.bmp
 uniform sampler2D tex;
 
-
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
@@ -18,6 +17,7 @@ uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 #define LINEAR_ATTENUATION 0.022
 #define QUADR_ATTENUATION 0.0019  
 
+//vlastnosti materialu
 struct Material {
 	vec4 ambient;
 	vec4 diffuse;
@@ -32,17 +32,11 @@ uniform bool paintAmbient;
 
 in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
+in vec3 eyeLightPos[MAX_LIGHTS]; // pozice svetla v prosotru OKA
 
-in vec3 eyeLightPos[MAX_LIGHTS];
-
-in vec4 specularF;
-
-in vec4 color;
-in vec2 t;
+in vec2 t; //texturovaci souradnice
 
 void main() {
-	
-	vec4 ambientF, diffuseF, specularF, shininessF;
 	vec3 lightDir;
 	float radius = 1.0;
 
@@ -58,9 +52,11 @@ void main() {
 
 	//////////////////////////////////////SVETLA/////////////////////////////////////
 	for(int i = 0; i < enabledLights ; i++) {
+		//zda-li se vykresli ambientni slozka svetla
 		if(paintAmbient)
 			finalColor += material.ambient * lights[i * 3 + 2];
 
+		//smer paprsky svetla
 		lightDir = eyeLightPos[i] - eyePosition;
 
 		//slabnuti svetla
@@ -75,18 +71,14 @@ void main() {
 									  
 		vec3 L = normalize(lightDir);
 
+		//zda-li se vyrkesli diffuzni a spekularni slozka svetla
 		if(paintDiffSpec) {
 			//difuzni slozka
 			float diffuse = max(dot(N,L),0.0);
-			diffuseF = 	material.diffuse * lights[i * 3 + 1];
+			vec4 diffuseF = 	material.diffuse * lights[i * 3 + 1];
 			vec4 diff = attenuation * diffuse * diffuseF;
-	
 			finalColor +=  diff;
 		}
-	} 
-	
-	//gl_FragColor = texture2D(textureNormal,t);
-	//gl_FragColor = ambientF[2];
-	//gl_FragColor = vec4(diffuse,0.0,0.0,1.0);		
+	} 	
 	gl_FragColor = texture(tex, t) * finalColor;
 }

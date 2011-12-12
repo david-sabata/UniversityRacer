@@ -6,17 +6,20 @@
 //blinn-phong(studium): http://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/lighting.php
 
 #define MAX_LIGHTS 4
+#define ONE_DIV_MAX_LIGHTS 0.25
 
-//zdroj : http://www.ogre3d.org/tikiwiki/-Point+Light+Attenuation
+// nacitani textur
 // @LOAD materials/textures/rearlight.bmp
 uniform sampler2D tex;
 
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
+//zdroj : http://www.ogre3d.org/tikiwiki/-Point+Light+Attenuation
 #define LINEAR_ATTENUATION 0.022
 #define QUADR_ATTENUATION 0.0019 
 
+//vlastnosti materialu
 struct Material {
 	vec4 ambient;
 	vec4 diffuse;
@@ -31,18 +34,16 @@ uniform bool paintAmbient;
 
 in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
+in vec3 eyeLightPos[MAX_LIGHTS]; // pozice svetel v prostoru OKA
 
-in vec3 eyeLightPos[MAX_LIGHTS];
-
-in vec4 specularF;
-
-in vec4 color;
-in vec2 t;
+in vec2 t; // texturovaci souradnice
 
 void main() {
 	
 	vec4 ambientF, diffuseF, specularF, shininessF;
 	vec3 lightDir;
+
+	//ovlivnuje dosah svetla
 	float radius = 1.0;
 
 	//kdyz je vse zhasnute, bude tma
@@ -50,16 +51,17 @@ void main() {
 
 	vec3 N = normalize(eyeNormal);
 
-	//vypocet half vectoru (HV)
 	//v eyespace muzeme povazovat za vektor pozorovatele eyePosition, jeho otocenim tak ziskame 
 	//vektor z plosky do pozorovaele
 	vec3 V = normalize(-eyePosition);
 
 	//////////////////////////////////////SVETLA/////////////////////////////////////
 	for(int i = 0; i < enabledLights ; i++) {
+		//zdali se bude vykreslovat ambientni slozka svetla
 		if(paintAmbient)
 			finalColor += material.ambient * lights[i * 3 + 2];
-
+	    
+		//smer paprsku svetla
 		lightDir = eyeLightPos[i] - eyePosition;
 
 		//slabnuti svetla
@@ -74,12 +76,14 @@ void main() {
 									  
 		vec3 L = normalize(lightDir);
 
+		//zda-li se bude vykreslovat diffuzni slozka svetla
 		if(paintDiffSpec) {
 			//difuzni slozka
 			float diffuse = max(dot(N,L),0.0);
 			diffuseF = 	material.diffuse * lights[i * 3 + 1];
 			vec4 diff = attenuation * diffuse * diffuseF;
-	
+			
+			//vypocet half vectoru (HV)
 			//halfvector = L + V - mezi light a pozorovatelem
 			vec3 H = normalize(L + V);
 	
@@ -91,10 +95,8 @@ void main() {
 			if(specular >= 0.0)
 				spec = attenuation *  specular * material.specular;
 			finalColor +=  diff +  spec;
+			finalColor = (texture(tex,t) * finalColor) * ONE_DIV_MAX_LIGHTS;
 		}
 	} 
-
-
-	 //gl_FragColor = vec4(t.s,t.t,0.0,1.0);	
-	 gl_FragColor = texture(tex,t) * finalColor;
+	 gl_FragColor = finalColor;
 }

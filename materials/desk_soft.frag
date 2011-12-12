@@ -26,16 +26,11 @@ uniform bool paintAmbient;
 
 in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
-in vec3 eyeLightPos[MAX_LIGHTS];
+in vec3 eyeLightPos[MAX_LIGHTS]; //pozice svetla v prostoru OKA
 
-in vec4 specularF;
-in vec4 color;
-in vec2 t;
-
+in vec2 t; //texturovaci souradnice
 
 void main() {
-	
-	vec4 ambientF, diffuseF, specularF, shininessF;
 	vec3 lightDir;
 	float radius = 1.0; //pak se nasobi dale - optimalizace, proto je opacny
 
@@ -44,7 +39,6 @@ void main() {
 	
 	vec3 N = normalize(eyeNormal);
 
-	//vypocet half vectoru (HV)
 	//v eyespace muzeme povazovat za vektor pozorovatele eyePosition, jeho otocenim tak ziskame 
 	//vektor z plosky do pozorovaele
 	vec3 V = normalize(-eyePosition);
@@ -52,6 +46,8 @@ void main() {
 
 	//////////////////////////////////////SVETLA/////////////////////////////////////
 	for(int i = 0; i < enabledLights ; i++) {
+		
+		//zda-li se vykresluje ambientni slozka svetla
 		if(paintAmbient)
 			finalColor += material.ambient * lights[i * 3 + 2];
 
@@ -70,18 +66,20 @@ void main() {
 									  
 		vec3 L = normalize(lightDir);
 
+		//zda-li se vykresluje difuzni a specularni slozka svetla
 		if(paintDiffSpec) {
+			
 			//difuzni slozka
 			float diffuse = max(dot(N,L),0.0);
-			diffuseF = 	material.diffuse * lights[i * 3 + 1];
+			vec4 diffuseF = 	material.diffuse * lights[i * 3 + 1];
 			vec4 diff = attenuation * diffuse * diffuseF;
-	
+			
+			//specularni slozka
+			//vypocet half vectoru (HV)
 			//halfvector = L + V - mezi light a pozorovatelem
 			vec3 H = normalize(L + V);
-	
 			//spocitame spekularni odlesk
 			float specular = pow(dot(N,H), material.shininess);
-	
 			vec4 spec = vec4(0.0,0.0,0.0,1.0);
 			//pricteme spekulární složku k výsledné barvì
 			if(specular >= 0.0)
@@ -89,7 +87,6 @@ void main() {
 			finalColor +=  diff +  spec;
 		}
 	} 
-		
 	gl_FragColor = finalColor;
 }
  
