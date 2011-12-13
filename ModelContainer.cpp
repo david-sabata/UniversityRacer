@@ -385,6 +385,7 @@ BaseModel* ModelContainer::load3DS(string filename)
 		cout << "Diffuse: " << m.DiffuseColor().r << " / " << m.DiffuseColor().g << " / " << m.DiffuseColor().b << endl;
 		cout << "Specular: " << m.SpecularColor().r << " / " << m.SpecularColor().g << " / " << m.SpecularColor().b << endl;
 		cout << "Shininess percentage: " << m.Shininess() << endl;
+		cout << "Texture: " << m.Texture() << endl;
 #endif
 	}
 

@@ -411,7 +411,7 @@ void Game::onInit()
 	ShaderManager::loadProgram("desk_soft");
 
 	// po startu nepouzivat generovane textury - hodne zpomaluji
-	ShaderManager::addShaderSubstitution("desk", "desk_soft");
+	ShaderManager::addShaderSubstitution("desk", "glossy");
 	//ShaderManager::MATERIALPARAMS params = ShaderManager::getMaterialParams("desk");
 	//ShaderManager::setMaterialParams("desk_soft", params);
 }
@@ -736,7 +736,7 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 		const map<string, string>& substitutions = ShaderManager::getSubstitutions();
 		map<string, string>::const_iterator substIt = substitutions.find("desk");
 		if (substIt == substitutions.end()) {
-			ShaderManager::addShaderSubstitution("desk", "desk_soft");
+			ShaderManager::addShaderSubstitution("desk", "glossy");
 
 			// je potreba zkopirovat i materialove vlastnosti puvodniho povrchu
 			//ShaderManager::MATERIALPARAMS params = ShaderManager::getMaterialParams("desk");
