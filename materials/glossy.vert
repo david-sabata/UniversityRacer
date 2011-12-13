@@ -28,6 +28,8 @@ out vec3 eyeLightPos[MAX_LIGHTS];
 out vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 out vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
 
+out vec3 oPosition; //pozice vertexu
+
 //PREDAVANI TEXTUROVACICH SOURADNIC DO FRAGMENT SHADERU
 out vec2 t;
 
@@ -36,6 +38,7 @@ void main() {
 	vec4 pos = vec4(position, 1.0);
 	gl_Position = modelViewProjection * pos;
 	t = texpos;
+	oPosition = position;
 
 	//transformace normaly do eyespace
 	eyeNormal = normalize(mv_inverse_transpose * normal);

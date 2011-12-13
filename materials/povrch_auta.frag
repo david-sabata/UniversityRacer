@@ -7,9 +7,6 @@
 
 #define MAX_LIGHTS 4
 
-// @LOAD materials/textures/povrch_auta.bmp
-uniform sampler2D tex;
-
 uniform vec4 lights[30]; // kazde tri vektory odpovidaji jednomu svetlu: pozice, difuzni, ambientni slozka; max 10 svetel
 uniform int enabledLights; // pocet pouzitych svetel (naplnenych do lights)
 
@@ -34,7 +31,12 @@ in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
 in vec3 eyeLightPos[MAX_LIGHTS]; // pozice svetel v prostoru OKA
 
+uniform sampler2D texture1;
+uniform bool useTexture;
+
 in vec2 t; // texturovaci souradnice
+
+out vec4 fragColor; //vystupni barva
 
 void main() {
 	vec3 lightDir;
@@ -43,34 +45,35 @@ void main() {
 	//kdyz je vse zhasnute, bude tma
 	vec4 finalColor = vec4(0.0,0.0,0.0,1.0);
 
-
 	vec3 N = normalize(eyeNormal);
 
-	//vypocet half vectoru (HV)
 	//v eyespace muzeme povazovat za vektor pozorovatele eyePosition, jeho otocenim tak ziskame 
 	//vektor z plosky do pozorovaele
 	vec3 V = normalize(-eyePosition);
 
 	//////////////////////////////////////SVETLA/////////////////////////////////////
+	float constantAtt = 1.0;
 	for(int i = 0; i < enabledLights ; i++) {
+
+		// urcuje zda-li se vykreslia mbientni slozka svetla
 		if(paintAmbient)
 			finalColor += material.ambient * lights[i * 3 + 2];
 
+		//vektor od zdoje svetla na vykreslovanou plosku
 		lightDir = eyeLightPos[i] - eyePosition;
 
-		//slabnuti svetla
+		//slabnuti svetla v zavislosti na vzdalenosti od zdroje
 		float attenuation, distance;
 		distance = length(lightDir / radius);	 
+		attenuation = 1.0 / (constantAtt + LINEAR_ATTENUATION * distance +
+										   QUADR_ATTENUATION * distance * distance);
+							
 
-		float constantAtt = 1.0;
-		float linearAtt = LINEAR_ATTENUATION;
-		float quadraticAtt = QUADR_ATTENUATION;
-		attenuation = 1.0 / (constantAtt + linearAtt * distance +
-										   quadraticAtt * distance * distance);
-									  
-		vec3 L = normalize(lightDir);
-
+		//urcuje, zda-li se vyrkesli difuzni a spekularni slozka
 		if(paintDiffSpec) {
+			//normalizovany vektor od svetla		  
+			vec3 L = normalize(lightDir);
+
 			//difuzni slozka
 			float diffuse = max(dot(N,L),0.0);
 			vec4 diffuseF = 	material.diffuse * lights[i * 3 + 1];
@@ -87,8 +90,10 @@ void main() {
 			if(specular >= 0.0)
 				spec = attenuation *  specular * material.specular;
 			finalColor += diff +  spec;
-			finalColor = (texture(tex,t) / MAX_LIGHTS) + finalColor;
+			if(useTexture) {
+				finalColor = (texture(tex,t) / MAX_LIGHTS) + finalColor;
+			}
 		}
 	} 
-	gl_FragColor = finalColor;
+	fragColor = finalColor;
 }

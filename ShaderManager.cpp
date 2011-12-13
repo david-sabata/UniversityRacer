@@ -7,7 +7,7 @@
 using namespace std;
 
 
-#define DEFAULT_PROGRAM "simple"
+#define DEFAULT_PROGRAM "diffuse"
 
 #define SHADERS_PATH "materials/"
 #define TEXTURES_PATH "materials/textures/"
