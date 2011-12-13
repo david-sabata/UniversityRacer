@@ -406,6 +406,7 @@ void Game::onInit()
     pos.left = Gui::RIGHT;
     guiCheckpoint = gui->addString(".", pos);
 
+
 	// pomocny shader na kresleni car a na kresleni lavic bez generovaneho sumu
 	ShaderManager::loadProgram("line");
 	ShaderManager::loadProgram("desk_soft");

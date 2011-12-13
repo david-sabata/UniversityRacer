@@ -114,6 +114,7 @@ class Gui {
 		LTRTEXCOORDS getCharTexCoords(char c);
 
 
+		ShaderManager::MATERIALPARAMS materialParams;
 
 
 		std::vector<GLfloat> vertices;	// 2 floaty == bod
