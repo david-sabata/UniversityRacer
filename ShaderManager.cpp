@@ -101,7 +101,9 @@ bool ShaderManager::loadProgram(string material)
 
 	for (unsigned int i = 1; i <= 3; i++)
 	{
-		mat.textureUniforms.push_back( glGetUniformLocation(mat.program, "texture" + i) );
+		ostringstream uniformName;
+		uniformName << "texture" << i;
+		mat.textureUniforms.push_back( glGetUniformLocation(mat.program, uniformName.str().c_str()) );
 	}
 
 	// Nacist textury

@@ -251,14 +251,14 @@ void Scene::draw(bool drawAmbient, bool drawLighting, vector<bool> enabledLights
 			Mesh* mesh = (*it).mesh;
 			string meshMaterial = mesh->getMaterialName();			
 
+			// za material se povazuje jen nazev pred podtrzitkem
+			string::size_type pos = meshMaterial.find("_");
+			if (pos != string::npos)
+				meshMaterial = meshMaterial.substr(0, pos);
+
 			// prepinat shadery jen pokud je treba
 			if (activeMaterial != meshMaterial)
 			{
-				// za material se povazuje jen nazev pred podtrzitkem
-				string::size_type pos = meshMaterial.find("_");
-				if (pos != string::npos)
-					meshMaterial = meshMaterial.substr(0, pos);
-
 				// prepnout na novy shader
 				activeMaterial = meshMaterial;
 				activeBinding = ShaderManager::useProgram(activeMaterial);					
