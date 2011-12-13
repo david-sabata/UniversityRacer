@@ -80,13 +80,11 @@ void main() {
 			vec4 diffuseF = material.diffuse; // * lights[i * 3 + 1];
 			vec4 diff = attenuation * diffuse * diffuseF;
 			finalColor +=  diff;
-			
-			//pokud je zapnuta textura1, pak ji namichej do barvy
-			if(useTexture)
-				finalColor = (texture(texture1, t) ) * finalColor;
 		}
 	} 	
 
+	//pokud je zapnuta textura1, pak ji namichej do barvy
+	if(useTexture)
+		finalColor = (texture(texture1, t)) * finalColor;
 	fragColor = finalColor;
-	//fragColor = vec4(1.0,0.0,0.0,1.0);
 }

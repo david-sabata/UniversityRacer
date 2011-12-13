@@ -85,7 +85,7 @@ void main() {
 			vec3 H = normalize(L + V);
 	
 			//spocitame spekularni odlesk
-			float specular = pow(dot(N,H), material.shininess + 100);
+			float specular = pow(dot(N,H), material.shininess);
 	
 			vec4 spec = vec4(0.0,0.0,0.0,1.0);
 			//pricteme spekulární složku k výsledné barvi
@@ -98,5 +98,5 @@ void main() {
 	if(useTexture)
 		finalColor = (texture(texture1, t)) * finalColor;
 	fragColor = finalColor;
-	//fragColor = vec4(1.0,0.0,0.0,1.0);
+
 }
