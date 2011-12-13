@@ -1,3 +1,11 @@
+// +------------------------------------------------------------+
+// |                      University Racer                      |
+// |         Projekt do PGR a GMU, FIT VUT v Brne, 2011         |
+// +------------------------------------------------------------+
+// |  Autori:  Tomáš Kimer,  xkimer00@stud.fit.vutbr.cz         |
+// |           Tomáš Sychra, xsychr03@stud.fit.vutbr.cz         |
+// |           David Šabata, xsabat01@stud.fit.vutbr.cz         |
+// +------------------------------------------------------------+
 
 #include "Physics.h"
 
@@ -37,7 +45,7 @@ void Physics::Initialize()
 
 void Physics::Deinitialize()
 {
-    //remove the rigidbodies from the dynamics world and delete them
+   // remove the rigidbodies from the dynamics world and delete them
    for (int i = m_dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--)
     {
         btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[i];
@@ -47,10 +55,6 @@ void Physics::Deinitialize()
         m_dynamicsWorld->removeCollisionObject(obj);
         delete obj;
     }
-
-    //delete collision shapes
-  //  for (int j = 0; j < m_collisionShapes.size(); j++)
-  //      delete m_collisionShapes[j];
 
     if (m_car)
     {

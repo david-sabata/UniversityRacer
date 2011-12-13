@@ -4,6 +4,14 @@
 #include <string>
 #include <vector>
 #include <utility>
+// +------------------------------------------------------------+
+// |                      University Racer                      |
+// |         Projekt do PGR a GMU, FIT VUT v Brne, 2011         |
+// +------------------------------------------------------------+
+// |  Autori:  Tomáš Kimer,  xkimer00@stud.fit.vutbr.cz         |
+// |           Tomáš Sychra, xsychr03@stud.fit.vutbr.cz         |
+// |           David Šabata, xsabat01@stud.fit.vutbr.cz         |
+// +------------------------------------------------------------+
 
 #include "Debug.h"
 #include "ShaderManager.h"

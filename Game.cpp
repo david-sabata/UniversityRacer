@@ -1,3 +1,12 @@
+// +------------------------------------------------------------+
+// |                      University Racer                      |
+// |         Projekt do PGR a GMU, FIT VUT v Brne, 2011         |
+// +------------------------------------------------------------+
+// |  Autori:  Tomáš Kimer,  xkimer00@stud.fit.vutbr.cz         |
+// |           Tomáš Sychra, xsychr03@stud.fit.vutbr.cz         |
+// |           David Šabata, xsabat01@stud.fit.vutbr.cz         |
+// +------------------------------------------------------------+
+
 #include "Game.h"
 #include "Light.h"
 
@@ -370,7 +379,7 @@ void Game::onInit()
 			//patnacty checkpoint
 			glm::rotate(glm::translate(glm::vec3(4.9f, 7.0f, -12.256f)), 180.f, glm::vec3(0, 1, 0)),
 			//sestnacty checkpoint
-			glm::rotate(glm::translate(glm::vec3(36.15f, 8.0f, -17.0f)), 180.f, glm::vec3(0, 1, 0))
+			glm::rotate(glm::translate(glm::vec3(36.15f, 8.0f, -17.5f)), 180.f, glm::vec3(0, 1, 0))
 		};
 
 		int arrLen = sizeof(rows) / sizeof(glm::mat4);

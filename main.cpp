@@ -1,3 +1,11 @@
+// +------------------------------------------------------------+
+// |                      University Racer                      |
+// |         Projekt do PGR a GMU, FIT VUT v Brne, 2011         |
+// +------------------------------------------------------------+
+// |  Autori:  Tomáš Kimer,  xkimer00@stud.fit.vutbr.cz         |
+// |           Tomáš Sychra, xsychr03@stud.fit.vutbr.cz         |
+// |           David Šabata, xsabat01@stud.fit.vutbr.cz         |
+// +------------------------------------------------------------+
 
 #include "main.h"
 
@@ -75,7 +83,7 @@ void mainLoop()
         gameTime.Update(SDL_GetTicks());
         fpsCounter.Update(gameTime);
 		ostringstream text;
-        text << "University Racer - Diff:" << gameTime << ", FPS - " << fpsCounter << "; " << ((Game *)application)->statsString();
+        text << "University Racer - Diff:" << gameTime << ", FPS - " << fpsCounter << "; " << "GPU Mem: " << ((Game *)application)->statsString();
         SDL_WM_SetCaption(text.str().c_str(), NULL);
 
         // Handle all waiting events
