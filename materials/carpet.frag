@@ -48,7 +48,7 @@ out vec4 fragColor; //vystupni barva
 
 void main() {
 	vec4 finalColor = vec4(0.0,0.0,0.0,1.0);
-	//if(useTexture) {
+	if(useTexture) {
 		//nove koordinaty po posunuti v parallax mappingu
 		vec2 newTexCoord;
 
@@ -98,7 +98,8 @@ void main() {
 			}
 		}
 		fragColor = texture(texture1, newTexCoord) * finalColor;
-	//} else {
-	//	fragColor = finalColor; //cerna barva znaci error pri nacitani textur
-	//}
+	} else {
+		fragColor = finalColor; //cerna barva znaci error pri nacitani textur
+	}
+
 }
