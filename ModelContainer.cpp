@@ -378,7 +378,7 @@ BaseModel* ModelContainer::load3DS(string filename)
 				(*meshIt)->setMaterialParams(params);
 		}
 
-#if 1
+#if 0
 		cout << "--- in " << filename << " ---------------------------------------------" << endl;
 		cout << "Material: " << m.Name() << endl;
 		cout << "Ambient: " << m.AmbientColor().r << " / " << m.AmbientColor().g << " / " << m.AmbientColor().b << endl;

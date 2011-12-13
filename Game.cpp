@@ -412,9 +412,7 @@ void Game::onInit()
 	ShaderManager::loadProgram("glossy");
 
 	// po startu nepouzivat generovane textury - hodne zpomaluji
-	ShaderManager::addShaderSubstitution("desk", "glossy");
-	//ShaderManager::MATERIALPARAMS params = ShaderManager::getMaterialParams("desk");
-	//ShaderManager::setMaterialParams("desk_soft", params);
+	ShaderManager::addShaderSubstitution("desk", "glossy");	
 }
  
 
