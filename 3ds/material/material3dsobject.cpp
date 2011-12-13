@@ -87,6 +87,18 @@ Material3DSObject::Material3DSObject(Model3DSChunk c)
 					}
 				}
 			break;
+
+			case (0xA200):
+				for (Model3DSChunk ccc = cc.Child(); ccc; ccc = ccc.Sibling())
+				{
+					switch(ccc.ID())
+					{
+						case (0xA300):
+							textureName = ccc.Str();
+						break;
+					}
+				}
+			break;
 		}
 	}
 }
@@ -100,7 +112,7 @@ const std::string &Material3DSObject::Name()
 }
 const std::string &Material3DSObject::Texture()
 {
-	return name;
+	return textureName;
 }
 const Mesh3Dcolor &Material3DSObject::AmbientColor()
 {

@@ -31,6 +31,12 @@ in vec3 eyeNormal; // normala zkomaneho bodu v prostoru OKA
 in vec3 eyePosition; // pozice zkoumaneho bodu v prostoru OKA
 in vec3 eyeLightPos[MAX_LIGHTS]; //pozice svetel v prostoru OKA
 
+uniform bool useTexture; // pouzivat texturu? bude pripadne naplnena v textureSampler
+
+uniform sampler2D texture1;
+uniform sampler2D texture2;
+uniform sampler2D texture3;
+
 in vec2 t; //texturovaci souradnice
 
 void main() {
@@ -76,5 +82,9 @@ void main() {
 			finalColor +=  diff;
 		}
 	} 	
-	gl_FragColor = finalColor;
+
+	if (useTexture)
+		gl_FragColor = finalColor * texture(texture1, t);
+	else
+		gl_FragColor = finalColor;
 }

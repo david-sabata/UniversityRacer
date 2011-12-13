@@ -9,6 +9,8 @@ using namespace std;
 
 #define DEFAULT_PROGRAM "simple"
 
+#define SHADERS_PATH "materials/"
+#define TEXTURES_PATH "materials/textures/"
 
 
 
@@ -17,19 +19,19 @@ ShaderManager::PROGRAMBINDING ShaderManager::currentProgram;
 
 map<string, ShaderManager::PROGRAMBINDING> ShaderManager::programs = map<string, ShaderManager::PROGRAMBINDING>();
 
-map<string, ShaderManager::MATERIALPARAMS> ShaderManager::materialParams = map<string, ShaderManager::MATERIALPARAMS>();
-
 map<string, GLuint> ShaderManager::textures = map<string, GLuint>();
 
 GLenum ShaderManager::activeTexture = GL_NONE;
 
+vector<string> ShaderManager::shadersToLoad = vector<string>();
+
 
 void ShaderManager::loadPrograms()
 {
-	for (map<string, MATERIALPARAMS>::iterator it = materialParams.begin(); it != materialParams.end(); it++)
+	for (vector<string>::iterator it = shadersToLoad.begin(); it != shadersToLoad.end(); it++)
 	{
-		if (!loadProgram( (*it).first )) {
-			cerr << "Warning: Shader for material '" << (*it).first << "' not found" << endl;
+		if (!loadProgram(*it)) {
+			cerr << "Warning: Shader for material '" << (*it) << "' not found" << endl;
 		}
 	}
 
@@ -46,13 +48,10 @@ bool ShaderManager::loadProgram(string material)
 	if (programs.find(material) != programs.end())
 		return true;
 
-	//if (material != "simple")
-	//	return false;
-
 	PROGRAMBINDING mat;
 	
 	// VS
-	string vsPath = "materials/" + material + ".vert";
+	string vsPath = SHADERS_PATH + material + ".vert";
 	string vsSource;
 
 	try { vsSource = loadFile(vsPath.c_str()); } 
@@ -62,7 +61,7 @@ bool ShaderManager::loadProgram(string material)
 
 
 	// FS
-	string fsPath = "materials/" + material + ".frag";
+	string fsPath = SHADERS_PATH + material + ".frag";
 	string fsSource;
 	
 	try { fsSource = loadFile(fsPath.c_str()); }
@@ -96,8 +95,15 @@ bool ShaderManager::loadProgram(string material)
 	mat.bDrawAmbientUniform = glGetUniformLocation(mat.program, "paintAmbient");
 	mat.bDrawDiffSpecUniform = glGetUniformLocation(mat.program, "paintDiffSpec");
 
+	mat.bUseTextureUniform = glGetUniformLocation(mat.program, "useTexture");
+
+	for (unsigned int i = 1; i <= 3; i++)
+	{
+		mat.textureUniforms.push_back( glGetUniformLocation(mat.program, "texture" + i) );
+	}
+
 	// Nacist textury
-	mat.textures = loadTextures(mat.program, vsSource + fsSource);
+	//mat.textures = loadTextures(mat.program, vsSource + fsSource);
 	
 	programs[material] = mat;
 
@@ -107,59 +113,34 @@ bool ShaderManager::loadProgram(string material)
 
 
 
-
-ShaderManager::MATERIALPARAMS ShaderManager::getMaterialParams(string material)
+void ShaderManager::useMaterialParams(ShaderManager::MATERIALPARAMS params)
 {
-	return materialParams.at(material);
-}
-
-
-void ShaderManager::setMaterialParams(string material, MATERIALPARAMS params)
-{
-	materialParams.insert(pair<string, MATERIALPARAMS>(material, params));
-}
-
-
-
-
-
-ShaderManager::PROGRAMBINDING ShaderManager::useProgram(string program)
-{	
-	map<string, PROGRAMBINDING>::iterator el = programs.find(program);
+	PROGRAMBINDING mat = getCurrentProgram();
 	
-	// fallback shaderu
-	if (el == programs.end())
-		el = programs.find(DEFAULT_PROGRAM);	
-
-	PROGRAMBINDING mat = (*el).second;
-
-	// nastavi aktualni shader v manageru
-	currentProgram = mat;
-
-	// a v GL
-	glUseProgram(mat.program);
+	// nastavi hodnoty materialu
+	glUniform4fv(mat.matParams.ambient, 1, glm::value_ptr(params.ambient));
+	glUniform4fv(mat.matParams.diffuse, 1, glm::value_ptr(params.diffuse));
+	glUniform4fv(mat.matParams.specular, 1, glm::value_ptr(params.specular));
+	glUniform1i(mat.matParams.shininess, params.shininess);
 	
-
-	map<string, MATERIALPARAMS>::iterator matIt = materialParams.find(program);
-	
-	// fallback parametru
-	if (matIt == materialParams.end())
-		matIt = materialParams.find(DEFAULT_PROGRAM);
-
-	if (matIt != materialParams.end())
+	// aktivovat pozadovane textury
+	GLenum textureEnums[] = { GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3, GL_TEXTURE4, GL_TEXTURE5 };
+	for (unsigned int i = 0; i < params.textures.size(); i++)
 	{
-		MATERIALPARAMS matParams = (*matIt).second;
+		if (activeTexture != textureEnums[i]) {
+			glActiveTexture(textureEnums[i]);
+			activeTexture = textureEnums[i];
+		}
 
-		// nastavi hodnoty materialu
-		glUniform4fv(mat.matParams.ambient, 1, glm::value_ptr(matParams.ambient));
-		glUniform4fv(mat.matParams.diffuse, 1, glm::value_ptr(matParams.diffuse));
-		glUniform4fv(mat.matParams.specular, 1, glm::value_ptr(matParams.specular));
-		glUniform1i(mat.matParams.shininess, matParams.shininess);
+		glBindTexture(GL_TEXTURE_2D, params.textures[i]);
+		glUniform1i(mat.textureUniforms[i], i);		
 	}
 
-	// aktivuje prislusne textury; predpokladame podporu alespon 6 textur
-	GLenum textureEnums[] = { GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3, GL_TEXTURE4, GL_TEXTURE5 };
+	// natavit priznak zda jsme predali nejakou texturu
+	glUniform1i(mat.bUseTextureUniform, (params.textures.size() > 0));
 
+	/*
+	
 	// postupne vse nastavit; pri samotnem kresleni jiz neni treba
 	for (unsigned int i = 0; i < mat.textures.size(); i++)
 	{		
@@ -202,8 +183,28 @@ ShaderManager::PROGRAMBINDING ShaderManager::useProgram(string program)
 
 		glUniform1i(binding.uniform, i);
 	}
+	*/
+}
 
-	return mat;
+
+
+ShaderManager::PROGRAMBINDING ShaderManager::useProgram(string program)
+{
+	map<string, PROGRAMBINDING>::iterator el = programs.find(program);
+	
+	// fallback shaderu
+	if (el == programs.end())
+		el = programs.find(DEFAULT_PROGRAM);	
+
+	PROGRAMBINDING mat = (*el).second;
+
+	// nastavi aktualni shader v manageru
+	currentProgram = mat;
+
+	// a v GL
+	glUseProgram(mat.program);
+	
+	return mat;	
 }
 
 
@@ -216,7 +217,30 @@ ShaderManager::PROGRAMBINDING ShaderManager::getCurrentProgram()
 
 
 
+GLuint ShaderManager::loadTexture(string path)
+{
+	SDL_Surface * surface = SDL_LoadBMP(path.c_str());
+	if(surface == NULL) throw SDL_Exception();
 
+	GLuint handle;
+
+	glGenTextures(1, &handle);
+	glBindTexture(GL_TEXTURE_2D, handle);
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); // automaticke mipmapy pro starsi gl
+	glGenerateMipmap(GL_TEXTURE_2D);
+	SurfaceImage2D(GL_TEXTURE_2D, 0, GL_RGB, surface);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+	return handle;
+}
+
+
+
+/*
 vector<ShaderManager::TEXTUREBINDING> ShaderManager::loadTextures(GLuint program, string source)
 {
 	vector<string> lines;
@@ -349,7 +373,7 @@ vector<ShaderManager::TEXTUREBINDING> ShaderManager::loadTextures(GLuint program
 
 	return bindings;
 }
-
+*/
 
 
 
@@ -358,18 +382,26 @@ void ShaderManager::loadDefaultProgram()
 {
 	if (!loadProgram(DEFAULT_PROGRAM))
 		throw std::runtime_error("Default material shader not found");
+}
 
-	// podivny sedy material
+
+ShaderManager::MATERIALPARAMS ShaderManager::getDefaultMaterial()
+{
 	MATERIALPARAMS params;
 	params.ambient = glm::vec4(0.5, 0.5, 0.5, 1);
 	params.diffuse = glm::vec4(0.3, 0.3, 0.3, 1);
 	params.specular = glm::vec4(0.8, 0.8, 0.8, 1);
 	params.shininess = 10;
 
-	setMaterialParams(DEFAULT_PROGRAM, params);
+	return params;
 }
 
 
+
+string ShaderManager::getTexturesPath()
+{
+	return TEXTURES_PATH;
+}
 
 
 

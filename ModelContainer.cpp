@@ -5,6 +5,10 @@
 	#define new MYDEBUG_NEW
 #endif
 
+#define TEX2_SUFFIX "_normal"
+#define TEX3_SUFFIX "_height"
+#define TEX_EXT ".bmp"
+
 using namespace std;
 
 
@@ -259,6 +263,17 @@ vector<Light> &ModelContainer::getLights()
 
 
 
+
+bool fileExists(string filename)
+{
+	ifstream ifile(filename);
+	return (bool)ifile;
+}
+
+
+
+
+
 BaseModel* ModelContainer::load3DS(string filename) 
 {
 	// parsovani souboru
@@ -317,9 +332,7 @@ BaseModel* ModelContainer::load3DS(string filename)
 			Mesh* m = new Mesh(name, material, vertices, faces, texcoords);
 			modelMeshes.push_back(m);
 		}
-	}
-	
-	model->setMeshes(modelMeshes);
+	}	
 
 
 	// ulozit materialy
@@ -332,8 +345,38 @@ BaseModel* ModelContainer::load3DS(string filename)
 		params.diffuse = glm::vec4( m.DiffuseColor().r, m.DiffuseColor().g, m.DiffuseColor().b, 1.0f );
 		params.specular = glm::vec4( m.SpecularColor().r, m.SpecularColor().g, m.SpecularColor().b, 1.0f );
 		params.shininess = m.Shininess();
+		
+		// nacist textury do GL, pokud odpovidajici soubory existuji
+		// hleda se automaticky zakladni textura, normalova a vyskova
+		string path = ShaderManager::getTexturesPath();
+		if (fileExists(path + m.Texture())) {
+			params.textures.push_back( ShaderManager::loadTexture(path + m.Texture()) );
 
-		ShaderManager::setMaterialParams(m.Name(), params);
+			string::size_type pos = m.Texture().find_last_of(".");
+			string baseName = m.Texture().substr(0, pos);
+
+			string normalTexture = path + baseName + TEX2_SUFFIX + TEX_EXT;
+			if (fileExists(normalTexture))
+				params.textures.push_back( ShaderManager::loadTexture(normalTexture) );
+
+			string heightTexture = path + baseName + TEX3_SUFFIX + TEX_EXT;
+			if (fileExists(heightTexture))
+				params.textures.push_back( ShaderManager::loadTexture(heightTexture) );
+		}
+
+		// za shader povazujeme vse pred podtrzitkem, pokud se v nazvu vyskytuje
+		string::size_type pos = m.Name().find("_");
+		if (pos != string::npos)
+			ShaderManager::addMaterial(m.Name().substr(0, pos));
+		else
+			ShaderManager::addMaterial(m.Name());
+
+		// priradit parametry materialu vsem meshim ktere ho pouzivaji
+		for (vector<Mesh*>::iterator meshIt = modelMeshes.begin(); meshIt != modelMeshes.end(); meshIt++)
+		{
+			if ((*meshIt)->getMaterialName() == m.Name())
+				(*meshIt)->setMaterialParams(params);
+		}
 
 #if 0
 		cout << "------------------------------------------------" << endl;
@@ -364,13 +407,10 @@ BaseModel* ModelContainer::load3DS(string filename)
 		Light l = Light(glmvert);		
 		addLight(l);
 	}
-
-
-
+	
 	delete scene;
 
-	//addModel(filename, model);
+	// ulozit a vratit model
+	model->setMeshes(modelMeshes);
 	return model;
 }
-
-

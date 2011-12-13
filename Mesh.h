@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 
 #ifndef GLM_INCLUDED
 #define GLM_INCLUDED
@@ -14,6 +15,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #endif
 
+#include "ShaderManager.h"
 #include "Debug.h"
 
 
@@ -82,6 +84,16 @@ class Mesh
 		 */
 		Mesh operator* (glm::mat4 const& matrix) const;
 
+		/**
+		 * Nastavi parametry materialu
+		 */
+		void setMaterialParams(ShaderManager::MATERIALPARAMS params);
+
+		/**
+		 * Vraci parametry materialu (barvy, lesklost,...)
+		 */
+		ShaderManager::MATERIALPARAMS const& getMaterialParams() const;
+
 
 	protected:
 		std::vector<glm::ivec3> faces;
@@ -97,6 +109,8 @@ class Mesh
 		std::string name;
 
 		std::string materialName;
+
+		ShaderManager::MATERIALPARAMS material;
 
 		bool normalsComputed;
 

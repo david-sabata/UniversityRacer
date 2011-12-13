@@ -295,6 +295,9 @@ void Scene::draw(bool drawAmbient, bool drawLighting, vector<bool> enabledLights
 				glUniform1i(activeBinding.bDrawDiffSpecUniform, drawLighting);
 			}				
 			
+			// nastaveni parametru materialu
+			ShaderManager::useMaterialParams(mesh->getMaterialParams());
+
 			// model view
 			glm::mat4 modelView = mView * (*it).matrix;
 			glUniformMatrix4fv(activeBinding.mModelViewUniform, 1, GL_FALSE, glm::value_ptr(modelView));
@@ -302,7 +305,6 @@ void Scene::draw(bool drawAmbient, bool drawLighting, vector<bool> enabledLights
 			// mvp
 			glm::mat4 modelViewProjection = mProjection * modelView;
 			glUniformMatrix4fv(activeBinding.mModelViewProjectionUniform, 1, GL_FALSE, glm::value_ptr(modelViewProjection));
-
 
 			// pomocna matice pro vypocty osvetleni - znacne snizeni fps!
 			glm::mat3 mSubModelView = glm::mat3(modelView);
