@@ -13,6 +13,9 @@
 #include <btBulletDynamicsCommon.h>
 #include <glm/gtc/type_ptr.hpp>
 
+/**
+ * Pomocne funkce pro praci s fyzikou, zejmena konverzni.
+ */
 class PhysicsUtils
 {
 public:

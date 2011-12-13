@@ -41,7 +41,6 @@ public:
     btRigidBody * AddRigidBody(float mass, const btTransform & startTransform, btCollisionShape * shape);
 
     void DebugDrawWorld() { m_dynamicsWorld->debugDrawWorld(); } 
-//    void AddCollisionShape(btCollisionShape * shape) { m_collisionShapes.push_back(shape); }
 
     static btCollisionShape * CreateStaticCollisionShape(Mesh * mesh, const btVector3 & scale = btVector3(1,1,1));
     static std::vector<btCollisionShape *> CreateStaticCollisionShapes(BaseModel * model, const btVector3 & scale);
@@ -65,7 +64,6 @@ private:
     btDefaultCollisionConfiguration* m_collisionConfiguration;
     
     btDiscreteDynamicsWorld *m_dynamicsWorld;
-    //btAlignedObjectArray<btCollisionShape*> m_collisionShapes;
 
     PhysicsCar *m_car;
     PhysicsCheckpoint m_checkpoint;

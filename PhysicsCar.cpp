@@ -57,7 +57,6 @@ btCollisionShape* PhysicsCar::CreateVehicleShape()
     btConvexHullShape *topHull  = new btConvexHullShape( topVertices,  8, 3 * sizeof(btScalar)); 
 
     btCompoundShape* compound = new btCompoundShape();
-    //m_collisionShapes.push_back(compound);
 
     // localTrans effectively shifts the center of mass with respect to the chassis
     btTransform localTrans = PhysicsUtils::btTransFrom(btVector3(0, m_cfg.bodyConnectionToChasisHeight, 0));
@@ -85,7 +84,7 @@ void PhysicsCar::Initialize(btDiscreteDynamicsWorld *refWorld, const btTransform
     m_refDynamicsWorld->addVehicle(m_vehicle);        
     
     m_carChassis->setActivationState(DISABLE_DEACTIVATION);  ///never deactivate the vehicle
-    m_vehicle->setCoordinateSystem(0, 1, 2);  //choose coordinate system
+    m_vehicle->setCoordinateSystem(0, 1, 2);
             
     // add wheels
     btVector3 connectionPointCS0;
