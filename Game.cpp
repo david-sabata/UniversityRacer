@@ -409,7 +409,7 @@ void Game::onInit()
 
 	// pomocny shader na kresleni car a na kresleni lavic bez generovaneho sumu
 	ShaderManager::loadProgram("line");
-	ShaderManager::loadProgram("desk_soft");
+	ShaderManager::loadProgram("glossy");
 
 	// po startu nepouzivat generovane textury - hodne zpomaluji
 	ShaderManager::addShaderSubstitution("desk", "glossy");
