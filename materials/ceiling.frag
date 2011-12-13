@@ -78,5 +78,8 @@ void main() {
 			finalColor += attenuation * diffuse * diffuseF;
 		}
 	}
-	fragColor = texture(texture1, t * scaleCoord) * finalColor;
+	if(useTexture)
+		fragColor = texture(texture1, t * scaleCoord) * finalColor;
+	else 
+		fragColor = finalColor;
 }

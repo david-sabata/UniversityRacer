@@ -94,7 +94,7 @@ void main() {
 			finalColor +=  diff +  spec;
 
 			//pokud je zapnuta textura1, pak ji namichej do barvy
-			if(usetexture)
+			if(useTexture)
 				finalColor = (texture(texture1, t) * ONE_DIV_MAX_LIGHTS) + finalColor;
 		}
 	} 

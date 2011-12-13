@@ -94,8 +94,8 @@ void main() {
 
 		//zajisti, ze hodiny sviti i ve tme
 		if(useTexture) {
-			vec4 texel = texture(tex, t);
-			vec4 color = finalColor * texture(tex, t);
+			vec4 texel = texture(texture1, t);
+			vec4 color = finalColor * texture(texture1, t);
 			color = max(color,texel);
 			fragColor = color;
 		} else {

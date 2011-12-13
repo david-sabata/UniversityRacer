@@ -47,9 +47,8 @@ in vec2 t;
 out vec4 fragColor; //vystupni barva
 
 void main() {
-	if(useTexture) {
-		vec4 finalColor = vec4(0.0,0.0,0.0,1.0);
-	
+	vec4 finalColor = vec4(0.0,0.0,0.0,1.0);
+	//if(useTexture) {
 		//nove koordinaty po posunuti v parallax mappingu
 		vec2 newTexCoord;
 
@@ -63,7 +62,7 @@ void main() {
 		////////////////////////PARALLAX MAPPING///////////////////////////////
 		//spocitame offset posunuti
 		float height = texture(texture3, t  * scaleCoord).r;
-		height = texture3 * scale + bias;
+		height = height * scale + bias;
 		newTexCoord = (t +  ( normalize(tanCam).xy * height)) * scaleCoord;
 
 
@@ -99,6 +98,7 @@ void main() {
 			}
 		}
 		fragColor = texture(texture1, newTexCoord) * finalColor;
-	} else {
-		fragColor = finalColor; //cerna barva znaci error pri nacitani textur
+	//} else {
+	//	fragColor = finalColor; //cerna barva znaci error pri nacitani textur
+	//}
 }
