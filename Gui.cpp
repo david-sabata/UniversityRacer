@@ -19,6 +19,10 @@ Gui::Gui(int screenWidth, int screenHeight) :
 {
 	// nacist shader
 	ShaderManager::loadProgram(PROGRAM_NAME);
+
+	// nastavit parametry 'materialu'
+	GLuint guiTexture = ShaderManager::loadTexture(ShaderManager::getTexturesPath() + "font.bmp");
+	materialParams.textures.push_back(guiTexture);
 }
 
 
@@ -154,6 +158,7 @@ void Gui::draw()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 
 	ShaderManager::PROGRAMBINDING activeBinding = ShaderManager::useProgram(PROGRAM_NAME);
+	ShaderManager::useMaterialParams(materialParams);
 
 	if (activeBinding.matParams.ambient != UNUSED_SHADER_ATTR)
 		glDisableVertexAttribArray(activeBinding.matParams.ambient);

@@ -379,12 +379,13 @@ BaseModel* ModelContainer::load3DS(string filename)
 		}
 
 #if 1
-		cout << "------------------------------------------------" << endl;
+		cout << "--- in " << filename << " ---------------------------------------------" << endl;
 		cout << "Material: " << m.Name() << endl;
 		cout << "Ambient: " << m.AmbientColor().r << " / " << m.AmbientColor().g << " / " << m.AmbientColor().b << endl;
 		cout << "Diffuse: " << m.DiffuseColor().r << " / " << m.DiffuseColor().g << " / " << m.DiffuseColor().b << endl;
 		cout << "Specular: " << m.SpecularColor().r << " / " << m.SpecularColor().g << " / " << m.SpecularColor().b << endl;
 		cout << "Shininess percentage: " << m.Shininess() << endl;
+		cout << "Texture: " << m.Texture() << endl;
 #endif
 	}
 
