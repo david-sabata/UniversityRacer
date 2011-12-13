@@ -25,6 +25,8 @@ GLenum ShaderManager::activeTexture = GL_NONE;
 
 vector<string> ShaderManager::shadersToLoad = vector<string>();
 
+map<string, string> ShaderManager::shaderSubstitutions;
+
 
 void ShaderManager::loadPrograms()
 {
@@ -189,7 +191,13 @@ void ShaderManager::useMaterialParams(ShaderManager::MATERIALPARAMS params)
 
 
 ShaderManager::PROGRAMBINDING ShaderManager::useProgram(string program)
-{
+{	
+	// overit substituci shaderu
+	map<string, string>::iterator substIt = shaderSubstitutions.find(program);
+	if (substIt != shaderSubstitutions.end())
+		program = (*substIt).second;
+
+
 	map<string, PROGRAMBINDING>::iterator el = programs.find(program);
 	
 	// fallback shaderu

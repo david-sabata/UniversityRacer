@@ -411,7 +411,7 @@ void Game::onInit()
 	ShaderManager::loadProgram("desk_soft");
 
 	// po startu nepouzivat generovane textury - hodne zpomaluji
-	scene->addShaderSubstitution("desk", "desk_soft");
+	ShaderManager::addShaderSubstitution("desk", "desk_soft");
 	//ShaderManager::MATERIALPARAMS params = ShaderManager::getMaterialParams("desk");
 	//ShaderManager::setMaterialParams("desk_soft", params);
 }
@@ -733,16 +733,16 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 
 	// F5 - zapnuti/vypnuti generovaneho sumu v shaderu desk lavic
 	if (key == SDLK_F5) {
-		const map<string, string>& substitutions = scene->getSubstitutions();
+		const map<string, string>& substitutions = ShaderManager::getSubstitutions();
 		map<string, string>::const_iterator substIt = substitutions.find("desk");
 		if (substIt == substitutions.end()) {
-			scene->addShaderSubstitution("desk", "desk_soft");
+			ShaderManager::addShaderSubstitution("desk", "desk_soft");
 
 			// je potreba zkopirovat i materialove vlastnosti puvodniho povrchu
 			//ShaderManager::MATERIALPARAMS params = ShaderManager::getMaterialParams("desk");
 			//ShaderManager::setMaterialParams("desk_soft", params);
 		} else
-			scene->removeShaderSubstitution("desk");
+			ShaderManager::removeShaderSubstitution("desk");
 	}
 
 	// F6 - zapnuti/vypnuti stinovych teles, resp. stencil stinu

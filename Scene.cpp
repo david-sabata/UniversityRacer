@@ -254,10 +254,10 @@ void Scene::draw(bool drawAmbient, bool drawLighting, vector<bool> enabledLights
 			// prepinat shadery jen pokud je treba
 			if (activeMaterial != meshMaterial)
 			{
-				// overit substituci shaderu
-				map<string, string>::iterator substIt = shaderSubstitutions.find(meshMaterial);
-				if (substIt != shaderSubstitutions.end())
-					meshMaterial = (*substIt).second;
+				// za material se povazuje jen nazev pred podtrzitkem
+				string::size_type pos = meshMaterial.find("_");
+				if (pos != string::npos)
+					meshMaterial = meshMaterial.substr(0, pos);
 
 				// prepnout na novy shader
 				activeMaterial = meshMaterial;

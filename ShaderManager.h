@@ -164,6 +164,33 @@ class ShaderManager
 		 * Vraci cestu ve ktere se budou hledat textury
 		 */
 		static std::string ShaderManager::getTexturesPath();
+
+		/**
+		 * Nastavi nahrazovani shaderu 'what' shaderem 'with'
+		 */
+		inline static void addShaderSubstitution(std::string what, std::string with)
+		{
+			shaderSubstitutions.insert(std::pair<std::string, std::string>(what, with));
+		}
+
+		/**
+		 * Odebere nastavenou substituci
+		 */
+		inline static void removeShaderSubstitution(std::string what)
+		{
+			std::map<std::string, std::string>::iterator it = shaderSubstitutions.find(what);
+			if (it != shaderSubstitutions.end())
+				shaderSubstitutions.erase(it);
+		}
+
+		/**
+		 * Vrati pole aktivnich substituci shaderu
+		 */
+		inline static const std::map<std::string, std::string>& getSubstitutions()
+		{
+			return shaderSubstitutions;
+		}
+
 		
 	protected:
 		/**
@@ -190,6 +217,12 @@ class ShaderManager
 		 * Aktualni nabindovana texturovaci jednotka - cache pro zvyseni vykonosti
 		 */
 		static GLenum activeTexture;
+
+		/**
+		 * Substituce shaderu - pomoci nich muzeme za behu programu
+		 * shadery prepinat (napr. pouzit vykonove mene narocnou variantu)
+		 */
+		static std::map<std::string, std::string> shaderSubstitutions; 
 
 		///////////////////////////////////////////////////////////////
 		
