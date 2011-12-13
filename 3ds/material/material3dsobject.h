@@ -27,6 +27,7 @@ class Material3DSObject
 	const int Shininess();
     private:
 	std::string name;
+	std::string textureName;
 	Mesh3Dcolor ambientColor;
 	Mesh3Dcolor diffuseColor;
 	Mesh3Dcolor specularColor;

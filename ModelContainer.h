@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <fstream>
 
 #include "Debug.h"
 #include "BaseModel.h"

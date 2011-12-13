@@ -10,7 +10,7 @@ using namespace std;
 
 
 Mesh::Mesh(string name, string materialName, vector<glm::vec3> vertices, 
-			vector<glm::ivec3> faces, vector<glm::vec2> texcoords) : 
+	vector<glm::ivec3> faces, vector<glm::vec2> texcoords) : 
 	name(name), materialName(materialName), vertices(vertices), faces(faces),
 		texcoords(texcoords)
 {
@@ -226,6 +226,16 @@ std::string const &Mesh::getMaterialName() const
 bool Mesh::areNormalsComputed() const
 {
 	return normalsComputed;
+}
+
+void Mesh::setMaterialParams(ShaderManager::MATERIALPARAMS params)
+{
+	material = params;
+}
+
+ShaderManager::MATERIALPARAMS const& Mesh::getMaterialParams() const
+{
+	return material;
 }
 
 Mesh Mesh::operator* (glm::mat4 const& matrix) const

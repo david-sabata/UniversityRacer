@@ -8,6 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include <iterator>
+#include <algorithm>
 
 #include <SDL/SDL.h>
 
@@ -72,7 +73,7 @@ class ShaderManager
 		typedef struct Program {
 			// vyuziva ShaderManager ----------
 			GLuint program;
-			std::vector<TEXTUREBINDING> textures;
+			//std::vector<TEXTUREBINDING> textures;
 			// --------------------------------
 
 			// vyuziva vykreslujici scena -----
@@ -85,6 +86,8 @@ class ShaderManager
 			GLuint vLightsUniform;
 			GLuint bDrawAmbientUniform;
 			GLuint bDrawDiffSpecUniform;
+			GLuint bUseTextureUniform;
+			std::vector<GLuint> textureUniforms;
 			struct {
 				GLuint ambient;
 				GLuint diffuse;
@@ -103,6 +106,7 @@ class ShaderManager
 			glm::vec4 diffuse;
 			glm::vec4 specular;
 			int shininess;
+			std::vector<GLuint> textures;
 		} MATERIALPARAMS;
 
 
@@ -117,6 +121,15 @@ class ShaderManager
 		static bool loadProgram(std::string material);
 
 		/**
+		 * Prida material pouzivany ve scene (bude se nacitat jeho shader)
+		 */
+		inline static void addMaterial(std::string material)
+		{
+			if (find(shadersToLoad.begin(), shadersToLoad.end(), material) == shadersToLoad.end())
+				shadersToLoad.push_back(material);
+		}
+
+		/**
 		 * Asociuje konkretni hodnoty s promennymi programu
 		 */
 		static void setMaterialParams(std::string material, MATERIALPARAMS params);
@@ -128,16 +141,29 @@ class ShaderManager
 		static PROGRAMBINDING useProgram(std::string material);
 
 		/**
+		 * Nastavi aktualnimu materialu parametry
+		 */
+		static void useMaterialParams(MATERIALPARAMS params);
+
+		/**
 		 * Vraci strukturu aktualniho shaderu
 		 */
 		static PROGRAMBINDING getCurrentProgram();
+		
+		/**
+		 * Vraci vychozi parametry materialu, pokud by zadne jine nebyly
+		 */
+		static MATERIALPARAMS getDefaultMaterial();
 
 		/**
-		 * Vraci parametry daneho materialu, pokud je jiz nacteny;
-		 * pokud ne, vraci parametry vychoziho materialu
+		 * Nacte texturu ze zadane cesty do GL a vraci jeji handle
 		 */
-		static MATERIALPARAMS getMaterialParams(std::string material);
+		static GLuint loadTexture(std::string filename);
 
+		/**
+		 * Vraci cestu ve ktere se budou hledat textury
+		 */
+		static std::string ShaderManager::getTexturesPath();
 		
 	protected:
 		/**
@@ -148,12 +174,12 @@ class ShaderManager
 		/**
 		 * Nazvy shaderu a jim odpovidajici struktury
 		 */
-		static std::map<std::string, PROGRAMBINDING> programs;		
+		static std::map<std::string, PROGRAMBINDING> programs;
 
 		/**
-		 * Konkretni hodnoty parametru jednotlivych materialu (programu)
+		 * Shadery ktere se pri inicializaci budou nacitat
 		 */
-		static std::map<std::string, MATERIALPARAMS> materialParams;
+		static std::vector<std::string> shadersToLoad;
 
 		/**
 		 * Nazvy souboru textur a jim odpovidajici GL objekty

@@ -83,7 +83,7 @@ void Game::onInit()
 	}
 
     // vykresli zidle
-	if (1) {
+	if (0) {
 		container->addModel("chairs", chairs);
                 
 		glm::mat4 scale = glm::scale(glm::vec3(STATICS_SCALE));
@@ -116,7 +116,7 @@ void Game::onInit()
 	}
 
 	// vykresli prostredni lavice
-	if (1) {
+	if (0) {
 		container->addModel("middesk", middesk);
 
 		glm::mat4 scale = glm::scale(glm::vec3(STATICS_SCALE));
@@ -142,7 +142,7 @@ void Game::onInit()
 	}
 
 	// vykresli postranni lavice
-	if (1) {
+	if (0) {
 		container->addModel("sidedesk", sidedesk);
 
 		glm::mat4 scale = glm::scale(glm::vec3(STATICS_SCALE));
@@ -176,7 +176,7 @@ void Game::onInit()
 	}
 
 	// pro kazde svetlo v kontejneru pridat kouli, ktera ho znazornuje
-	if (1) {
+	if (0) {
 		BaseModel* sphere = container->load3DS("models/sphere.3ds");
 		container->addModel("lightsphere", sphere);
 
@@ -193,20 +193,20 @@ void Game::onInit()
 	}
 
 	// pridat auto
-    {
+    if (0) {
 		container->addModel("car", car);
 		carQueueItem = container->queueDraw(car);
 	}
 
 	// pridat kola auta
-    {
+    if (0) {
 		container->addModel("wheel", wheel);
 		for (unsigned int i = 0; i < 4; i++)
             wheelQueueItem[i] = container->queueDraw(wheel);
 	}
 
 	// pridat desticky
-	{        
+	if (0) {        
 		container->addModel("plank", plank);
         std::vector<btCollisionShape*> plankShapes = Physics::CreateStaticCollisionShapes(plank);
 
@@ -335,7 +335,7 @@ void Game::onInit()
 	}
 
     // vykresli checkpointy
-    {
+    if (0) {
         container->addModel("checkpoint", checkpoint);
 
         glm::mat4 rows[] = {
@@ -412,8 +412,8 @@ void Game::onInit()
 
 	// po startu nepouzivat generovane textury - hodne zpomaluji
 	scene->addShaderSubstitution("desk", "desk_soft");
-	ShaderManager::MATERIALPARAMS params = ShaderManager::getMaterialParams("desk");
-	ShaderManager::setMaterialParams("desk_soft", params);
+	//ShaderManager::MATERIALPARAMS params = ShaderManager::getMaterialParams("desk");
+	//ShaderManager::setMaterialParams("desk_soft", params);
 }
  
 
@@ -739,8 +739,8 @@ void Game::onKeyDown(SDLKey key, Uint16 mod)
 			scene->addShaderSubstitution("desk", "desk_soft");
 
 			// je potreba zkopirovat i materialove vlastnosti puvodniho povrchu
-			ShaderManager::MATERIALPARAMS params = ShaderManager::getMaterialParams("desk");
-			ShaderManager::setMaterialParams("desk_soft", params);
+			//ShaderManager::MATERIALPARAMS params = ShaderManager::getMaterialParams("desk");
+			//ShaderManager::setMaterialParams("desk_soft", params);
 		} else
 			scene->removeShaderSubstitution("desk");
 	}
