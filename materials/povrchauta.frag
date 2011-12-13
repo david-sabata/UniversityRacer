@@ -91,7 +91,7 @@ void main() {
 				spec = attenuation *  specular * material.specular;
 			finalColor += diff +  spec;
 			if(useTexture) {
-				finalColor = (texture(tex,t) / MAX_LIGHTS) + finalColor;
+				finalColor = (texture(texture1,t) / MAX_LIGHTS) + finalColor;
 			}
 		}
 	} 
